@@ -9,25 +9,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
 <body theme="dark" class="bg-gray-900">
     <input id="roomId" type="text" placeholder="Room Id">
-    <button onclick="joinRoom()">connectroom</button>
+    <button id="joinRoom">connectroom</button>
     <div id="lasteventParse"></div>
-    <script>
-        const socket = io();
-        function joinRoom() {
-            const roomId = document.getElementById('roomId').value;
-            socket.emit('joinRoom', { uniqueId: roomId });
-        }
-        const events = ['chat', 'gift', 'connected', 'disconnected',
-            'websocketConnected', 'error', 'member', 'roomUser',
-            'like', 'social', 'emote', 'envelope', 'questionNew',
-            'subscribe', 'follow', 'share'];
-        events.forEach(event => {
-            socket.on(event, (data) => {
-                console.log(event, data);
-                document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
-            });
-        });
-    </script>
+    <script type="module" src="./main.js"></script>
     <div class="tabcontainer" data-tab="tab2">
         <div class="containerbox relative">
           <div class="LiveContainer">
