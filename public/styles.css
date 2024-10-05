@@ -1,0 +1,107 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+:root {
+    --black-font: #212121;
+    --white-font: #f5f5f5;
+    --black-bg: #1c1c1c;
+    --blue-box-900: #091fc5;
+    --blue-box-200: #766ff9;
+}
+* {
+    color: var(--white-font);
+    background-color: var(--black-font);
+}
+.containerbox {
+    box-sizing: content-box;
+    padding: 0.5rem;
+    position: relative;
+    border: 1px solid rgba(88, 88, 255, 0.123);
+    border-radius: 0.5rem;
+    background-color: #212121;
+    margin: 0.8rem;
+    min-width: 90%;
+    min-height: 50%;
+    gap: 0.5rem;
+  }
+  .containerbox:hover {
+    border: 1px solid var(--blue-box-900);
+  }
+  .sub-containerbox {
+    box-sizing: content-box;
+    position: relative;
+    border: 1px solid rgba(88, 88, 255, 0.123);
+    border-radius: 0.5rem;
+    background-color: #212121;
+    gap: 0.5rem;
+  }
+  .sub-containerbox:hover {
+    border: 1px solid var(--blue-box-900);
+  }
+  .card {
+    width: 100%;
+    max-width: 21rem;
+    font-size: large;
+    overflow: hidden; /* Oculta el desbordamiento del contenido */
+    text-overflow: ellipsis; /* Añade puntos suspensivos (...) */
+    background-color: #1c1c1c;
+    border: 10px solid var(--blue-box-900);
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    span {
+      font-size: 1rem;
+    }
+    span {
+      color: var(--blue-box-200);
+    }
+  }
+  
+  .flexbox {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 20rem));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .relative {
+    position: relative;
+  }
+  .absolute {
+    position: absolute;
+  }
+  .flexbox .card:nth-child(n+4) {
+    display: none;
+  }
+  .tabcontainer {
+    margin: 0%;
+    width: 100%;
+    overflow: auto;
+  }
+  .box-sizing-content-box {
+    box-sizing: content-box;
+    width: 40%;
+  }
+  .float-right {
+    float: right;
+  }
+  .float-left {
+    float: left;
+  }
+  .flex {
+    display: flex;
+  }
+  .hidden {
+    display: none;
+  }
+.LiveContainer {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    /* grid-template-rows: repeat(6, 1fr); */
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.chat1 { grid-area: 1 / 1 / 5 / 4;  }
+.gift2 { grid-area: 1 / 4 / 5 / 7; }
+.events3 { grid-area: 5 / 1 / 7 / 7; }
