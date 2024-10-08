@@ -10,6 +10,11 @@ body {
     --blue-box-900: #091fc5;
     --blue-box-200: #766ff9;
 }
+input {
+  box-sizing: content-box;
+  max-width: 500px;
+  max-height: 500px;
+}
 * {
     color: var(--white-font);
     background-color: var(--black-font);
