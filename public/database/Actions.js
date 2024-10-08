@@ -1,5 +1,5 @@
 import { Giftsparsed, mapselectgift } from '../assets/gifts.js';
-import DynamicTable from '../components/renderfields.js';
+import DynamicTable, { EditModal } from '../components/renderfields.js';
 const config = {
     nombre: {
       class: 'input-default',
@@ -51,7 +51,7 @@ const config = {
   const deletecallback = async (index, data,modifiedData) => {
     console.log("deletecallback", index, data,modifiedData);
   }
-const Formelement = new DynamicTable('#table-container',editcallback,config,deletecallback);
+const Formelement = new EditModal('#table-container',editcallback,config,deletecallback);
 const testdata = 
   {
     nombre: "test",
@@ -61,6 +61,6 @@ const testdata =
       like: 10,
       gift: 10,
     },
-    id: 10,
+    id: 1,
   }
-Formelement.addRow(testdata);
+Formelement.render(testdata);

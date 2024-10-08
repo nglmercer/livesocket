@@ -12,12 +12,16 @@ body {
 }
 input {
   box-sizing: content-box;
-  max-width: 500px;
-  max-height: 500px;
+  max-width: auto;
+  max-height: auto;
 }
 * {
     color: var(--white-font);
     background-color: var(--black-font);
+    box-sizing: border-box;
+    field-sizing: content;
+    width: auto;
+    height: auto;
 }
 .containerbox {
     box-sizing: content-box;
