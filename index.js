@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const port = parseInt(process.env.PORT) || 3000;
+const port = parseInt(process.env.PORT) || 3002;
 server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });

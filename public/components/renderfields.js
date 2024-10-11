@@ -132,8 +132,11 @@ class DynamicRow {
 
       if (typeConfig && typeConfig.type === 'object') {
         const objectContainer = document.createElement('details');
+        if (typeConfig.open) {
+          objectContainer.setAttribute('open', '');
+        }
         const summary = document.createElement('summary');
-        // console.log("typeConfig", typeConfig, key);
+        console.log("typeConfig", typeConfig, key);
         summary.textContent = 'Mostrar '+ key;
 
         objectContainer.appendChild(summary);
@@ -143,7 +146,7 @@ class DynamicRow {
 
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;
-          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, row.rowIndex);
+          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, objectContainer);
 
           if (inputElement) {
             const wrapper = document.createElement('div');
@@ -164,7 +167,7 @@ class DynamicRow {
 
         cell.appendChild(objectContainer);
       } else {
-        const inputElement = this.createInputElement(key, null, value, typeConfig, row.rowIndex);
+        const inputElement = this.createInputElement(key, null, value, typeConfig, cell);
         console.log("inputElement", inputElement);
         if (inputElement) {
           cell.appendChild(inputElement);
@@ -207,17 +210,20 @@ class DynamicRow {
 
       if (typeConfig && typeConfig.type === 'object') {
         const objectContainer = document.createElement('details');
+        if (typeConfig.open) {
+          objectContainer.setAttribute('open', '');
+        }
         const summary = document.createElement('summary');
         summary.textContent = 'Mostrar ' + key;
 
         objectContainer.appendChild(summary);
 
         Object.keys(typeConfig).forEach(subKey => {
-          if (subKey === 'type') return;
+          if (subKey === 'type' || subKey === 'open') return;
 
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;
-          const inputElement = this.createInputElement(key, subKey, subValue, subConfig);
+          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, objectContainer);
 
           if (inputElement) {
             const wrapper = document.createElement('div');
@@ -236,7 +242,7 @@ class DynamicRow {
 
         itemContainer.appendChild(objectContainer);
       } else {
-        const inputElement = this.createInputElement(key, null, value, typeConfig);
+        const inputElement = this.createInputElement(key, null, value, typeConfig,itemContainer);
         if (inputElement) {
           itemContainer.appendChild(inputElement);
         } else {
@@ -274,8 +280,8 @@ class DynamicRow {
     this.HtmlContainer.appendChild(container);
     return container;
   }
-
-  createInputElement(key, subKey, value, typeConfig, rowindex) {
+  
+  createInputElement(key, subKey, value, typeConfig, HtmlContainer) {
     if (value === undefined && subKey === 'class' || subKey === 'label') {
       // console.log("createInputElement return", key, subKey, value, typeConfig);
       return null;
@@ -302,10 +308,13 @@ class DynamicRow {
         inputElement = this.createtexareaElement(key, subKey, value);
         break;
       case 'select':
-        inputElement = this.createSelectElement(key, subKey, value, typeConfig, rowindex);
+        inputElement = this.createSelectElement(key, subKey, value, typeConfig, HtmlContainer);
         break;
       case 'multiSelect':
         inputElement = this.createMultiSelectElement(key, subKey, value, typeConfig);
+        break;
+      case 'radio':
+        inputElement = this.createRadioElement(key, subKey, value, typeConfig, HtmlContainer);
         break;
       default:
         // Por defecto, crear un input type="text"
@@ -321,7 +330,7 @@ class DynamicRow {
     }
     return inputElement || document.createTextNode('');
   }
-  createSelectElement(key, subKey, value, typeConfig, rowindex) {
+  createSelectElement(key, subKey, value, typeConfig, HtmlContainer) {
     const divElement = document.createElement('div');
     divElement.classList.add('div-select');
     const selectElement = document.createElement('select');
@@ -349,13 +358,13 @@ class DynamicRow {
     selectElement.value = value;
     if (typeConfig.toggleoptions) {
       setTimeout(() => {
-        this.handletoggleoptions(subKey, value, rowindex);
+        this.handletoggleoptions(subKey, value, HtmlContainer);
       }, 500);
     }
     selectElement.addEventListener('change', () => {
       this.updateModifiedData(key, subKey, selectElement.value);
       if (typeConfig.toggleoptions) {
-        this.handletoggleoptions(subKey, selectElement.value, rowindex);
+        this.handletoggleoptions(subKey, selectElement.value, HtmlContainer);
       }
     });
     const labelElement = document.createElement('label');
@@ -367,6 +376,9 @@ class DynamicRow {
       divElement.appendChild(labelElement);
     }
     return divElement;
+  }
+  createRadioElement(key, subKey, value, typeConfig, HtmlContainer) {
+
   }
 
   createSliderElement(key, subKey, value, typeConfig) {
@@ -462,23 +474,17 @@ class DynamicRow {
       this.modifiedData[key] = value;
     }
   }
-  handletoggleoptions(key, subKey, rowindex) {
-    const rows = this.HtmlContainer.rows
-    if (!rows) return;
-    Array.from(rows).forEach(row => {
-      console.log("handletoggleoptions",row, row.rowIndex); // Nombre o contenido de la fila
-      if (row.rowIndex === rowindex) {
-        const fields = row.querySelectorAll('[data-associated]');
+  handletoggleoptions(key, subKey, HtmlContainer) {
+        const fields = HtmlContainer.querySelectorAll('[data-associated]');
+        if (!fields) return; 
         fields.forEach(field => {
           if (field.getAttribute('data-associated') === subKey) {
             field.style.display = 'block';
           } else {
             field.style.display = 'none';
           }
-      });
-      }
     });
-    console.log("handletoggleoptions", key, subKey, rowindex);
+    console.log("handletoggleoptions", key, subKey, HtmlContainer);
   }
 }
 function createMultiSelectField1(field, onChangeCallback, value) {
@@ -573,6 +579,11 @@ export class EditModal {
     const renderhtml = renderelement.renderDivs();
     this.HtmlContainer.appendChild(renderhtml);
     console.log("renderhtml", renderhtml);
+  }
+  ReturnHtml(data){
+    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    const renderhtml = renderelement.renderDivs();
+    return renderhtml;
   }
   addRow(data) {
     const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);

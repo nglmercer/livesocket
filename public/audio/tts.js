@@ -91,7 +91,6 @@ export class TTS {
 
     async speak(message) {
         console.log('TTS speak', message);
-
         const voices = speechSynthesis.getVoices();
         console.log("voices", voices);
         let voiceSelect = document.getElementById('voiceSelect');
@@ -215,6 +214,7 @@ function populateVoiceList() {
 
 // Función para verificar si las voces están disponibles
 function checkVoices() {
+    if (typeof speechSynthesis === "undefined") return;
   if (speechSynthesis.getVoices().length > 0) {
     clearInterval(voiceCheckInterval);
     populateVoiceList();

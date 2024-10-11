@@ -1,66 +1,72 @@
-import { Giftsparsed, mapselectgift } from '../assets/gifts.js';
 import DynamicTable, { EditModal } from '../components/renderfields.js';
 const config = {
-    nombre: {
+  nombre: {
+    class: 'input-default',
+    type: 'textarea',
+    returnType: 'string',
+  }, 
+  minecraft:{
+    type: 'object',
+    check: {
+      class: 'filled-in',
+      label: 'check',
+      type: 'checkbox',
+      returnType: 'boolean',
+    },
+    command: {
       class: 'input-default',
+      label: '',
       type: 'textarea',
       returnType: 'string',
-    }, // Especifica el orden de las columnas
-    Evento: {
+    },
+  },
+  tts: {
+    label: 'TTS',
+    type: 'object',
+    check: {
+      class: 'filled-in',
+      label: 'check',
+      type: 'checkbox',
+      returnType: 'boolean',
+    },
+    text: {
       class: 'input-default',
-      // label: 'Evento',
-      type: 'object',
-      eventType: {
-        class: 'select-default',
-        type: 'select',
-        returnType: 'string',
-        options: [{ value: 'chat', label: 'Chat' }, { value: 'follow', label: 'Seguimiento' },{ value: 'like', label: 'like'},
-       {value: 'share', label: 'compartir'}, { value: 'subscribe', label: 'suscripcion' }, { value: 'gift', label: 'Gift' }],
-      },
-      chat: {
-        label: 'chat',
-        class: 'input-default',
-        type: 'textarea',
-        returnType: 'string',
-        hidden: true,
-      },
-      like: {
-        label: 'like',
-        class: 'input-default',
-        type: 'number',
-        returnType: 'number',
-        hidden: true,
-      },
-      gift: {
-        class: 'input-default',
-        label: '',
-        type: 'select',
-        returnType: 'number',
-        options: mapselectgift
-      },
+      label: 'leer texto',
+      type: 'text',
+      returnType: 'string',
     },
-    id: {
-      type: 'number',
-      returnType: 'number',
-      hidden: true,
-    }
-  };
-  const editcallback = async (index, data,modifiedData) => {
-    console.log("editcallback", index, data,modifiedData);
+  },
+  id: {
+    type: 'number',
+    returnType: 'number',
+    hidden: true,
   }
-  const deletecallback = async (index, data,modifiedData) => {
-    console.log("deletecallback", index, data,modifiedData);
-  }
-const Formelement = new EditModal('#table-container',editcallback,config,deletecallback);
-const testdata = 
-  {
-    nombre: "test",
-    Evento: {
-      eventType: "chat",
-      chat: "test",
-      like: 10,
-      gift: 10,
-    },
-    id: 1,
-  }
-Formelement.render(testdata);
+}
+const ActionModal = document.getElementById('ActionModal');
+const Buttonform  = document.getElementById('ActionModalButton');
+const editcallback = async (index, data,modifiedData) => {
+  console.log("editcallback", index, data,modifiedData);
+  ActionModal.close();
+}
+const deletecallback = async (index, data,modifiedData) => {
+  ActionModal.close();
+  console.log("deletecallback", index, data,modifiedData);
+}
+const Aformelement = new EditModal('#ActionModalContainer',editcallback,config,deletecallback);
+const testdata = {
+  nombre: "coloca tu nombre",
+  minecraft: {
+    check: true,
+    command: "test",
+  },
+  tts: {
+    check: true,
+    text: "test",
+  },
+  id: null,
+}
+Aformelement.render(testdata);
+Buttonform.className = 'open-modal-btn';
+Buttonform.onclick = () => {
+  ActionModal.open();
+};
