@@ -12,8 +12,8 @@ const config = {
       type: 'object',
       open: true,
       eventType: {
-        class: 'select-default',
-        type: 'select',
+        class: 'radio-default',
+        type: 'radio',
         toggleoptions: true,
         returnType: 'string',
         options: [{ value: 'chat', label: 'Chat' }, { value: 'follow', label: 'Seguimiento' },{ value: 'like', label: 'like'},
