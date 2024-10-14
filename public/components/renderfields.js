@@ -378,8 +378,50 @@ class DynamicRow {
     return divElement;
   }
   createRadioElement(key, subKey, value, typeConfig, HtmlContainer) {
+    const divElement = document.createElement('div');
+    divElement.classList.add('div-radio-group');
 
-  }
+    if (typeConfig.options) {
+        typeConfig.options.forEach(option => {
+            const radioWrapper = document.createElement('div');
+            radioWrapper.classList.add('radio-wrapper');
+            
+            const radioElement = document.createElement('input');
+            radioElement.type = 'radio';
+            radioElement.name = key;
+            radioElement.id = `${key}_${option.value}`; // Unique ID for each radio
+            radioElement.value = typeof option.value === 'object' ? option.value.index : option.value;
+            radioElement.checked = radioElement.value == value; // Marca como seleccionado si coincide con el valor actual
+            
+            const labelElement = document.createElement('label');
+            labelElement.textContent = option.label;
+            labelElement.classList.add('label');
+            labelElement.setAttribute('for', radioElement.id);
+
+            radioWrapper.appendChild(radioElement);
+            radioWrapper.appendChild(labelElement);
+            divElement.appendChild(radioWrapper);
+
+            // Listener para actualizar el valor seleccionado
+            radioElement.addEventListener('change', () => {
+                if (radioElement.checked) {
+                    this.updateModifiedData(key, subKey, radioElement.value);
+                    if (typeConfig.toggleoptions) {
+                        this.handletoggleoptions(subKey, radioElement.value, HtmlContainer);
+                    }
+                }
+            });
+        });
+    }
+
+    if (typeConfig.toggleoptions) {
+        setTimeout(() => {
+            this.handletoggleoptions(subKey, value, HtmlContainer);
+        }, 500);
+    }
+
+    return divElement;
+}
 
   createSliderElement(key, subKey, value, typeConfig) {
     const inputElement = document.createElement('input');
