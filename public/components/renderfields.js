@@ -146,7 +146,7 @@ class DynamicRow {
 
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;
-          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, objectContainer);
+          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, cell);
 
           if (inputElement) {
             const wrapper = document.createElement('div');
@@ -223,7 +223,7 @@ class DynamicRow {
 
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;
-          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, objectContainer);
+          const inputElement = this.createInputElement(key, subKey, subValue, subConfig, itemContainer);
 
           if (inputElement) {
             const wrapper = document.createElement('div');
@@ -242,7 +242,7 @@ class DynamicRow {
 
         itemContainer.appendChild(objectContainer);
       } else {
-        const inputElement = this.createInputElement(key, null, value, typeConfig,itemContainer);
+        const inputElement = this.createInputElement(key, null, value, typeConfig,container);
         if (inputElement) {
           itemContainer.appendChild(inputElement);
         } else {

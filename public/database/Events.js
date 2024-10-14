@@ -6,11 +6,6 @@ const config = {
       type: 'textarea',
       returnType: 'string',
     }, // Especifica el orden de las columnas
-    Evento: {
-      class: 'input-default',
-      // label: 'Evento',
-      type: 'object',
-      open: true,
       eventType: {
         class: 'radio-default',
         type: 'radio',
@@ -24,7 +19,6 @@ const config = {
         class: 'input-default',
         type: 'textarea',
         returnType: 'string',
-        hidden: true,
         dataAssociated: 'chat',
       },
       like: {
@@ -32,7 +26,6 @@ const config = {
         class: 'input-default',
         type: 'number',
         returnType: 'number',
-        hidden: true,
         dataAssociated: 'like',
       },
       gift: {
@@ -43,7 +36,6 @@ const config = {
         options: mapselectgift,
         dataAssociated: 'gift',
       },
-    },
     id: {
       type: 'number',
       returnType: 'number',
@@ -64,12 +56,11 @@ const Formelement = new EditModal('#EventsModalContainer',editcallback,config,de
 const testdata = 
   {
     nombre: "coloca tu nombre",
-    Evento: {
       eventType: "chat",
       chat: "default text",
       like: 10,
       gift: 10,
-    },
+    
     id: null,
   }
 Formelement.render(testdata);
