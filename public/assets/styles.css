@@ -30,6 +30,12 @@ input {
   max-width: auto;
   max-height: auto;
 }
+.grid {
+  display: grid;
+}
+.flex {
+  display: flex;
+}
 * {
     color: var(--white-font);
     background-color: var(--black-font);
@@ -66,7 +72,7 @@ input {
   }
   .card {
     width: 100%;
-    max-width: 21rem;
+    max-width: 28rem;
     font-size: large;
     overflow: hidden; /* Oculta el desbordamiento del contenido */
     text-overflow: ellipsis; /* Añade puntos suspensivos (...) */
@@ -85,7 +91,7 @@ input {
   
   .flexbox {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(17rem, 20rem));
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 28rem));
     transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .relative {
@@ -145,6 +151,8 @@ input {
   color: var(--dark-text);
   padding: 1.5rem;
   border-radius: 8px;
+  display: grid;
+  grid-template-rows: minmax(1fr, 1fr);
 }
 
 /* Estilos para inputs y textareas */
@@ -214,6 +222,9 @@ details[open] {
 
 .deletebutton:hover {
   background-color: #c82333;
+}
+.gap-1 {
+  gap: 0.5rem;
 }
 /* Estilos base para todos los inputs */
 input[type="text"],
