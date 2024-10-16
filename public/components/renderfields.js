@@ -310,6 +310,9 @@ class DynamicRow {
       case 'select':
         inputElement = this.createSelectElement(key, subKey, value, typeConfig, HtmlContainer);
         break;
+      case 'select2':
+        inputElement = this.createSelect2Element(key, subKey, value, typeConfig, HtmlContainer);
+        break;
       case 'multiSelect':
         inputElement = this.createMultiSelectElement(key, subKey, value, typeConfig);
         break;
@@ -376,6 +379,9 @@ class DynamicRow {
       divElement.appendChild(labelElement);
     }
     return divElement;
+  }
+  createSelect2Element(key, subKey, value, typeConfig, HtmlContainer) {
+    const divElement = document.createElement('div');
   }
   createRadioElement(key, subKey, value, typeConfig, HtmlContainer) {
     const divElement = document.createElement('div');
