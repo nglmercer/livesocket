@@ -1,5 +1,9 @@
 import { Giftsparsed, mapselectgift } from '../assets/gifts.js';
 import DynamicTable, { EditModal } from '../components/renderfields.js';
+import { databases, IndexedDBManager, DBObserver } from './indexdb.js'
+const ObserverEvents = new DBObserver();
+const EventsManager = new IndexedDBManager(databases.eventsDB,ObserverEvents);
+
 const config = {
     nombre: {
       class: 'input-default',
@@ -31,7 +35,7 @@ const config = {
       gift: {
         class: 'input-default',
         label: '',
-        type: 'select',
+        type: 'select2',
         returnType: 'number',
         options: mapselectgift,
         dataAssociated: 'gift',
@@ -44,9 +48,10 @@ const config = {
   };
   const EventsModal = document.getElementById('EventsModal');
   const Buttonform  = document.getElementById('EventsModalButton');
-  const editcallback = async (index, data,modifiedData) => {
-    console.log("editcallback", index, data,modifiedData);
+  const editcallback = async (data,modifiedData) => {
+    console.log("editcallback", data,modifiedData);
     EventsModal.close();
+    EventsManager.saveData(modifiedData)
   }
   const deletecallback = async (index, data,modifiedData) => {
     EventsModal.close();
@@ -59,9 +64,8 @@ const testdata =
       eventType: "chat",
       chat: "default text",
       like: 10,
-      gift: 10,
-    
-    id: null,
+      gift: 5655,
+      id: undefined,
   }
 Formelement.render(testdata);
 

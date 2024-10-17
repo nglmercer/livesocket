@@ -82,6 +82,7 @@ class CustomModal extends HTMLElement {
     }
 
     setupEventListeners() {
+        console.log("created modal 123123123123123")
         this.closeButton.addEventListener('click', () => this.close());
         this.overlay.addEventListener('click', (e) => {
             if (e.target === this.overlay) {

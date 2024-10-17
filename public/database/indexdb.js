@@ -1,9 +1,9 @@
-export const databases = {
+const databases = {
     eventsDB: { name: 'ActionEvent', version: 1, store: 'events' },
     ActionsDB: { name: 'ActionEvent', version: 1, store: 'actions' },
   };
 
-export class IndexedDBManager {
+class IndexedDBManager {
 constructor(dbConfig, idbObserver) {
     this.dbConfig = dbConfig;
     this.debouncedSaveData = debounce(this.saveData.bind(this), 300); // 300 ms debounce
@@ -195,8 +195,7 @@ return function(...args) {
     timeout = setTimeout(() => func.apply(context, args), wait);
 };
 }
-
-export class DBObserver {
+class DBObserver {
 constructor() {
     this.listeners = [];
 }
@@ -213,7 +212,7 @@ notify(action, data) {
     this.listeners.forEach(listener => listener(action, data));
 }
 }
-
+export { databases, IndexedDBManager, DBObserver } 
   
   // Usage example
   // IndexedDBManager.updateData({ name: 'User 1', points: 100 }, 'name');

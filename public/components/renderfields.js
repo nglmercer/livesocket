@@ -275,9 +275,6 @@ class DynamicRow {
     actionContainer.appendChild(saveButton);
     container.appendChild(actionContainer);
 
-    // Limpiar el contenedor HTML original y agregar el nuevo contenido
-    this.HtmlContainer.innerHTML = '';
-    this.HtmlContainer.appendChild(container);
     return container;
   }
   
@@ -359,16 +356,12 @@ class DynamicRow {
     }
 
     selectElement.value = value;
-    if (typeConfig.toggleoptions) {
-      setTimeout(() => {
-        this.handletoggleoptions(subKey, value, HtmlContainer);
-      }, 500);
-    }
+    if (typeConfig.toggleoptions) setTimeout(this.handletoggleoptions(subKey, value, HtmlContainer), 500);
+    
     selectElement.addEventListener('change', () => {
       this.updateModifiedData(key, subKey, selectElement.value);
-      if (typeConfig.toggleoptions) {
-        this.handletoggleoptions(subKey, selectElement.value, HtmlContainer);
-      }
+      if (typeConfig.toggleoptions) this.handletoggleoptions(subKey, selectElement.value, HtmlContainer);
+
     });
     const labelElement = document.createElement('label');
     divElement.appendChild(selectElement);
@@ -380,8 +373,31 @@ class DynamicRow {
     }
     return divElement;
   }
-  createSelect2Element(key, subKey, value, typeConfig, HtmlContainer) {
+  createSelect2Element(key, subKey, value, typeConfig, HtmlContainer) { 
     const divElement = document.createElement('div');
+    const selectComponent = document.createElement('custom-select');
+    selectComponent.setOptions(typeConfig.options);
+    selectComponent.setValue(value);  // Establecer valor predeterminado
+    if (typeConfig.toggleoptions) setTimeout(this.handletoggleoptions(subKey, value, HtmlContainer), 500);
+    // Añadir el evento change
+    selectComponent.addEventListener('change', (e) => {
+        console.log('Seleccionado:', e.detail);
+        console.log('Valor:', selectComponent.getValue());
+        console.log('mySelect:', selectComponent.value);
+        this.updateModifiedData(key, subKey, selectComponent.value);
+        if (typeConfig.toggleoptions) handletoggleoptions(subKey, selectComponent.value, HtmlContainer);
+        
+      });
+
+    const labelElement = document.createElement('label');
+    divElement.appendChild(selectComponent);
+    if (typeConfig.label) {
+      labelElement.textContent = typeConfig.label;
+      labelElement.classList.add('label');
+      labelElement.setAttribute('for', key);
+      divElement.appendChild(labelElement);
+    }
+    return divElement
   }
   createRadioElement(key, subKey, value, typeConfig, HtmlContainer) {
     const divElement = document.createElement('div');
