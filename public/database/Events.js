@@ -1,6 +1,8 @@
 import { Giftsparsed, mapselectgift } from '../assets/gifts.js';
 import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { databases, IndexedDBManager, DBObserver } from './indexdb.js'
+import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
+
 const ObserverEvents = new DBObserver();
 const EventsManager = new IndexedDBManager(databases.eventsDB,ObserverEvents);
 
@@ -50,8 +52,25 @@ const config = {
   const Buttonform  = document.getElementById('EventsModalButton');
   const editcallback = async (data,modifiedData) => {
     console.log("editcallback", data,modifiedData);
-    EventsModal.close();
-    EventsManager.saveData(modifiedData)
+    const alldata = await EventsManager.getAllData()
+    console.log("alldata",alldata)
+    
+    const keysToCheck = ['eventType', modifiedData.eventType];
+    
+    const callbackFunction = (matchingObject, index, results) => {
+      console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
+    };
+    
+    const results = compareObjects(modifiedData, alldata, keysToCheck, callbackFunction);
+    console.log("results",results)
+    if (results && results.length >= 1) {
+      console.log(results.length)
+    } else {
+
+    }
+    //const existdata = 
+    //EventsModal.close();
+    //EventsManager.saveData(modifiedData)
   }
   const deletecallback = async (index, data,modifiedData) => {
     EventsModal.close();

@@ -298,10 +298,87 @@ const replaceVariables = (command, data, iscommand = false ) => {
   return replacedCommand;
 };
 
-const escapeMinecraftCommand = (command) => {
-// Escape only double quotes, not backslashes (unchanged)
-return command.replace(/"/g, '\\"');
-};
+class ObjectComparator {
+  constructor(mainObject) {
+    this.mainObject = mainObject;
+  }
+
+  compareKeys(objectsToCompare, keysToCheck) {
+    return objectsToCompare.map(obj => {
+      const result = {};
+      keysToCheck.forEach(key => {
+        result[key] = this.compareValues(this.mainObject[key], obj[key]);
+      });
+      return result;
+    });
+  }
+
+  checkExistence(keysToCheck) {
+    const result = {};
+    keysToCheck.forEach(key => {
+      result[key] = key in this.mainObject;
+    });
+    return result;
+  }
+
+  compareValues(value1, value2) {
+    if (typeof value1 === 'string' && typeof value2 === 'string') {
+      return this.compareStrings(value1, value2);
+    } else if (typeof value1 === 'number' && typeof value2 === 'number') {
+      return this.compareNumbers(value1, value2);
+    } else {
+      return value1 === value2;
+    }
+  }
+
+  compareStrings(str1, str2) {
+    return {
+      isEqual: str1 === str2,
+      contains: str1.includes(str2),
+      startsWith: str1.startsWith(str2),
+    };
+  }
+
+  compareNumbers(num1, num2) {
+    return {
+      isEqual: num1 === num2,
+      isLess: num1 < num2,
+      isGreater: num1 > num2,
+      isLessOrEqual: num1 <= num2,
+      isGreaterOrEqual: num1 >= num2,
+    };
+  }
+}
+
+function compareObjects(mainObject, objectsToCompare, keysToCheck, callback) {
+  const comparator = new ObjectComparator(mainObject);
+  const comparisonResults = comparator.compareKeys(objectsToCompare, keysToCheck);
+  const existenceResults = comparator.checkExistence(keysToCheck);
+  
+  const results = {
+    comparisons: comparisonResults,
+    existence: existenceResults,
+  };
+
+  const validResults = [];
+
+  // Ejecutar el callback si se proporciona
+  if (callback && typeof callback === 'function') {
+    comparisonResults.forEach((comparisonResult, index) => {
+      const allKeysExist = keysToCheck.every(key => existenceResults[key]);
+      const allComparisonsTrue = Object.values(comparisonResult).every(comparison =>
+        typeof comparison === 'boolean' ? comparison : comparison.isEqual
+      );
+
+      if (allKeysExist && allComparisonsTrue) {
+        callback(objectsToCompare[index], index, results);
+        validResults.push(objectsToCompare[index]); // Agregar el objeto si cumple con las condiciones
+      }
+    });
+  }
+
+  return validResults; // Retornar solo los objetos válidos
+}
 
 
 // Crear múltiples contadores con diferentes intervalos
@@ -329,5 +406,5 @@ console.log(tracker.comboCounters);
 
 // Total acumulado de todos los combos (likes + comentarios)
 console.log('Total de combos acumulados:', tracker.getTotalCombos()); // 12 */
-export { Counter, TypeofData,ComboTracker, replaceVariables };
+export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects };
   
