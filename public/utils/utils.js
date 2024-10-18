@@ -303,20 +303,29 @@ class ObjectComparator {
     this.mainObject = mainObject;
   }
 
+  // Ahora devuelve todos los tipos de comparación para cada clave
   compareKeys(objectsToCompare, keysToCheck) {
-    return objectsToCompare.map(obj => {
-      const result = {};
-      keysToCheck.forEach(key => {
-        result[key] = this.compareValues(this.mainObject[key], obj[key]);
+    if (Array.isArray(objectsToCompare)) {
+      // Si es un array, procesamos todos los objetos
+      return objectsToCompare.map(obj => {
+        return this.compareSingleObject(obj, keysToCheck);
       });
-      return result;
-    });
+    } else {
+      // Si es un solo objeto, simplemente lo procesamos
+      return this.compareSingleObject(objectsToCompare, keysToCheck);
+    }
   }
 
-  checkExistence(keysToCheck) {
+  compareSingleObject(obj, keysToCheck) {
     const result = {};
     keysToCheck.forEach(key => {
-      result[key] = key in this.mainObject;
+      const keyName = typeof key === 'object' ? key.key : key;
+      const compareType =
+        typeof key === 'object' && key.compare ? key.compare : 'isEqual';
+      result[keyName] = this.compareValues(
+        this.mainObject[keyName],
+        obj[keyName]
+      );
     });
     return result;
   }
@@ -327,7 +336,7 @@ class ObjectComparator {
     } else if (typeof value1 === 'number' && typeof value2 === 'number') {
       return this.compareNumbers(value1, value2);
     } else {
-      return value1 === value2;
+      return { isEqual: value1 === value2 };
     }
   }
 
@@ -336,51 +345,68 @@ class ObjectComparator {
       isEqual: str1 === str2,
       contains: str1.includes(str2),
       startsWith: str1.startsWith(str2),
+      endsWith: str1.endsWith(str2),
     };
   }
 
   compareNumbers(num1, num2) {
+    const maxRange2 = num2 * 1.1; // 110% del valor de num2
+    const minRange2 = num2 * 0.9; // 90% del valor de num2
     return {
       isEqual: num1 === num2,
       isLess: num1 < num2,
       isGreater: num1 > num2,
       isLessOrEqual: num1 <= num2,
       isGreaterOrEqual: num1 >= num2,
+      isInRange: num1 >= minRange2 && num1 <= maxRange2,
     };
   }
 }
 
 function compareObjects(mainObject, objectsToCompare, keysToCheck, callback) {
   const comparator = new ObjectComparator(mainObject);
-  const comparisonResults = comparator.compareKeys(objectsToCompare, keysToCheck);
-  const existenceResults = comparator.checkExistence(keysToCheck);
-  
-  const results = {
-    comparisons: comparisonResults,
-    existence: existenceResults,
-  };
-
+  const comparisonResults = comparator.compareKeys(
+    objectsToCompare,
+    keysToCheck
+  );
   const validResults = [];
 
   // Ejecutar el callback si se proporciona
   if (callback && typeof callback === 'function') {
     comparisonResults.forEach((comparisonResult, index) => {
-      const allKeysExist = keysToCheck.every(key => existenceResults[key]);
-      const allComparisonsTrue = Object.values(comparisonResult).every(comparison =>
-        typeof comparison === 'boolean' ? comparison : comparison.isEqual
+      const allComparisonsTrue = getComparisonValues(
+        comparisonResult,
+        keysToCheck
       );
-
-      if (allKeysExist && allComparisonsTrue) {
-        callback(objectsToCompare[index], index, results);
-        validResults.push(objectsToCompare[index]); // Agregar el objeto si cumple con las condiciones
+      
+      if (allComparisonsTrue.allTrue) {
+        callback(objectsToCompare[index], index);
+        validResults.push(objectsToCompare[index]);
       }
     });
   }
 
-  return validResults; // Retornar solo los objetos válidos
+  return { comparisonResults, validResults }; // Retornar solo los objetos válidos
 }
+function getComparisonValues(obj, keysToCheck) {
+  const result = {};
+  let allTrue = true; // Variable para rastrear si todos son true
 
+  keysToCheck.forEach(({ key, compare }) => {
+    if (obj[key] && obj[key][compare] !== undefined) {
+      result[key] = obj[key][compare];
+      // Si alguno de los valores no es true, establecer allTrue en false
+      if (!obj[key][compare]) {
+        allTrue = false;
+      }
+    }
+  });
 
+  // Añadir el resultado de la verificación allTrue
+  result.allTrue = allTrue;
+
+  return result;
+}
 // Crear múltiples contadores con diferentes intervalos
 // const counter1 = new Counter(0, 1000); // Genera ID cada 1 segundo
 // // Usar los IDs generados

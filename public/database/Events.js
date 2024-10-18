@@ -55,19 +55,18 @@ const config = {
     const alldata = await EventsManager.getAllData()
     console.log("alldata",alldata)
     
-    const keysToCheck = ['eventType', modifiedData.eventType];
-    
+    const keysToCheck = [
+      { key: 'eventType', compare: 'isEqual' },
+/*       { key: 'gift', compare: 'isEqual' },
+ */      { key: modifiedData.eventType, compare: 'isEqual' }
+    ];    
     const callbackFunction = (matchingObject, index, results) => {
       console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
     };
     
     const results = compareObjects(modifiedData, alldata, keysToCheck, callbackFunction);
     console.log("results",results)
-    if (results && results.length >= 1) {
-      console.log(results.length)
-    } else {
 
-    }
     //const existdata = 
     //EventsModal.close();
     //EventsManager.saveData(modifiedData)
