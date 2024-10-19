@@ -550,6 +550,11 @@ class DynamicRow {
     });
     console.log("handletoggleoptions", key, subKey, HtmlContainer);
   }
+  updateData(newData) {
+    this.data = { ...newData };
+    this.originalData = { ...newData };
+    this.modifiedData = JSON.parse(JSON.stringify(newData));
+  }
 }
 function createMultiSelectField1(field, onChangeCallback, value) {
   const container = document.createElement('div');
@@ -637,10 +642,11 @@ export class EditModal {
     this.deletecallback = deletecallback;
     // this.HtmlContainer = document.createElement('div');
     this.columns = this.getOrderedElements(config); // Establece las columnas en el orden deseado
+    this.renderelement = new DynamicRow(this.HtmlContainer, {}, this.columns, this.config, this.callback,this.deletecallback);
   }
   render(data) {
-    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
-    const renderhtml = renderelement.renderDivs();
+    this.renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    const renderhtml = this.renderelement.renderDivs();
     this.HtmlContainer.appendChild(renderhtml);
     console.log("renderhtml", renderhtml);
   }
@@ -652,6 +658,7 @@ export class EditModal {
   addRow(data) {
     const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
     const renderhtml = renderelement.renderDivs();
+    return renderhtml
   }
   getOrderedElements(config) {
     return Object.keys(config);
@@ -677,6 +684,9 @@ export class EditModal {
     });
 
     return filledData;
+  }
+  updateData(newData) {
+    this.renderelement.updateData(newData)
   }
 }
 

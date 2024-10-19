@@ -143,8 +143,37 @@ input {
   --dark-text: #e0e0e0;
   --dark-accent: #4a9eff;
   --dark-hover: #3d3d3d;
+  --succes-green: #4CAF50;
+  --info: #607d8b;
+  --warning-yellow: #FFCA28;
+  --error-red: #f44336;
 }
-
+.alert {
+  padding: 15px 25px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  opacity: 1;
+  color: white;
+  font-weight: 500;
+}
+.alert-container {
+  position: fixed;
+  top: 1%;
+  right: 1%;
+  z-index: 100;
+  .alert-success {
+    background-color: var(--succes-green);
+  }  
+  .alert-info {
+    background-color: var(--info);
+  }
+  .alert-warning {
+    background-color: var(--warning-yellow);
+  }
+  .alert-error {
+    background-color: var(--error-red);
+  }
+}
 /* Estilos base */
 .dynamic-row-container {
   background-color: var(--dark-bg);

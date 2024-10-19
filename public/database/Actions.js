@@ -57,16 +57,17 @@ const testdata = {
   nombre: "coloca tu nombre",
   minecraft: {
     check: true,
-    command: "test",
+    command: "/say coloca tu comando",
   },
   tts: {
     check: true,
-    text: "test",
+    text: "texto a leer",
   },
-  id: null,
+  id: undefined,
 }
 Aformelement.render(testdata);
 Buttonform.className = 'open-modal-btn';
 Buttonform.onclick = () => {
   ActionModal.open();
+  ActionModal.updateData(testdata)
 };

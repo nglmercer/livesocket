@@ -1,4 +1,4 @@
-function showAlert(type, message, duration = 3000) {
+function showAlert(type='info', message, duration = 3000) {
   // Buscar el contenedor de alertas o crearlo si no existe
   let alertContainer = document.querySelector('.alert-container');
   if (!alertContainer) {
