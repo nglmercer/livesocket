@@ -36,14 +36,13 @@ const { ttsconfig, ttsdata } = keys.reduce((acc, { key, text, check }) => {
 console.log(ttsconfig);
 console.log(ttsdata);
 
+const ttsdatastore = localStorage.getItem('ttsdatastore') ? JSON.parse(localStorage.getItem('ttsdatastore')) : ttsdata;
 
-
-const callbackconfig = { callback: async (index, data,modifiedData) => {
-    console.log("editcallback", index, data,modifiedData);
+const callbackconfig = { callback: async (data,modifiedData) => {
+    console.log("editcallback", data,modifiedData);
+    localStorage.setItem('ttsdatastore', JSON.stringify(modifiedData));
   }
-  , deletecallback:  async (index, data,modifiedData) => {
-    console.log("deletecallback", index, data,modifiedData);
-  } };
+  , deletecallback:  undefined };
 const configelement = new EditModal('#chatbotconfig',callbackconfig,ttsconfig);
-configelement.render(ttsdata);
+configelement.render(ttsdatastore);
 // asdasd como seria un metodo para hacer un string a json

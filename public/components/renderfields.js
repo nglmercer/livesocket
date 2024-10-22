@@ -184,13 +184,15 @@ class DynamicRow {
     actionButton.addEventListener('click', () => {
       this.callback(row.rowIndex, this.originalData, this.modifiedData);
     });
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Eliminar';
-    deleteButton.className = 'deletebutton custombutton';
-    deleteButton.addEventListener('click', () => {
-      this.deletecallback(row.rowIndex, this.originalData, this.modifiedData);
-    });
-    actionCell.appendChild(deleteButton);
+    if (this.deletecallback) {
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Eliminar';
+      deleteButton.className = 'deletebutton custombutton';
+      deleteButton.addEventListener('click', () => {
+        this.deletecallback(row.rowIndex, this.originalData, this.modifiedData);
+      });
+      actionCell.appendChild(deleteButton);
+    }
     actionCell.appendChild(actionButton);
   }
   renderDivs() {
@@ -265,6 +267,7 @@ class DynamicRow {
     saveButton.addEventListener('click', () => {
       this.callback(this.originalData, this.modifiedData);
     });
+    if (this.deletecallback) {
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Eliminar';
@@ -274,6 +277,7 @@ class DynamicRow {
     });
 
     actionContainer.appendChild(deleteButton);
+  }
     actionContainer.appendChild(saveButton);
     container.appendChild(actionContainer);
 
