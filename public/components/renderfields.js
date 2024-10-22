@@ -136,8 +136,8 @@ class DynamicRow {
           objectContainer.setAttribute('open', '');
         }
         const summary = document.createElement('summary');
-        console.log("typeConfig", typeConfig, key);
-        summary.textContent = 'Mostrar '+ key;
+        console.log("typeConfig summary", typeConfig, key);
+        summary.textContent = typeConfig.label || 'Mostrar ' + key;
 
         objectContainer.appendChild(summary);
 
@@ -214,7 +214,9 @@ class DynamicRow {
           objectContainer.setAttribute('open', '');
         }
         const summary = document.createElement('summary');
-        summary.textContent = 'Mostrar ' + key;
+        console.log("typeConfig summary", typeConfig, key);
+
+        summary.textContent = typeConfig.label || 'Mostrar ' + key;
 
         objectContainer.appendChild(summary);
 
@@ -229,7 +231,7 @@ class DynamicRow {
             const wrapper = document.createElement('div');
             wrapper.classList.add('input-wrapper');
 
-            if (subConfig.label) {
+            if (subConfig.label && subConfig.label !== '' && subConfig.type !== 'checkbox') {
               const label = document.createElement('label');
               label.textContent = subConfig.label;
               wrapper.appendChild(label);
@@ -292,7 +294,7 @@ class DynamicRow {
         inputElement = this.createSliderElement(key, subKey, value, typeConfig);
         break;
       case 'checkbox':
-        inputElement = this.createCheckboxElement(key, subKey, value);
+        inputElement = this.createCheckboxElement(key, subKey, value, typeConfig);
         break;
       case 'number':
         inputElement = this.createNumberElement(key, subKey, value);
@@ -323,7 +325,7 @@ class DynamicRow {
 
     // Agregar clase si existe
     if (typeConfig?.class) {
-      inputElement.classList.add(typeConfig.class);
+      inputElement.className = typeConfig.class;
     }
     if (typeConfig.dataAssociated) {
           inputElement.setAttribute('data-associated', typeConfig.dataAssociated);
@@ -443,7 +445,7 @@ class DynamicRow {
     }
 
     return divElement;
-}
+  }
 
   createSliderElement(key, subKey, value, typeConfig) {
     const inputElement = document.createElement('input');
@@ -460,17 +462,28 @@ class DynamicRow {
     return inputElement;
   }
 
-  createCheckboxElement(key, subKey, value) {
+  createCheckboxElement(key, subKey, value, typeConfig) {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('checkbox-wrapper'); // Clase para ajustar el tamaño
+
     const inputElement = document.createElement('input');
     inputElement.type = 'checkbox';
     inputElement.checked = value;
+    inputElement.id = `${key}_${subKey}`; // Generar un id único
+    inputElement.className = 'checkbox-4';
+    const labelElement = document.createElement('label');
+    labelElement.setAttribute('for', inputElement.id); // Relacionar el label con el checkbox
+    labelElement.textContent = typeConfig.label || subKey; // Texto del label o ajusta según tus necesidades
 
     inputElement.addEventListener('change', () => {
       const returnValue = inputElement.checked;
       this.updateModifiedData(key, subKey, returnValue);
     });
 
-    return inputElement;
+    wrapper.appendChild(inputElement);
+    wrapper.appendChild(labelElement);
+
+    return wrapper;
   }
 
   createNumberElement(key, subKey, value) {

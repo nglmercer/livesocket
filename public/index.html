@@ -6,7 +6,8 @@
     <title>Document</title>
     <link rel="stylesheet" href="./assets/styles.css">
     <link rel="stylesheet" href="./assets/modal.css">
-    </head>
+    <link rel="stylesheet" href="./assets/fields.css">
+  </head>
   <script src="./components/webmodal.js"></script>
   <script type="module" src="./components/webcomponents.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
@@ -45,10 +46,10 @@
         <label for="show-more" class="show-more-label"><span></span></label>
     
         <div class="flexbox gap-1">
-    
+          <div id="chatbotconfig" class="card grid"></div>
           <div class="card grid">
               <div class="card-header">
-                  <h2 class="card-title">General Settings</h2>
+                  <h2 class="card-title">Voice Settings</h2>
               </div>
               <div class="card-content">
                       <!-- <input type="checkbox" id="voiceenabled" checked>
@@ -201,26 +202,8 @@
                   </div>
               </div>
           </div>
-          <div class="card">
-              <div class="card-header">
-                  <h2 class="card-title">BlackList: Input de palabras que no aparecerán en el chat </h2>
-              </div>
-              <div class="card-content space-y-4">
-                  <input type="text" id="filter-words" class="border p-2 mr-2">
-                  <button class="custombutton" id="addfilter-words" >✅word</button>
-                  <button id="load-known-filters" class="custombutton">Añadir filtros conocidos</button>
-                  <div id="containerfilter-words" class="overflow-y-auto max-h-28 space-y-2 mt-2"></div>
-              </div>
-    
-          </div>
-          <div class="card hidden">
-              <h2 class="card-title">WhiteList: Input de usuarios que aparecerán en el chat++</h2>
-              <div class="card-content space-y-4">
-                  <input type="text" id="filter-users" class="border p-2 mr-2">
-                  <button class="custombutton" id="addfilter-users" >✅user</button>
-                  <div id="containerfilter-users" class="overflow-y-auto max-h-28 space-y-2 mt-2"></div>
-              </div>
-          </div>
+
+
       </div>
     
       </div>
@@ -228,5 +211,6 @@
     <script type="module" src="./audio/tts.js"></script>
     <script type="module" src="./database/Actions.js"></script>
     <script type="module" src="./database/Events.js"></script>
+    <script type="module" src="./features/speechconfig.js"></script>
 </body>
 </html>

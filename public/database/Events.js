@@ -87,11 +87,11 @@ const deletecallback = async (index, data,modifiedData) => {
 const Formelement = new EditModal('#EventsModalContainer',editcallback,config,deletecallback);
 const testdata = {
   nombre: "coloca tu nombre",
-    eventType: "chat",
-    chat: "default text",
-    like: 10,
-    gift: 5655,
-    id: undefined,
+  eventType: "chat",
+  chat: "default text",
+  like: 10,
+  gift: 5655,
+  id: undefined,
 }
 Formelement.render(testdata);
 
