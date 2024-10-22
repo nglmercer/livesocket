@@ -75,3 +75,83 @@ custom-modal {
 .modal-warning { background-color: #fff3cd; }
 .modal-success { background-color: #d4edda; }
 .modal-error { background-color: #f8d7da; }
+.modal-trigger {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.modal-trigger:hover {
+    transform: scale(1.1);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color:  black;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    padding: 0;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-top: 5px;
+    display: none;
+}
+
+.modal-title {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 15px;
+}

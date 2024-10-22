@@ -42,12 +42,12 @@ const config = {
     options: mapselectgift,
     dataAssociated: 'gift',
   },
-  Actions: {
+/*   Actions: {
     class: 'input-default',
     type: 'multiSelect',
     returnType: 'string',
     options: [{ value: 'edit', label: 'Editar' }, { value: 'delete', label: 'Eliminar' }],
-  },
+  }, */
   id: {
     type: 'number',
     returnType: 'number',
