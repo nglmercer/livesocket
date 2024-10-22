@@ -259,13 +259,13 @@ export async function AccionEventoOverlayEval(eventType = "chat", indexdbdata, u
   }
 }
 
-const editcallback = async (index, data,modifiedData) => {
+const asdasdcallackback = async (index, data,modifiedData) => {
   console.log("editcallback", index, data,modifiedData);
   if (modifiedData.id) {
     AccionEventsDBManager.updateData(modifiedData);
   }
 }
-const deletecallback = async (index, data,modifiedData) => {
+const deadeasdcallackback = async (index, data,modifiedData) => {
   console.log("deletecallback", index, data,modifiedData);
   if (modifiedData.id) {
     AccionEventsDBManager.deleteData(modifiedData.id);

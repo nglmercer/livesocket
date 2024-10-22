@@ -648,11 +648,11 @@ function createMultiSelectField1(field, onChangeCallback, value) {
   return container;
 }
 export class EditModal {
-  constructor(containerSelector, callback, config = {},deletecallback) {
+  constructor(containerSelector, callback, config = {}) {
     this.HtmlContainer = document.querySelector(containerSelector);
     this.config = config;
-    this.callback = callback;
-    this.deletecallback = deletecallback;
+    this.callback = callback.callback;
+    this.deletecallback = callback.deletecallback;
     // this.HtmlContainer = document.createElement('div');
     this.columns = this.getOrderedElements(config); // Establece las columnas en el orden deseado
     this.renderelement = new DynamicRow(this.HtmlContainer, {}, this.columns, this.config, this.callback,this.deletecallback);

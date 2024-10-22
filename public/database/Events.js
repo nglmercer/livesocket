@@ -84,7 +84,10 @@ const deletecallback = async (index, data,modifiedData) => {
   EventsModal.close();
   console.log("deletecallback", index, data,modifiedData);
 }
-const Formelement = new EditModal('#EventsModalContainer',editcallback,config,deletecallback);
+const callbackconfig = { callback: editcallback
+, deletecallback:  deletecallback
+};
+const Formelement = new EditModal('#EventsModalContainer',callbackconfig,config);
 const testdata = {
   nombre: "coloca tu nombre",
   eventType: "chat",

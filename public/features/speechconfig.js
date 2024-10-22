@@ -38,12 +38,12 @@ console.log(ttsdata);
 
 
 
-const editcallback = async (data,modifiedData) => {
-  console.log("editcallback", data,modifiedData);
-}
-const deletecallback = async (index, data,modifiedData) => {
-  console.log("deletecallback", index, data,modifiedData);
-}
-const configelement = new EditModal('#chatbotconfig',editcallback,ttsconfig,deletecallback);
+const callbackconfig = { callback: async (index, data,modifiedData) => {
+    console.log("editcallback", index, data,modifiedData);
+  }
+  , deletecallback:  async (index, data,modifiedData) => {
+    console.log("deletecallback", index, data,modifiedData);
+  } };
+const configelement = new EditModal('#chatbotconfig',callbackconfig,ttsconfig);
 configelement.render(ttsdata);
 // asdasd como seria un metodo para hacer un string a json

@@ -44,15 +44,16 @@ const config = {
 }
 const ActionModal = document.getElementById('ActionModal');
 const Buttonform  = document.getElementById('ActionModalButton');
-const editcallback = async (index, data,modifiedData) => {
+
+const callbackconfig = { callback: async (index, data,modifiedData) => {
   console.log("editcallback", index, data,modifiedData);
   ActionModal.close();
 }
-const deletecallback = async (index, data,modifiedData) => {
+, deletecallback:  async (index, data,modifiedData) => {
   ActionModal.close();
   console.log("deletecallback", index, data,modifiedData);
-}
-const Aformelement = new EditModal('#ActionModalContainer',editcallback,config,deletecallback);
+} };
+const Aformelement = new EditModal('#ActionModalContainer',callbackconfig,config);
 const testdata = {
   nombre: "coloca tu nombre",
   minecraft: {
@@ -69,5 +70,5 @@ Aformelement.render(testdata);
 Buttonform.className = 'open-modal-btn';
 Buttonform.onclick = () => {
   ActionModal.open();
-  ActionModal.updateData(testdata)
+  Aformelement.updateData(testdata)
 };
