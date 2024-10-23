@@ -84,8 +84,10 @@ const deletecallback = async (index, data,modifiedData) => {
   EventsModal.close();
   console.log("deletecallback", index, data,modifiedData);
 }
-const callbackconfig = { callback: editcallback
-, deletecallback:  deletecallback
+const callbackconfig = { 
+  callback: editcallback, deletecallback:  deletecallback,
+  callbacktext: 'Guardar cambios',
+  deletecallbacktext: 'Eliminar',
 };
 const Formelement = new EditModal('#EventsModalContainer',callbackconfig,config);
 const testdata = {

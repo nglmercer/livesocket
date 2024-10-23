@@ -33,7 +33,7 @@ class CustomModal extends HTMLElement {
                     align-items: center;
                 }
                 .modal-content {
-                    background: white;
+                    background: black;
                     padding: 20px;
                     border-radius: 5px;
                     position: relative;
@@ -43,10 +43,18 @@ class CustomModal extends HTMLElement {
                     position: absolute;
                     top: 10px;
                     right: 10px;
-                    cursor: pointer;
-                    background: none;
-                    border: none;
-                    font-size: 24px;
+                    background-color: #dc3545;
+                    width: 24px;
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    padding: 0;
+                    border-radius: 50%;
+                }
+                .close-button:hover {
+                    background-color: #c82333;
                 }
                 .modal-body {
                     margin-top: 20px;

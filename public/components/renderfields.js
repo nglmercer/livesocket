@@ -1,10 +1,9 @@
 class DynamicTable {
-  constructor(containerSelector, callback, config = {},deletecallback) {
-    this.container = document.querySelector(containerSelector);
+  constructor(containerSelector, callback, config = {}) {
     this.config = config;
-    this.columns = this.getOrderedColumns(config); // Establece las columnas en el orden deseado
     this.callback = callback;
-    this.deletecallback = deletecallback;
+    this.container = document.querySelector(containerSelector);
+    this.columns = this.getOrderedColumns(config); // Establece las columnas en el orden deseado
     this.HtmlContainer = document.createElement('table');
     this.HtmlContainer.classList.add('dynamic-table');
     this.container.appendChild(this.HtmlContainer);
@@ -42,7 +41,7 @@ class DynamicTable {
   }
 
   addRow(data) {
-    const row = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    const row = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     row.render();
     this.fillEmptyFields(data);
   }
@@ -105,15 +104,17 @@ class DynamicTable {
   }
 }
 class DynamicRow {
-  constructor(table, data, columns, config, callback,deletecallback) {
+  constructor(table, data, columns, config, callback) {
     this.HtmlContainer = table;
     this.data = data;
     this.columns = columns;
     this.config = config;
-    this.callback = callback;
+    this.callback = callback.callback;
     this.originalData = { ...data }; // Guardamos los datos originales
     this.modifiedData = JSON.parse(JSON.stringify(data)); // Inicializamos modifiedData con una copia profunda de originalData
-    this.deletecallback = deletecallback;
+    this.deletecallback = callback.deletecallback;
+    this.deletecallbacktext = callback.deletecallbacktext || 'Eliminar';
+    this.callbacktext = callback.callbacktext || 'Guardar cambios';
   }
 
   render() {
@@ -179,14 +180,14 @@ class DynamicRow {
 
     const actionCell = row.insertCell(cellIndex);
     const actionButton = document.createElement('button');
-    actionButton.textContent = 'Guardar cambios';
+    actionButton.textContent = this.callbacktext || 'Guardar cambios';
     actionButton.className = 'savebutton custombutton';
     actionButton.addEventListener('click', () => {
       this.callback(row.rowIndex, this.originalData, this.modifiedData);
     });
     if (this.deletecallback) {
       const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Eliminar';
+      deleteButton.textContent = this.deletecallbacktext || 'Eliminar';
       deleteButton.className = 'deletebutton custombutton';
       deleteButton.addEventListener('click', () => {
         this.deletecallback(row.rowIndex, this.originalData, this.modifiedData);
@@ -573,7 +574,9 @@ class DynamicRow {
     this.modifiedData = JSON.parse(JSON.stringify(newData));
   }
 }
-function createMultiSelectField1(field, onChangeCallback, value) {
+function createMultiSelectField1(
+  
+  field, onChangeCallback, value) {
   const container = document.createElement('div');
   container.classList.add('input-field', 'col', 's12', 'gap-padding-margin-10');
 
@@ -655,25 +658,24 @@ export class EditModal {
   constructor(containerSelector, callback, config = {}) {
     this.HtmlContainer = document.querySelector(containerSelector);
     this.config = config;
-    this.callback = callback.callback;
-    this.deletecallback = callback.deletecallback;
+    this.callback = callback;
     // this.HtmlContainer = document.createElement('div');
     this.columns = this.getOrderedElements(config); // Establece las columnas en el orden deseado
-    this.renderelement = new DynamicRow(this.HtmlContainer, {}, this.columns, this.config, this.callback,this.deletecallback);
+    this.renderelement = new DynamicRow(this.HtmlContainer, {}, this.columns, this.config, this.callback);
   }
   render(data) {
-    this.renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    this.renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     const renderhtml = this.renderelement.renderDivs();
     this.HtmlContainer.appendChild(renderhtml);
     console.log("renderhtml", renderhtml);
   }
   ReturnHtml(data){
-    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     const renderhtml = renderelement.renderDivs();
     return renderhtml;
   }
   addRow(data) {
-    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback,this.deletecallback);
+    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     const renderhtml = renderelement.renderDivs();
     return renderhtml
   }

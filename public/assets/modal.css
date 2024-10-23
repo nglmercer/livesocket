@@ -15,17 +15,6 @@ custom-modal {
     z-index: 1000;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    position: relative;
-    min-width: 300px;
-    max-width: 80%;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
 .close-button {
     position: absolute;
     right: 10px;
@@ -113,14 +102,16 @@ custom-modal {
     display: flex;
 }
 
+
 .modal-content {
-    background-color:  black;
+    background-color: #1f1f1f; /* Fondo oscuro */
     padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    color: #ffffff; /* Texto blanco */
 }
+
 
 .modal-close {
     position: absolute;
@@ -132,18 +123,20 @@ custom-modal {
     cursor: pointer;
     color: #666;
 }
-
+.close-button,
 .delete-btn {
-    background-color: #dc3545;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: #ff5555; /* Botón de eliminar en rojo */
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
     font-size: 14px;
-    padding: 0;
 }
 
+.delete-btn:hover {
+    background-color: #ff9999; /* Cambio de color al pasar el mouse */
+}
 .error-message {
     color: #dc3545;
     margin-top: 5px;
@@ -151,7 +144,7 @@ custom-modal {
 }
 
 .modal-title {
-    font-size: 1.5em;
-    color: #333;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #00adb5; /* Título con un color azul suave */
 }
