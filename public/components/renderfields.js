@@ -137,7 +137,7 @@ class DynamicRow {
           objectContainer.setAttribute('open', '');
         }
         const summary = document.createElement('summary');
-        console.log("typeConfig summary", typeConfig, key);
+        //console.log("typeConfig summary", typeConfig, key);
         summary.textContent = typeConfig.label || 'Mostrar ' + key;
 
         objectContainer.appendChild(summary);
@@ -217,7 +217,7 @@ class DynamicRow {
           objectContainer.setAttribute('open', '');
         }
         const summary = document.createElement('summary');
-        console.log("typeConfig summary", typeConfig, key);
+        //console.log("typeConfig summary", typeConfig, key);
 
         summary.textContent = typeConfig.label || 'Mostrar ' + key;
 
@@ -546,7 +546,6 @@ class DynamicRow {
     return multiSelectField;
   }
 
-
   updateModifiedData(key, subKey, value) {
     if (subKey) {
       if (!this.modifiedData[key]) {
@@ -569,11 +568,20 @@ class DynamicRow {
     });
     console.log("handletoggleoptions", key, subKey, HtmlContainer);
   }
+
   updateData(newData) {
     this.data = { ...newData };
     this.originalData = { ...newData };
     this.modifiedData = JSON.parse(JSON.stringify(newData));
+    // Limpiar el contenedor actual donde se están mostrando los divs
+    const containerElement = this.HtmlContainer;
+    containerElement.innerHTML = ''; // Limpiar el contenido
+
+    // Renderizar los nuevos divs
+    const newDivs = this.renderDivs();
+    containerElement.appendChild(newDivs); // Agregar los nuevos divs al DOM
   }
+
 }
 function createMultiSelectField1(
   
@@ -671,12 +679,12 @@ export class EditModal {
     console.log("renderhtml", renderhtml);
   }
   ReturnHtml(data){
-    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
+    this.renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     const renderhtml = renderelement.renderDivs();
     return renderhtml;
   }
   addRow(data) {
-    const renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
+    this.renderelement = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     const renderhtml = renderelement.renderDivs();
     return renderhtml
   }

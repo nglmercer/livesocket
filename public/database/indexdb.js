@@ -1,6 +1,6 @@
 const databases = {
-    eventsDB: { name: 'ActionEvent', version: 1, store: 'events' },
-    ActionsDB: { name: 'ActionEvent', version: 1, store: 'actions' },
+    eventsDB: { name: 'Events', version: 1, store: 'events' },
+    ActionsDB: { name: 'Actions', version: 1, store: 'actions' },
   };
 
 class IndexedDBManager {

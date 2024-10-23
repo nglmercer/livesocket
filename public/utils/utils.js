@@ -370,7 +370,7 @@ function compareObjects(mainObject, objectsToCompare, keysToCheck, callback) {
     keysToCheck
   );
   const validResults = [];
-
+  let coincidentobjects = {};
   // Ejecutar el callback si se proporciona
   if (callback && typeof callback === 'function') {
     comparisonResults.forEach((comparisonResult, index) => {
@@ -380,13 +380,14 @@ function compareObjects(mainObject, objectsToCompare, keysToCheck, callback) {
       );
       
       if (allComparisonsTrue.allTrue) {
-        callback(objectsToCompare[index], index);
+        callback(objectsToCompare[index], index,allComparisonsTrue);
         validResults.push(objectsToCompare[index]);
+        coincidentobjects = allComparisonsTrue;
       }
     });
   }
 
-  return { comparisonResults, validResults }; // Retornar solo los objetos válidos
+  return { comparisonResults, validResults, coincidentobjects }; // Retornar solo los objetos válidos
 }
 function getComparisonValues(obj, keysToCheck) {
   const result = {};
