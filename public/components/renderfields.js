@@ -263,7 +263,8 @@ class DynamicRow {
     actionContainer.classList.add('action-container');
 
     const saveButton = document.createElement('button');
-    saveButton.textContent = 'Guardar cambios';
+    saveButton.textContent  = this.callbacktext || 'Guardar cambios';
+    
     saveButton.className = 'savebutton custombutton';
     saveButton.addEventListener('click', () => {
       this.callback(this.originalData, this.modifiedData);
@@ -271,7 +272,7 @@ class DynamicRow {
     if (this.deletecallback) {
 
     const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Eliminar';
+    deleteButton.textContent = this.deletecallbacktext || 'Eliminar';
     deleteButton.className = 'deletebutton custombutton';
     deleteButton.addEventListener('click', () => {
       this.deletecallback(this.originalData, this.modifiedData);

@@ -1,5 +1,5 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
-const config = {
+const actionsconfig = {
   nombre: {
     class: 'input-default',
     type: 'textarea',
@@ -53,7 +53,7 @@ const callbackconfig = { callback: async (index, data,modifiedData) => {
   ActionModal.close();
   console.log("deletecallback", index, data,modifiedData);
 } };
-const Aformelement = new EditModal('#ActionModalContainer',callbackconfig,config);
+const Aformelement = new EditModal('#ActionModalContainer',callbackconfig,actionsconfig);
 const testdata = {
   nombre: "coloca tu nombre",
   minecraft: {
@@ -72,3 +72,4 @@ Buttonform.onclick = () => {
   ActionModal.open();
   Aformelement.updateData(testdata)
 };
+export { actionsconfig }

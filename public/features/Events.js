@@ -1,12 +1,12 @@
 import { Giftsparsed, mapselectgift } from '../assets/gifts.js';
 import DynamicTable, { EditModal } from '../components/renderfields.js';
-import { databases, IndexedDBManager, DBObserver } from './indexdb.js'
+import { databases, IndexedDBManager, DBObserver } from '../database/indexdb.js'
 import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
 import showAlert from '../components/alerts.js';
 const ObserverEvents = new DBObserver();
 const EventsManager = new IndexedDBManager(databases.eventsDB,ObserverEvents);
 
-const config = {
+const eventsconfig = {
   nombre: {
     class: 'input-default',
     type: 'textarea',
@@ -80,16 +80,16 @@ const editcallback = async (data,modifiedData) => {
     showAlert('success','Se ha guardado el evento')
   }
 }
-const deletecallback = async (index, data,modifiedData) => {
+const deletecallback = async (data,modifiedData) => {
   EventsModal.close();
-  console.log("deletecallback", index, data,modifiedData);
+  console.log("deletecallback", data,modifiedData);
 }
 const callbackconfig = { 
   callback: editcallback, deletecallback:  deletecallback,
   callbacktext: 'Guardar cambios',
-  deletecallbacktext: 'Eliminar',
+  deletecallbacktext: 'cerrar',
 };
-const Formelement = new EditModal('#EventsModalContainer',callbackconfig,config);
+const Formelement = new EditModal('#EventsModalContainer',callbackconfig,eventsconfig);
 const testdata = {
   nombre: "coloca tu nombre",
   eventType: "chat",
@@ -105,3 +105,4 @@ Buttonform.onclick = () => {
   EventsModal.open();
   Formelement.updateData(testdata)
 };
+export { eventsconfig}
