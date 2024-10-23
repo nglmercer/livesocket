@@ -583,9 +583,7 @@ class DynamicRow {
   }
 
 }
-function createMultiSelectField1(
-  
-  field, onChangeCallback, value) {
+function createMultiSelectField1(field, onChangeCallback, value) {
   const container = document.createElement('div');
   container.classList.add('input-field', 'col', 's12', 'gap-padding-margin-10');
 
@@ -637,7 +635,7 @@ function createMultiSelectField1(
       gridSelect.appendChild(checkbox);
     });
   }
-
+  console.log("field",field)
   // Inicializar las opciones
   renderOptions(field.options);
 

@@ -3,9 +3,28 @@ import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { databases, IndexedDBManager, DBObserver } from '../database/indexdb.js'
 import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
 import showAlert from '../components/alerts.js';
+import { ActionsManager } from './Actions.js'
 const ObserverEvents = new DBObserver();
 const EventsManager = new IndexedDBManager(databases.eventsDB,ObserverEvents);
+async function EventsManagermap(data) {
+  const alldata = await ActionsManager.getAllData()
+/*   console.log("alldatainit",alldata)
+  const mapedevents = alldata.map(data => ({
+    value: data.id,
+    label: data.nombre,
+  }))
+  console.log("alldata",mapedevents) */
+  return  alldata.map(data => ({
+    value: data.id,
+    label: data.nombre,
+  }))
+}
 
+// function async que se invoca a si mismo seria:
+(async () => {
+  const mapedevents = await EventsManagermap()
+  console.log("mapedevents",mapedevents)
+})()
 const eventsconfig = {
   nombre: {
     class: 'input-default',
@@ -42,12 +61,12 @@ const eventsconfig = {
     options: mapselectgift,
     dataAssociated: 'gift',
   },
-/*   Actions: {
+  Actions: {
     class: 'input-default',
     type: 'multiSelect',
-    returnType: 'string',
-    options: [{ value: 'edit', label: 'Editar' }, { value: 'delete', label: 'Eliminar' }],
-  }, */
+    returnType: 'array',
+    options: await EventsManagermap(),
+  },
   id: {
     type: 'number',
     returnType: 'number',
@@ -102,7 +121,7 @@ Formelement.render(testdata);
 
 Buttonform.className = 'open-modal-btn';
 Buttonform.onclick = () => {
-  EventsModal.open();
   Formelement.updateData(testdata)
+  setTimeout(() => {EventsModal.open()}, 100);
 };
 export { eventsconfig}

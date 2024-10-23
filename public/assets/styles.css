@@ -2,6 +2,7 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
+    font-style: system-ui, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 :root {
     --black-font: #212121;
@@ -111,6 +112,9 @@ input {
   .box-sizing-content-box {
     box-sizing: content-box;
     width: 40%;
+  }
+  .float {
+    float: initial;
   }
   .float-right {
     float: right;
@@ -313,11 +317,6 @@ textarea:disabled {
   border-color: var(--dark-border);
 }
 
-/* Estilos específicos para input number */
-input[type="number"] {
-  -moz-appearance: textfield; /* Firefox */
-}
-
 /* Ocultar flechas de input number en Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -489,18 +488,4 @@ optgroup option {
   select[multiple] option {
     padding: 10px 12px;
   }
-}
-
-/* Soporte para navegadores específicos */
-/* Firefox */
-@-moz-document url-prefix() {
-  select {
-    color: var(--dark-text);
-    background-color: var(--dark-select-bg);
-  }
-}
-
-/* Safari y Chrome */
-_::-webkit-full-page-media, _:future, :root select {
-  text-indent: 3px;
 }

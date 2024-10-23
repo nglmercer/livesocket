@@ -12,15 +12,34 @@ class CustomModal extends HTMLElement {
         const template = document.createElement('template');
         template.innerHTML = `
             <style>
-                :host {
-                    display: none;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    z-index: 1000;
-                }
+       :host {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            /* Agregamos la transición base */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        /* Cuando está visible */
+        :host([visible]) {
+            opacity: 1;
+        }
+        .modal-content {
+            background: black;
+            padding: 20px;
+            border-radius: 5px;
+            position: relative;
+            min-width: 300px;
+            opacity: 0;
+        }
+        :host([visible]) .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
                 .modal-overlay {
                     position: fixed;
                     top: 0;
@@ -31,13 +50,6 @@ class CustomModal extends HTMLElement {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                }
-                .modal-content {
-                    background: black;
-                    padding: 20px;
-                    border-radius: 5px;
-                    position: relative;
-                    min-width: 300px;
                 }
                 .close-button {
                     position: absolute;
@@ -102,6 +114,9 @@ class CustomModal extends HTMLElement {
     open(onOpenCallback = null) {
         this.onOpenCallback = onOpenCallback;
         this.style.display = 'block';
+        // Forzamos un reflow
+        this.offsetHeight;
+        this.setAttribute('visible', '');
         this.isOpen = true;
         
         if (this.onOpenCallback) {
@@ -113,10 +128,15 @@ class CustomModal extends HTMLElement {
         this.onCloseCallback = onCloseCallback;
         this.style.display = 'none';
         this.isOpen = false;
-        
-        if (this.onCloseCallback) {
-            this.onCloseCallback();
-        }
+        this.removeAttribute('visible');
+        // Esperamos a que termine la animación
+        setTimeout(() => {
+            this.style.display = 'none';
+            this.isOpen = false;
+            if (this.onCloseCallback) {
+                this.onCloseCallback();
+            }
+        }, 300); // Mismo tiempo que la transición
     }
 
     // Método mejorado para agregar contenido

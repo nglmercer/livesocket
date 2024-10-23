@@ -100,11 +100,11 @@ const Aformelement = new EditModal('#ActionModalContainer',callbackconfig,action
 Aformelement.render(testdata);
 Buttonform.className = 'open-modal-btn';
 Buttonform.onclick = () => {
-  ActionModal.open();
   updatedataformmodal(testdata)
+  ActionModal.open();
 };
 function updatedataformmodal(data = testdata) {
   Aformelement.updateData(data)
   Aformelement.fillEmptyFields(data)
 }
-export { actionsconfig }
+export { actionsconfig,ActionsManager }
