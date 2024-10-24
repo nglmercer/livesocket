@@ -10,12 +10,13 @@
   </head>
   <script src="./components/webmodal.js"></script>
   <script type="module" src="./components/webcomponents.js"></script>
+  <script type="module" src="./main.js"></script>
+  <script type="module" src="./audio/tts.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
 <body theme="dark" class="bg-gray-900">
     <input id="roomId" type="text" placeholder="Room Id">
-    <button id="joinRoom">connectroom</button>
+    <button id="joinRoom" class="open-modal-btn">connectroom</button>
     <div id="lasteventParse"></div>
-    <script type="module" src="./main.js"></script>
     <div class="tabcontainer" data-tab="tab1">
       <div class="containerbox relative">
         <button id="ActionModalButton">Action Add</button>
@@ -280,7 +281,7 @@
                       <h2 class="modal-title">Gestor de elementos</h2>
                       <div class="input-container">
                           <input type="text" id="itemInput" placeholder="Ingresa un elemento...">
-                          <button id="addButton">Agregar</button>
+                          <button id="addButton" class="open-modal-btn">Agregar</button>
                       </div>
                       <div id="errorMessage" class="error-message">
                           El texto debe tener al menos 2 caracteres

@@ -215,7 +215,9 @@ function populateVoiceList() {
 // Función para verificar si las voces están disponibles
 function checkVoices() {
     if (typeof speechSynthesis === "undefined") return;
-  if (speechSynthesis.getVoices().length > 0) {
+    
+    if (speechSynthesis.getVoices().length > 0) {
+      console.log("speechSynthesis.getVoices()",speechSynthesis.getVoices());
     clearInterval(voiceCheckInterval);
     populateVoiceList();
   }
@@ -224,6 +226,7 @@ function checkVoices() {
 // Verificar si las voces están disponibles al cargar la página
 if (typeof speechSynthesis !== "undefined" && speechSynthesis.onvoiceschanged !== undefined) {
   speechSynthesis.onvoiceschanged = populateVoiceList;
+  setTimeout(populateVoiceList,1000);
 }
 
 // Usar un intervalo para verificar si las voces están disponibles

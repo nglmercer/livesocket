@@ -1,4 +1,6 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
+import {replaceVariables} from '../utils/utils.js';
+import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 const keys = [
     { key: 'chat', text: "uniqueId dice comment", check: true },
     { key: 'gift', text: "uniqueId regalo xrepeatcount giftName", check: true },
@@ -36,13 +38,37 @@ const { ttsconfig, ttsdata } = keys.reduce((acc, { key, text, check }) => {
 console.log(ttsconfig);
 console.log(ttsdata);
 
-const ttsdatastore = localStorage.getItem('ttsdatastore') ? JSON.parse(localStorage.getItem('ttsdatastore')) : ttsdata;
-
+function getTTSdatastore() {
+    return localStorage.getItem('ttsdatastore') ? JSON.parse(localStorage.getItem('ttsdatastore')) : ttsdata;
+}
 const callbackconfig = { callback: async (data,modifiedData) => {
     console.log("editcallback", data,modifiedData);
     localStorage.setItem('ttsdatastore', JSON.stringify(modifiedData));
   }
   , deletecallback:  undefined };
 const configelement = new EditModal('#chatbotconfig',callbackconfig,ttsconfig);
-configelement.render(ttsdatastore);
+configelement.render(getTTSdatastore());
+
+const testdata = {
+    uniqueId: 'testUser',
+    comment: 'testComment',
+    likeCount: 50,
+    repeatCount: 123,
+    giftName: 'testgiftName',
+    diamondCount: 50,
+    followRole: 0,
+    userId: 1235646,
+    teamMemberLevel: 0,
+    subMonth: 0,
+}
+function Replacetextoread(data, eventType = 'chat') {
+    const configtts = getTTSdatastore();
+    console.log(configtts);
+    if (!configtts[eventType] || !configtts[eventType].check) return;
+    const textoread = replaceVariables(configtts[eventType].text, data);
+    console.log(textoread,configtts[eventType].text);
+    handleleermensaje(textoread);
+}
+setTimeout(() =>{Replacetextoread(testdata,'chat')},1000);
+export { Replacetextoread}
 // asdasd como seria un metodo para hacer un string a json

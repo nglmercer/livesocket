@@ -1,6 +1,7 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
 import { Counter } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
+import { Replacetextoread } from './features/speechconfig.js';
 const socket = io();
 document.getElementById('joinRoom').addEventListener('click', joinRoom);
 function joinRoom() {
@@ -22,13 +23,24 @@ const newGiftContainer = new ChatContainer('.giftcontainer', 500);
 const newEventsContainer = new ChatContainer('.eventscontainer', 200);    
 events.forEach(event => {
     socket.on(event, (data) => {
-        console.log(event, data);
-        showAlert('success', `Event ${event}`);
-        if (event === 'chat') {
-            handlechat(data);
-        }
-        if (event === 'gift') {
-            handlegift(data);
+        switch (event) {
+            case 'chat':
+                handlechat(data);
+                break;
+            case 'gift':
+                handlegift(data);
+                break;
+            case 'connected':
+                showAlert('success', `Connected`);
+                break;
+            case 'disconnected':
+                showAlert('error', `Disconnected`);
+                break;
+            default:
+                Readtext(data, event);
+                console.log(event, data);
+                //showAlert('success', `Event ${event}`);
+                break;  
         }
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
@@ -50,30 +62,30 @@ const textcontent = {
     //   text: "text",
     // }
   }
-  const numbercontent = {
-    content: {
-      1: ["text", "nombre de usuario = ","white"],
-      2: ["text", "uniqueId","gold"],
-      3: ["number", 1,"white"],
-      4: ["text", "= repeatCount","gold"],
-      5: ["text", "giftname = rose","cyan"],
-    },
-    data: {
-      number: 123,
-      text: "text",
-    }
+const numbercontent = {
+  content: {
+    1: ["text", "nombre de usuario = ","white"],
+    2: ["text", "uniqueId","gold"],
+    3: ["number", 1,"white"],
+    4: ["text", "= repeatCount","gold"],
+    5: ["text", "giftname = rose","cyan"],
+  },
+  data: {
+    number: 123,
+    text: "text",
   }
-  const eventcontent = {
-    content: {
-      1: ["text", "UniqueId","white"],
-      2: ["text", "te","white"],
-      3: ["text", "sigue!","yellow"],
-    },
-    data: {
-      number: 123,
-      text: "text",
-    }
+}
+const eventcontent = {
+  content: {
+    1: ["text", "UniqueId","white"],
+    2: ["text", "te","white"],
+    3: ["text", "sigue!","yellow"],
+  },
+  data: {
+    number: 123,
+    text: "text",
   }
+}
 const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent);
 const message2 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', numbercontent);
 const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', eventcontent);
@@ -90,7 +102,6 @@ function handlechat(data) {
       },
       comment: data.comment,
     };
-    handleleermensaje(data.comment);
     const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedchatdata);
     newChatContainer.addMessage(newMessage);
     console.log("chat", data);
@@ -111,3 +122,6 @@ function handlegift(data) {
     newGiftContainer.addMessage(newMessage);
     showAlert('info', `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`, 5000);
   }
+function Readtext(data, eventType = 'chat') {
+  Replacetextoread(data, eventType);
+}
