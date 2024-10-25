@@ -107,4 +107,26 @@ function updatedataformmodal(data = testdata) {
   Aformelement.updateData(data)
   Aformelement.fillEmptyFields(data)
 }
+
+/*tabla de Actions para modificar y renderizar todos los datos*/
+const callbacktable = async (data,modifiedData) => {
+  console.log("callbacktable",data,modifiedData);
+}
+const callbacktabledelete = async (data,modifiedData) => {
+  console.log("callbacktabledelete",data,modifiedData);
+}
+const tableconfigcallback = {
+  callback: callbacktable,
+  deletecallback: callbacktabledelete,
+  callbacktext: 'Guardar cambios',
+  deletecallbacktext: 'eliminar',
+}
+const table = new DynamicTable('#table-containerAction',tableconfigcallback,actionsconfig);
+(async () => {
+  const alldata = await ActionsManager.getAllData()
+  alldata.forEach((data) => {
+    table.addRow(data);
+  });
+  console.log("alldata render table",alldata);
+})  (); 
 export { actionsconfig,ActionsManager }

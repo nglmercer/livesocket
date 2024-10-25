@@ -523,7 +523,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       this.attachShadow({ mode: 'open' });
   
       this.shadowRoot.innerHTML = `
-        <style>
+          <style>
           :host {
             --sidebar-width: 250px;
             --sidebar-bg: #333;
@@ -531,212 +531,206 @@ class ResponsiveNavSidebar extends HTMLElement {
             --text-color: #fff;
             --nav-height: 60px;
             --hover-bg: rgba(255, 255, 255, 0.1);
+            --active-bg: #555;
           }
-  
-          .container {
-            height: 100%;
-          }
-  
-          /* Estilos para navegación superior fija */
-          .top-nav {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--nav-height);
-            background: var(--nav-bg);
-            color: var(--text-color);
-            z-index: 999;
-            padding: auto;
-          }
-  
-          .top-nav-content {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          }
-  
-          /* Contenedor de items base en el navbar */
-          .nav-base-items {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-          }
-  
-          /* Contenedor de items base en el sidebar */
-          .sidebar-base-items {
-            margin-bottom: 15px;
-          }
-  
-          /* Estilos para el sidebar */
-          .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: var(--sidebar-width);
-            height: 100vh;
-            background: var(--sidebar-bg);
-            color: var(--text-color);
-            overflow-y: auto;
-            z-index: 10;
-          }
-  
-          .sidebar-content {
-            padding: 20px;
-          }
-  
-          .menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 10px;
-          }
-  
-          .content {
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-          }
-  
-          /* Overlay para cerrar el menú en móvil */
-          .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 800;
-          }
-  
-          /* Estilos para elementos del menú */
-          ::slotted(.menu-item) {
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            border-radius: 4px;
-            margin: 5px 0;
-          }
-  
-          ::slotted(.menu-item:hover) {
-            background: var(--hover-bg);
-          }
-  
-          ::slotted(.base-item) {
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            border-radius: 4px;
-            margin: 5px 0;
-          }
-  
-          ::slotted(.base-item:hover) {
-            background: var(--hover-bg);
-          }
-  
-          /* Media query para modo responsive */
-          @media (max-width: 768px) {
+            .container {
+              height: 100%;
+            }
+              .menu-item {
+                .active {
+                background-color: var(--active-bg);
+                color: var(--active-color);
+              }
+              }
+            /* Estilos para navegación superior fija */
             .top-nav {
-              display: block;
-            }
-  
-            .content {
-              margin-left: 0;
-              padding-top: calc(var(--nav-height) + 20px);
-            }
-  
-            .sidebar {
-              transform: translateX(-100%);
-              transition: transform 0.3s ease;
-            }
-  
-            .sidebar.active {
-              transform: translateX(0);
-            }
-  
-            .menu-btn {
-              display: block;
-            }
-  
-            .overlay.active {
-              display: block;
-            }
-  
-            /* En móvil, ocultamos los items base del sidebar */
-            .sidebar-base-items {
               display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: var(--nav-height);
+              background: var(--nav-bg);
+              color: var(--text-color);
+              z-index: 888;
+              padding: auto;
             }
-  
-            /* Y mostramos los del navbar */
+    
+            .top-nav-content {
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            }
+    
+            /* Contenedor de items base en el navbar */
             .nav-base-items {
               display: flex;
+              align-items: center;
+              gap: 20px;
             }
-          }
-  
-          @media (min-width: 769px) {
-            /* En desktop, ocultamos los items base del navbar */
-            .nav-base-items {
-              display: none;
-            }
-  
-            /* Y mostramos los del sidebar */
+    
+            /* Contenedor de items base en el sidebar */
             .sidebar-base-items {
-              display: block;
+              margin-bottom: 15px;
             }
-          }
-        </style>
-  
+    
+            /* Estilos para el sidebar */
+            .sidebar {
+              position: fixed;
+              left: 0;
+              top: 0;
+              width: var(--sidebar-width);
+              height: 100vh;
+              background: var(--sidebar-bg);
+              color: var(--text-color);
+              overflow-y: auto;
+              z-index: 999;
+            }
+    
+            .sidebar-content {
+              padding: 20px;
+            }
+    
+            .menu-btn {
+              display: none;
+              background: none;
+              border: none;
+              color: var(--text-color);
+              font-size: 24px;
+              cursor: pointer;
+              padding: 10px;
+            }
+    
+            .content {
+              margin-left: var(--sidebar-width);
+              padding: 20px;
+            }
+    
+            /* Overlay para cerrar el menú en móvil */
+            .overlay {
+              display: none;
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: rgba(0, 0, 0, 0.5);
+              z-index: 800;
+            }
+    
+            /* Estilos para elementos del menú */
+            ::slotted(.menu-item) {
+              padding: 12px 15px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+              border-radius: 4px;
+              margin: 5px 0;
+            }
+    
+            ::slotted(.menu-item:hover) {
+              background: var(--hover-bg);
+            }
+    
+            ::slotted(.base-item) {
+              padding: 12px 15px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              cursor: pointer;
+              transition: background-color 0.2s;
+              border-radius: 4px;
+              margin: 5px 0;
+            }
+    
+            ::slotted(.base-item:hover) {
+              background: var(--hover-bg);
+            }
+    
+            /* Media query para modo responsive */
+            @media (max-width: 768px) {
+              .top-nav {
+                display: flex;
+              }
+    
+              .content {
+                margin-left: 0;
+                padding-top: calc(var(--nav-height) + 20px);
+              }
+    
+              .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+              }
+    
+              .sidebar.active {
+                transform: translateX(0);
+              }
+    
+              .menu-btn {
+                display: block;
+              }
+    
+              .overlay.active {
+                display: block;
+              }
+    
+              /* En móvil, ocultamos los items base del sidebar */
+              .sidebar-base-items {
+                display: none;
+              }
+    
+              /* Y mostramos los del navbar */
+              .nav-base-items {
+                display: flex;
+              }
+            }
+    
+            @media (min-width: 769px) {
+              /* En desktop, ocultamos los items base del navbar */
+              .nav-base-items {
+                display: none;
+              }
+    
+              /* Y mostramos los del sidebar */
+              .sidebar-base-items {
+                display: block;
+              }
+            }
+          </style>
+    
+        
         <div class="container">
-          <!-- Navegación superior para móvil -->
           <nav class="top-nav">
-            <div class="top-nav-content">
-              <button class="menu-btn">☰</button>
-              <div class="nav-base-items">
-                <slot name="nav-base-items"></slot>
-              </div>
+            <button class="menu-btn">☰</button>
+            <div class="nav-base-items">
+              <slot name="nav-base-items"></slot>
             </div>
           </nav>
   
-          <!-- Overlay para cerrar menú en móvil -->
           <div class="overlay"></div>
   
-          <!-- Sidebar -->
           <div class="sidebar">
-            <div class="sidebar-content">
-              <!-- Items base en el sidebar -->
-              <div class="sidebar-base-items">
-                <slot name="sidebar-base-items"></slot>
-              </div>
-              <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-              <!-- Items adicionales del menú -->
-              <slot name="menu-items"></slot>
+            <div class="sidebar-base-items">
+              <slot name="sidebar-base-items"></slot>
             </div>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+            <slot name="menu-items"></slot>
           </div>
   
-          <!-- Contenido principal -->
           <div class="content">
             <slot name="main-content"></slot>
           </div>
         </div>
       `;
   
-      // Referencias a elementos del DOM
       this.menuBtn = this.shadowRoot.querySelector('.menu-btn');
       this.sidebar = this.shadowRoot.querySelector('.sidebar');
       this.overlay = this.shadowRoot.querySelector('.overlay');
   
-      // Event listeners
       this.menuBtn.addEventListener('click', () => this.toggleMenu());
       this.overlay.addEventListener('click', () => this.closeMenu());
     }

@@ -3,7 +3,6 @@ import { Counter } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
 const socket = io();
-document.getElementById('joinRoom').addEventListener('click', joinRoom);
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
 if (userProfile.state.connected) {
