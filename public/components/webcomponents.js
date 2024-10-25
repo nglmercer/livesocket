@@ -329,9 +329,7 @@ class UserProfile extends HTMLElement {
                 }
 
                 :host([minimal]) input {
-                    width: auto;
                     padding: 6px;
-                    font-size: 12px;
                 }
 
                 input:focus {
@@ -550,7 +548,7 @@ class ResponsiveNavSidebar extends HTMLElement {
             background: var(--nav-bg);
             color: var(--text-color);
             z-index: 999;
-            padding: 0 20px;
+            padding: auto;
           }
   
           .top-nav-content {
@@ -582,7 +580,7 @@ class ResponsiveNavSidebar extends HTMLElement {
             background: var(--sidebar-bg);
             color: var(--text-color);
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 10;
           }
   
           .sidebar-content {

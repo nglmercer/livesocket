@@ -43,208 +43,207 @@
 
         <!-- Contenido principal -->
         <div slot="main-content">
-            <h1>Contenido Principal</h1>
-            <p>Este es el contenido principal de tu aplicación.</p>
+            <input id="roomId" type="text" placeholder="Room Id">
+            <button id="joinRoom" class="open-modal-btn">connectroom</button>
+            <div id="lasteventParse"></div>
+            <div class="tabcontainer" data-tab="tab1">
+              <div class="containerbox relative">
+                <button id="ActionModalButton">Action Add</button>
+                <custom-modal modal-type="form" id="ActionModal">
+                  <div id="ActionModalContainer"></div>
+                </custom-modal>
+                <div id="table-container" class="dynamic-table"></div>
+              </div>
+              <div class="containerbox relative">
+                <button id="EventsModalButton">Event Add</button>
+                <custom-modal modal-type="form" id="EventsModal">
+                  <div id="EventsModalContainer"></div>
+                </custom-modal>
+                <div id="table-container1" class="dynamic-table1"></div>
+              </div>
+            </div>
+            <div class="tabcontainer" data-tab="tab2">
+                <div class="containerbox relative">
+                  <div class="LiveContainer">
+                    <div  id="chat-container" class="chat1 chatcontainer">Chats</div>
+                    <div class="gift2 giftcontainer">Gifts</div>
+                    <div class="events3 eventscontainer">Events</div>
+            
+                </div>
+              </div>
+              <div class="containerbox relative">
+                <input type="checkbox" id="show-more" style="display:none;">
+                <label for="show-more" class="show-more-label"><span></span></label>
+            
+                <div class="flexbox gap-1">
+                  <div id="chatbotconfig" class="card grid"></div>
+                  <div class="card grid">
+                      <div class="card-header">
+                          <h2 class="card-title">Voice Settings</h2>
+                      </div>
+                      <div class="card-content">
+                              <!-- <input type="checkbox" id="voiceenabled" checked>
+                              <label for="voiceenabled">Enabled</label> -->
+            
+                              <div class="card-subcontent">
+            
+                                <label class="flex" for="selectvoice1"><input type="radio" name="selectvoice" id="selectvoice1" class="radio checked:bg-blue-300 float-start" checked><span>Voz1</span></label>
+            
+                                <div id="voiceSelectContainer" class="relative m-3 content-center">
+                                  <label for="voiceSelect1">
+                                    <span>select voice</span>
+                                      <select id="voiceSelect1" class="select select-info browser-default" style="width: 100%;" aria-label="Select Voice">select voice</select>
+                                      </label>
+                                      <label for="audiolist">
+                                    <audio id="audio"></audio>
+                                    <input type="checkbox" id="audiolist" class="filled-in" checked>
+                                    <span>Cola de audio</span>
+                                    </label>
+            
+                                </div>
+            
+            
+                                <label class="flex" for="selectvoice2">
+                                  <input type="radio" name="selectvoice" id="selectvoice2" class="radio checked:bg-blue-500 float-start">
+                                  <span>Voz2</span></label>
+                            <div class="grid">
+                                <select id="voiceSelect" class="select select-info browser-default"></select>
+            
+                                  <label for="randomVoice"><input type="checkbox" id="randomVoice" checked><span>Random Voice</span></label>
+            
+                                    <label for="randomSpeed">
+                                    <input type="checkbox" id="randomSpeed">
+                                    <span>random speed</span>
+                                    </label>
+                                    <input type="range" class="range range-sm" id="randomSpeedValue" name="randomSpeedValue" value="1" min="0.1" max="2" step="0.1">
+            
+                                    </div>
+                                <div class="flex">
+                                  <label for="randomPitch">
+                                    <input type="checkbox" id="randomPitch">
+                                    <span>random pitch</span></label>
+                                    <input type="range" class="range range-sm" id="randomPitchValue" name="randomPitchValue" value="1" min="0.1" max="2" step="0.1">
+                                </div>
+                                <div class="flex">
+                                    <label for="default-speed">Default Speed</label>
+                                    <input type="range" id="default-speed" class="range range-sm">                                   </div>
+                                <div class="flex">
+                                    <label for="default-pitch">Default Pitch</label>
+                                    <input type="range" id="default-pitch" class="range range-sm">                                   </div>
+                                <small>Speech Volume</small>
+                                <label for="volume">
+                                    <i class="bi bi-volume-up-fill"></i></label>
+                                    <input id="volume" type="range" min="0" max="1" value="1" step="0.1" class="range range-sm">
+            
+                            </div>
+                      </div>
+                  </div>
+                  <div class="card">
+                      <div class="card-header">
+                          <h2 class="card-title">Allowed Users</h2>
+                      </div>
+                      <div class="card-content space-y-4 text-lg">
+                          <div class="flex items-center">
+                            <label for="allUsers">
+                                <input type="checkbox" id="allUsers" checked>
+                                <span>All Users</span></label>
+                          </div>
+                          <div class="flex items-center">
+                            <label for="followRole">
+                                <input type="checkbox" id="followRole" checked>
+                                <span>Followers</span></label>
+                          </div>
+                          <div class="flex items-center">
+                            <label for="isSubscriber">
+                                <input type="checkbox" id="isSubscriber" checked>
+                                <span>isSubscriber</span>
+                              </label>
+                          </div>
+                          <div class="flex items-center">
+                            <label for="isModerator">
+                                <input type="checkbox" id="isModerator" checked>
+                                <span>isModerator</span>
+                              </label>
+                          </div>
+                          <div class="flex items-center">
+                            <label for="isNewGifter">
+                                <input type="checkbox" id="isNewGifter" checked>
+                                <span>isNewGifter</span>
+                              </label>
+                          </div>
+                          <div class="flex items-center">
+                            <label for="teamMemberLevel">
+                                <input type="checkbox" id="teamMemberLevel" checked>
+                                  <span>Team Members <span>Min. Level:</span></span>
+                              </label>
+                              <input type="number" id="teamMemberLevel-value" class="input input-bordered w-12" value="1" min="0">
+                          </div>
+                          <div class="flex items-center">
+                            <label for="topGifterRank">
+                                <input type="checkbox" id="topGifterRank" checked>
+                                <span>Top Gifters <span>Top:</span></span>
+            
+            
+            
+            
+                              </label>
+                              <input type="number" id="topGifterRank-value" class="input input-bordered w-12" value="3" min="0">
+                          </div>
+                          <div class="flex items-center">
+                            <label for="allowed-users-list">
+                                <input type="checkbox" id="allowed-users-list" checked>
+                                  <span>Allowed Users from list <p>Manage List</p></span>
+                              </label>
+                          </div>
+                      </div>
+            
+                  </div>
+                  <div class="card">
+                      <div class="card-header">
+                          <h2 class="card-title">Comment Types</h2>
+                      </div>
+                      <div class="card-content space-y-4">
+                          <label>Read...</label>
+                          <div>
+                              <div class="flex items-center">
+                                <label for="any-comment">
+                                    <input type="radio" name="comment-type" value="any-comment" id="any-comment" class="radio checked:bg-blue-300" checked>
+                                    <span>Any comment</span></label>
+                              </div>
+                              <div class="flex items-center">
+                                <label for="dot-comment">
+                                    <input type="radio" name="comment-type" value="dot-comment" id="dot-comment" class="radio checked:bg-blue-300">
+                                    <span>Comments starting with dot (.)</span></label>
+                              </div>
+                              <div class="flex items-center">
+                                <label for="slash-comment">
+                                    <input type="radio" name="comment-type" value="slash-comment" id="slash-comment" class="radio checked:bg-blue-300">
+                                    <span>Comments starting with slash (/)</span></label>
+                              </div>
+                              <div class="flex items-center">
+                                <label for="command-comment">
+                                  <input type="radio" name="comment-type" value="command-comment" id="command-comment" class="radio checked:bg-blue-300">
+                                  <span>Comments starting with Command:</span></label>
+                              </div>
+                          </div>
+                          <div class="space-y-2">
+                              <label for="command">Command</label>
+                              <input type="text" id="command" placeholder="!speak">
+                          </div>
+                      </div>
+                  </div>
+        
+        
+              </div>
+            
+              </div>
+            </div>
+            
+            <button id="openModal" class="modal-trigger">+</button>
         </div>
     </responsive-nav-sidebar>
 
-    <input id="roomId" type="text" placeholder="Room Id">
-    <button id="joinRoom" class="open-modal-btn">connectroom</button>
-    <div id="lasteventParse"></div>
-    <div class="tabcontainer" data-tab="tab1">
-      <div class="containerbox relative">
-        <button id="ActionModalButton">Action Add</button>
-        <custom-modal modal-type="form" id="ActionModal">
-          <div id="ActionModalContainer"></div>
-        </custom-modal>
-        <div id="table-container" class="dynamic-table"></div>
-      </div>
-      <div class="containerbox relative">
-        <button id="EventsModalButton">Event Add</button>
-        <custom-modal modal-type="form" id="EventsModal">
-          <div id="EventsModalContainer"></div>
-        </custom-modal>
-        <div id="table-container1" class="dynamic-table1"></div>
-      </div>
-    </div>
-    <div class="tabcontainer" data-tab="tab2">
-        <div class="containerbox relative">
-          <div class="LiveContainer">
-            <div  id="chat-container" class="chat1 chatcontainer">Chats</div>
-            <div class="gift2 giftcontainer">Gifts</div>
-            <div class="events3 eventscontainer">Events</div>
-    
-        </div>
-      </div>
-      <div class="containerbox relative">
-        <input type="checkbox" id="show-more" style="display:none;">
-        <label for="show-more" class="show-more-label"><span></span></label>
-    
-        <div class="flexbox gap-1">
-          <div id="chatbotconfig" class="card grid"></div>
-          <div class="card grid">
-              <div class="card-header">
-                  <h2 class="card-title">Voice Settings</h2>
-              </div>
-              <div class="card-content">
-                      <!-- <input type="checkbox" id="voiceenabled" checked>
-                      <label for="voiceenabled">Enabled</label> -->
-    
-                      <div class="card-subcontent">
-    
-                        <label class="flex" for="selectvoice1"><input type="radio" name="selectvoice" id="selectvoice1" class="radio checked:bg-blue-300 float-start" checked><span>Voz1</span></label>
-    
-                        <div id="voiceSelectContainer" class="relative m-3 content-center">
-                          <label for="voiceSelect1">
-                            <span>select voice</span>
-                              <select id="voiceSelect1" class="select select-info browser-default" style="width: 100%;" aria-label="Select Voice">select voice</select>
-                              </label>
-                              <label for="audiolist">
-                            <audio id="audio"></audio>
-                            <input type="checkbox" id="audiolist" class="filled-in" checked>
-                            <span>Cola de audio</span>
-                            </label>
-    
-                        </div>
-    
-    
-                        <label class="flex" for="selectvoice2">
-                          <input type="radio" name="selectvoice" id="selectvoice2" class="radio checked:bg-blue-500 float-start">
-                          <span>Voz2</span></label>
-                    <div class="grid">
-                        <select id="voiceSelect" class="select select-info browser-default"></select>
-    
-                          <label for="randomVoice"><input type="checkbox" id="randomVoice" checked><span>Random Voice</span></label>
-    
-                            <label for="randomSpeed">
-                            <input type="checkbox" id="randomSpeed">
-                            <span>random speed</span>
-                            </label>
-                            <input type="range" class="range range-sm" id="randomSpeedValue" name="randomSpeedValue" value="1" min="0.1" max="2" step="0.1">
-    
-                            </div>
-                        <div class="flex">
-                          <label for="randomPitch">
-                            <input type="checkbox" id="randomPitch">
-                            <span>random pitch</span></label>
-                            <input type="range" class="range range-sm" id="randomPitchValue" name="randomPitchValue" value="1" min="0.1" max="2" step="0.1">
-                        </div>
-                        <div class="flex">
-                            <label for="default-speed">Default Speed</label>
-                            <input type="range" id="default-speed" class="range range-sm">                                   </div>
-                        <div class="flex">
-                            <label for="default-pitch">Default Pitch</label>
-                            <input type="range" id="default-pitch" class="range range-sm">                                   </div>
-                        <small>Speech Volume</small>
-                        <label for="volume">
-                            <i class="bi bi-volume-up-fill"></i></label>
-                            <input id="volume" type="range" min="0" max="1" value="1" step="0.1" class="range range-sm">
-    
-                    </div>
-              </div>
-          </div>
-          <div class="card">
-              <div class="card-header">
-                  <h2 class="card-title">Allowed Users</h2>
-              </div>
-              <div class="card-content space-y-4 text-lg">
-                  <div class="flex items-center">
-                    <label for="allUsers">
-                        <input type="checkbox" id="allUsers" checked>
-                        <span>All Users</span></label>
-                  </div>
-                  <div class="flex items-center">
-                    <label for="followRole">
-                        <input type="checkbox" id="followRole" checked>
-                        <span>Followers</span></label>
-                  </div>
-                  <div class="flex items-center">
-                    <label for="isSubscriber">
-                        <input type="checkbox" id="isSubscriber" checked>
-                        <span>isSubscriber</span>
-                      </label>
-                  </div>
-                  <div class="flex items-center">
-                    <label for="isModerator">
-                        <input type="checkbox" id="isModerator" checked>
-                        <span>isModerator</span>
-                      </label>
-                  </div>
-                  <div class="flex items-center">
-                    <label for="isNewGifter">
-                        <input type="checkbox" id="isNewGifter" checked>
-                        <span>isNewGifter</span>
-                      </label>
-                  </div>
-                  <div class="flex items-center">
-                    <label for="teamMemberLevel">
-                        <input type="checkbox" id="teamMemberLevel" checked>
-                          <span>Team Members <span>Min. Level:</span></span>
-                      </label>
-                      <input type="number" id="teamMemberLevel-value" class="input input-bordered w-12" value="1" min="0">
-                  </div>
-                  <div class="flex items-center">
-                    <label for="topGifterRank">
-                        <input type="checkbox" id="topGifterRank" checked>
-                        <span>Top Gifters <span>Top:</span></span>
-    
-    
-    
-    
-                      </label>
-                      <input type="number" id="topGifterRank-value" class="input input-bordered w-12" value="3" min="0">
-                  </div>
-                  <div class="flex items-center">
-                    <label for="allowed-users-list">
-                        <input type="checkbox" id="allowed-users-list" checked>
-                          <span>Allowed Users from list <p>Manage List</p></span>
-                      </label>
-                  </div>
-              </div>
-    
-          </div>
-          <div class="card">
-              <div class="card-header">
-                  <h2 class="card-title">Comment Types</h2>
-              </div>
-              <div class="card-content space-y-4">
-                  <label>Read...</label>
-                  <div>
-                      <div class="flex items-center">
-                        <label for="any-comment">
-                            <input type="radio" name="comment-type" value="any-comment" id="any-comment" class="radio checked:bg-blue-300" checked>
-                            <span>Any comment</span></label>
-                      </div>
-                      <div class="flex items-center">
-                        <label for="dot-comment">
-                            <input type="radio" name="comment-type" value="dot-comment" id="dot-comment" class="radio checked:bg-blue-300">
-                            <span>Comments starting with dot (.)</span></label>
-                      </div>
-                      <div class="flex items-center">
-                        <label for="slash-comment">
-                            <input type="radio" name="comment-type" value="slash-comment" id="slash-comment" class="radio checked:bg-blue-300">
-                            <span>Comments starting with slash (/)</span></label>
-                      </div>
-                      <div class="flex items-center">
-                        <label for="command-comment">
-                          <input type="radio" name="comment-type" value="command-comment" id="command-comment" class="radio checked:bg-blue-300">
-                          <span>Comments starting with Command:</span></label>
-                      </div>
-                  </div>
-                  <div class="space-y-2">
-                      <label for="command">Command</label>
-                      <input type="text" id="command" placeholder="!speak">
-                  </div>
-              </div>
-          </div>
 
-
-      </div>
-    
-      </div>
-    </div>
-    
-    <button id="openModal" class="modal-trigger">+</button>
     <script>
       // Clase para manejar el almacenamiento
       class ArrayStorageManager {
@@ -308,10 +307,8 @@
 
           setupModal() {
               const modal = document.createElement('div');
-              modal.className = 'modal';
               modal.innerHTML = `
-                  <div class="modal-content">
-                      <button class="modal-close">&times;</button>
+                <custom-modal modal-type="form" id="ArrayManagerUI">
                       <h2 class="modal-title">Gestor de elementos</h2>
                       <div class="input-container">
                           <input type="text" id="itemInput" placeholder="Ingresa un elemento...">
@@ -322,7 +319,7 @@
                       </div>
                       <div id="itemsContainer" class="items-container">
                       </div>
-                  </div>
+                  </custom-modal>
               `;
               document.body.appendChild(modal);
               this.modal = modal;
@@ -332,18 +329,6 @@
               // Botón para abrir modal
               document.getElementById('openModal').addEventListener('click', () => {
                   this.openModal();
-              });
-
-              // Botón para cerrar modal
-              this.modal.querySelector('.modal-close').addEventListener('click', () => {
-                  this.closeModal();
-              });
-
-              // Click fuera del modal para cerrar
-              this.modal.addEventListener('click', (e) => {
-                  if (e.target === this.modal) {
-                      this.closeModal();
-                  }
               });
 
               // Agregar item
@@ -401,13 +386,13 @@
           }
 
           openModal() {
-              this.modal.classList.add('active');
               this.loadItems();
+              document.getElementById('ArrayManagerUI').open();
           }
 
           closeModal() {
-              this.modal.classList.remove('active');
-          }
+              document.getElementById('ArrayManagerUI').close();
+        }
       }
 
       // Inicialización

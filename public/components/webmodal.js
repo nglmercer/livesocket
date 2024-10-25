@@ -29,7 +29,7 @@ class CustomModal extends HTMLElement {
             opacity: 1;
         }
         .modal-content {
-            background: black;
+            background: #1c1c1c;
             padding: 20px;
             border-radius: 5px;
             position: relative;

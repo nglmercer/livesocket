@@ -4,8 +4,22 @@ import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
 const socket = io();
 document.getElementById('joinRoom').addEventListener('click', joinRoom);
-function joinRoom() {
-    const roomId = document.getElementById('roomId').value;
+const userProfile = document.querySelector('user-profile');
+console.log(userProfile.state);
+if (userProfile.state.connected) {
+    //joinRoom(userProfile.state.username);
+}
+// Escuchar eventos
+userProfile.addEventListener('userConnected', (e) => {
+    console.log('Usuario conectado:', e.detail.username, e);
+    //joinRoom(e.detail.username);
+  });
+
+userProfile.addEventListener('userDisconnected', (e) => {
+    console.log('Usuario desconectado',e);
+});
+function joinRoom(roomid) {
+    const roomId = roomid || document.getElementById('roomId').value;
     socket.emit('joinRoom', { uniqueId: roomId });
 }
 const events = ['chat', 'gift', 'connected', 'disconnected',
