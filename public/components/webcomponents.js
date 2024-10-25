@@ -207,3 +207,551 @@ class CustomSelect extends HTMLElement {
 }
 
 customElements.define('custom-select', CustomSelect);
+class UserProfile extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        
+        // Singleton instance
+        if (!UserProfile.instance) {
+            UserProfile.instance = this;
+            
+            this.state = {
+                connected: false,
+                username: '',
+                imageUrl: 'https://via.placeholder.com/100/1a1a2e',
+                language: 'es'
+            };
+
+            this.translations = {
+                es: {
+                    connect: 'Conectar',
+                    disconnect: 'Desconectar',
+                    placeholder: 'Ingresa tu nombre'
+                },
+                en: {
+                    connect: 'Connect',
+                    disconnect: 'Disconnect',
+                    placeholder: 'Enter your name'
+                }
+            };
+            
+            this.loadFromLocalStorage();
+        }
+
+        // Registro de instancias
+        if (!UserProfile.instances) {
+            UserProfile.instances = new Set();
+        }
+        UserProfile.instances.add(this);
+
+        // Cada instancia mantiene sus propios listeners
+        this.activeListeners = new Set();
+
+        this.render();
+        return this;
+    }
+
+    static get observedAttributes() {
+        return ['minimal'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'minimal') {
+            this.render();
+        }
+    }
+
+    get isMinimal() {
+        return this.hasAttribute('minimal');
+    }
+
+    static updateAllInstances() {
+        UserProfile.instances.forEach(instance => {
+            instance.render();
+        });
+    }
+
+    getStyles() {
+        // ... (mismos estilos que antes) ...
+        return `
+            <style>
+                .container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 20px;
+                    padding: 20px;
+                    background-color: #1a1a2e;
+                    border-radius: 8px;
+                    color: #fff;
+                }
+
+                /* Estilos para modo minimal */
+                :host([minimal]) .container {
+                    flex-direction: row;
+                    padding: 8px;
+                    gap: 10px;
+                    background-color: transparent;
+                }
+
+                .profile-image {
+                    width: 120px;
+                    height: 120px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 3px solid #4d7cff;
+                    box-shadow: 0 0 15px rgba(77, 124, 255, 0.3);
+                    transition: all 0.3s ease;
+                }
+
+                :host([minimal]) .profile-image {
+                    width: 36px;
+                    height: 36px;
+                    border-width: 2px;
+                }
+
+                .profile-image:hover {
+                    transform: scale(1.05);
+                    border-color: #4d9cff;
+                }
+
+                input {
+                    width: 100%;
+                    padding: 12px;
+                    background-color: #162447;
+                    border: 2px solid #4d9cff;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    box-sizing: border-box;
+                }
+
+                :host([minimal]) input {
+                    width: auto;
+                    padding: 6px;
+                    font-size: 12px;
+                }
+
+                input:focus {
+                    outline: none;
+                    border-color: #e94560;
+                    box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
+                }
+
+                input::placeholder {
+                    color: #8a8a9e;
+                }
+
+                input:disabled {
+                    background-color: #1f1f3d;
+                    border-color: #404060;
+                    cursor: not-allowed;
+                }
+
+                button {
+                    width: 100%;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #4d7cff 0%, #3b5998 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+
+                :host([minimal]) button {
+                    width: auto;
+                    padding: 6px 12px;
+                    font-size: 12px;
+                }
+
+                button:hover {
+                    background: linear-gradient(135deg, #5a88ff 0%, #4866ab 100%);
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(77, 124, 255, 0.3);
+                }
+
+                button:active {
+                    transform: translateY(0);
+                }
+
+                button.connected {
+                    background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
+                }
+
+                button.connected:hover {
+                    background: linear-gradient(135deg, #f25672 0%, #d4405f 100%);
+                }
+            </style>
+        `;
+    }
+
+    render() {
+        const state = UserProfile.instance.state;
+        const currentTranslations = UserProfile.instance.translations[state.language];
+        
+        this.shadowRoot.innerHTML = `
+            ${this.getStyles()}
+            <div class="container ${state.connected ? 'connected' : ''}">
+                <img 
+                    class="profile-image" 
+                    src="${state.imageUrl}"
+                    alt="Profile"
+                />
+                <input 
+                    type="text"
+                    placeholder="${currentTranslations.placeholder}"
+                    value="${state.username}"
+                    ${state.connected ? 'disabled' : ''}
+                />
+                <button class="${state.connected ? 'connected' : ''}">
+                    ${state.connected ? currentTranslations.disconnect : currentTranslations.connect}
+                </button>
+            </div>
+        `;
+
+        // Configurar listeners para cada instancia después de renderizar
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Limpia los listeners anteriores de esta instancia
+        this.activeListeners.forEach(({ element, type, handler }) => {
+            element.removeEventListener(type, handler);
+        });
+        this.activeListeners.clear();
+
+        const button = this.shadowRoot.querySelector('button');
+        const input = this.shadowRoot.querySelector('input');
+
+        // Los handlers usan la instancia singleton para la lógica
+        const buttonHandler = () => {
+            if (UserProfile.instance.state.connected) {
+                UserProfile.instance.disconnect();
+            } else if (input.value.trim()) {
+                UserProfile.instance.connect(input.value);
+            }
+        };
+
+        const inputHandler = (e) => {
+            UserProfile.instance.state.username = e.target.value;
+        };
+
+        button.addEventListener('click', buttonHandler);
+        input.addEventListener('input', inputHandler);
+
+        // Guarda las referencias para limpieza
+        this.activeListeners.add({ element: button, type: 'click', handler: buttonHandler });
+        this.activeListeners.add({ element: input, type: 'input', handler: inputHandler });
+    }
+
+    loadFromLocalStorage() {
+        const savedState = localStorage.getItem('userProfileState');
+        if (savedState) {
+            this.state = { ...this.state, ...JSON.parse(savedState) };
+        }
+    }
+
+    saveToLocalStorage() {
+        localStorage.setItem('userProfileState', JSON.stringify(this.state));
+    }
+
+    connect(username) {
+        if (this !== UserProfile.instance) return;
+        
+        this.state.connected = true;
+        this.state.username = username;
+        this.state.imageUrl = 'https://via.placeholder.com/100/4d7cff';
+        this.saveToLocalStorage();
+        UserProfile.updateAllInstances();
+        this.dispatchEvent(new CustomEvent('userConnected', { 
+            detail: { username: this.state.username }
+        }));
+    }
+
+    disconnect() {
+        if (this !== UserProfile.instance) return;
+        
+        this.state.connected = false;
+        this.state.imageUrl = 'https://via.placeholder.com/100/1a1a2e';
+        this.state.username = '';
+        this.saveToLocalStorage();
+        UserProfile.updateAllInstances();
+        this.dispatchEvent(new CustomEvent('userDisconnected'));
+    }
+
+    setLanguage(lang) {
+        if (this !== UserProfile.instance) return;
+        
+        if (this.translations[lang]) {
+            this.state.language = lang;
+            this.saveToLocalStorage();
+            UserProfile.updateAllInstances();
+        }
+    }
+
+    setProfileImage(url) {
+        if (this !== UserProfile.instance) return;
+        
+        this.state.imageUrl = url;
+        this.saveToLocalStorage();
+        UserProfile.updateAllInstances();
+    }
+
+    disconnectedCallback() {
+        UserProfile.instances.delete(this);
+        
+        // Limpia los listeners cuando se remueve el elemento
+        this.activeListeners.forEach(({ element, type, handler }) => {
+            element.removeEventListener(type, handler);
+        });
+        
+        if (this === UserProfile.instance) {
+            UserProfile.instance = null;
+        }
+    }
+}
+
+customElements.define('user-profile', UserProfile);
+class ResponsiveNavSidebar extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+  
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            --sidebar-width: 250px;
+            --sidebar-bg: #333;
+            --nav-bg: #333;
+            --text-color: #fff;
+            --nav-height: 60px;
+            --hover-bg: rgba(255, 255, 255, 0.1);
+          }
+  
+          .container {
+            height: 100%;
+          }
+  
+          /* Estilos para navegación superior fija */
+          .top-nav {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: var(--nav-bg);
+            color: var(--text-color);
+            z-index: 999;
+            padding: 0 20px;
+          }
+  
+          .top-nav-content {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+  
+          /* Contenedor de items base en el navbar */
+          .nav-base-items {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+          }
+  
+          /* Contenedor de items base en el sidebar */
+          .sidebar-base-items {
+            margin-bottom: 15px;
+          }
+  
+          /* Estilos para el sidebar */
+          .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: var(--text-color);
+            overflow-y: auto;
+            z-index: 1000;
+          }
+  
+          .sidebar-content {
+            padding: 20px;
+          }
+  
+          .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+          }
+  
+          .content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+          }
+  
+          /* Overlay para cerrar el menú en móvil */
+          .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 800;
+          }
+  
+          /* Estilos para elementos del menú */
+          ::slotted(.menu-item) {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+            margin: 5px 0;
+          }
+  
+          ::slotted(.menu-item:hover) {
+            background: var(--hover-bg);
+          }
+  
+          ::slotted(.base-item) {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+            margin: 5px 0;
+          }
+  
+          ::slotted(.base-item:hover) {
+            background: var(--hover-bg);
+          }
+  
+          /* Media query para modo responsive */
+          @media (max-width: 768px) {
+            .top-nav {
+              display: block;
+            }
+  
+            .content {
+              margin-left: 0;
+              padding-top: calc(var(--nav-height) + 20px);
+            }
+  
+            .sidebar {
+              transform: translateX(-100%);
+              transition: transform 0.3s ease;
+            }
+  
+            .sidebar.active {
+              transform: translateX(0);
+            }
+  
+            .menu-btn {
+              display: block;
+            }
+  
+            .overlay.active {
+              display: block;
+            }
+  
+            /* En móvil, ocultamos los items base del sidebar */
+            .sidebar-base-items {
+              display: none;
+            }
+  
+            /* Y mostramos los del navbar */
+            .nav-base-items {
+              display: flex;
+            }
+          }
+  
+          @media (min-width: 769px) {
+            /* En desktop, ocultamos los items base del navbar */
+            .nav-base-items {
+              display: none;
+            }
+  
+            /* Y mostramos los del sidebar */
+            .sidebar-base-items {
+              display: block;
+            }
+          }
+        </style>
+  
+        <div class="container">
+          <!-- Navegación superior para móvil -->
+          <nav class="top-nav">
+            <div class="top-nav-content">
+              <button class="menu-btn">☰</button>
+              <div class="nav-base-items">
+                <slot name="nav-base-items"></slot>
+              </div>
+            </div>
+          </nav>
+  
+          <!-- Overlay para cerrar menú en móvil -->
+          <div class="overlay"></div>
+  
+          <!-- Sidebar -->
+          <div class="sidebar">
+            <div class="sidebar-content">
+              <!-- Items base en el sidebar -->
+              <div class="sidebar-base-items">
+                <slot name="sidebar-base-items"></slot>
+              </div>
+              <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+              <!-- Items adicionales del menú -->
+              <slot name="menu-items"></slot>
+            </div>
+          </div>
+  
+          <!-- Contenido principal -->
+          <div class="content">
+            <slot name="main-content"></slot>
+          </div>
+        </div>
+      `;
+  
+      // Referencias a elementos del DOM
+      this.menuBtn = this.shadowRoot.querySelector('.menu-btn');
+      this.sidebar = this.shadowRoot.querySelector('.sidebar');
+      this.overlay = this.shadowRoot.querySelector('.overlay');
+  
+      // Event listeners
+      this.menuBtn.addEventListener('click', () => this.toggleMenu());
+      this.overlay.addEventListener('click', () => this.closeMenu());
+    }
+  
+    toggleMenu() {
+      this.sidebar.classList.toggle('active');
+      this.overlay.classList.toggle('active');
+    }
+  
+    closeMenu() {
+      this.sidebar.classList.remove('active');
+      this.overlay.classList.remove('active');
+    }
+  }
+  
+  customElements.define('responsive-nav-sidebar', ResponsiveNavSidebar);
