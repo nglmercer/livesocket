@@ -23,6 +23,8 @@ const newGiftContainer = new ChatContainer('.giftcontainer', 500);
 const newEventsContainer = new ChatContainer('.eventscontainer', 200);    
 events.forEach(event => {
     socket.on(event, (data) => {
+      Readtext(event, data);
+
         switch (event) {
             case 'chat':
                 handlechat(data);
@@ -37,7 +39,6 @@ events.forEach(event => {
                 showAlert('error', `Disconnected`);
                 break;
             default:
-                Readtext(data, event);
                 console.log(event, data);
                 //showAlert('success', `Event ${event}`);
                 break;  
@@ -111,7 +112,7 @@ function handlegift(data) {
     console.log("gift", data);
     const parsedgiftdata = {
       content: {
-        1: ["text", data.uniqueId,"white"],
+        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
         2: ["text", "gifted","white"],
         3: ["number", data.diamondCount,"gold"],
         4: ["text", data.giftName,"gold"],
@@ -122,6 +123,6 @@ function handlegift(data) {
     newGiftContainer.addMessage(newMessage);
     showAlert('info', `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`, 5000);
   }
-function Readtext(data, eventType = 'chat') {
-  Replacetextoread(data, eventType);
+function Readtext(eventType = 'chat',data) {
+  Replacetextoread(eventType, data);
 }

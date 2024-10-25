@@ -61,7 +61,7 @@ const testdata = {
     teamMemberLevel: 0,
     subMonth: 0,
 }
-function Replacetextoread(data, eventType = 'chat') {
+function Replacetextoread(eventType = 'chat',data) {
     const configtts = getTTSdatastore();
     console.log(configtts);
     if (!configtts[eventType] || !configtts[eventType].check) return;
@@ -69,6 +69,5 @@ function Replacetextoread(data, eventType = 'chat') {
     console.log(textoread,configtts[eventType].text);
     handleleermensaje(textoread);
 }
-setTimeout(() =>{Replacetextoread(testdata,'chat')},1000);
 export { Replacetextoread}
 // asdasd como seria un metodo para hacer un string a json
