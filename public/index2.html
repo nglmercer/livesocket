@@ -65,6 +65,29 @@
 
 <h3>Registro de Eventos:</h3>
 <div id="eventLog"></div>
+
+<div>
+    <h2><translate-text key="select1"></translate-text></h2>
+    <language-selector id="selector1"></language-selector>
+  </div>
+  
+  <div>
+    <h2><translate-text key="select2"></translate-text></h2>
+    <language-selector id="selector2"></language-selector>
+  </div>
+  
+  <div>
+    <h2><translate-text key="select3"></translate-text></h2>
+    <language-selector id="selector3"></language-selector>
+  </div>
+
+  <h1>
+    <translate-text key="hello"></translate-text> 
+    <translate-text key="world"></translate-text>!
+  </h1>
+
+  <div id="languageInfo"></div>
+
     <script>
 class UserProfile extends HTMLElement {
     constructor() {
@@ -431,5 +454,234 @@ userProfile.addEventListener('userDisconnected', () => {
         logEvent('Componente inicializado'+ JSON.stringify(userProfile));
         console.log(userProfile);
     </script>
+    <script>
+
+    // Definición del componente TranslateText
+class TranslateText extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    this.updateContent();
+    document.addEventListener('languageChanged', () => this.updateContent());
+  }
+
+  updateContent() {
+    const key = this.getAttribute('key');
+    const text = TranslateText.translations[TranslateText.currentLanguage][key] || key;
+    this.shadowRoot.textContent = text;
+  }
+}
+
+// Definición del componente LanguageSelector mejorado
+class LanguageSelector extends HTMLElement {
+  static instances = new Set();
+  static STORAGE_KEY = 'selectedLanguage';
+  
+  // Definición de las etiquetas de idioma
+  static languageLabels = {
+    es: 'Español',
+    en: 'English',
+    fr: 'Français'
+  };
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  static get observedAttributes() {
+    return ['id'];
+  }
+
+  connectedCallback() {
+    LanguageSelector.instances.add(this);
+    
+    // Cargar el idioma guardado o usar el predeterminado
+    TranslateText.currentLanguage = this.loadStoredLanguage();
+    
+    this.render();
+    
+    const select = this.shadowRoot.querySelector('select');
+    
+    // Establecer el valor inicial desde localStorage
+    select.value = TranslateText.currentLanguage;
+    
+    // Agregar event listener para el cambio
+    select.addEventListener('change', (e) => {
+      const newLanguage = e.target.value;
+      
+      // Guardar en localStorage
+      this.saveLanguage(newLanguage);
+      
+      // Actualizar todos los selectores
+      LanguageSelector.updateAllSelectors(newLanguage, this);
+      
+      // Actualizar el idioma global
+      TranslateText.currentLanguage = newLanguage;
+      
+      // Disparar evento global de cambio de idioma
+      document.dispatchEvent(new Event('languageChanged'));
+      
+      // Disparar evento personalizado en el selector
+      this.dispatchEvent(new CustomEvent('languageChange', {
+        detail: {
+          language: newLanguage,
+          selectorId: this.getAttribute('id'),
+          label: LanguageSelector.languageLabels[newLanguage]
+        },
+        bubbles: true,
+        composed: true
+      }));
+    });
+  }
+
+  disconnectedCallback() {
+    LanguageSelector.instances.delete(this);
+  }
+
+  // Método para guardar el idioma en localStorage
+  saveLanguage(language) {
+    try {
+      localStorage.setItem(LanguageSelector.STORAGE_KEY, language);
+    } catch (e) {
+      console.warn('No se pudo guardar el idioma en localStorage:', e);
+    }
+  }
+
+  // Método para cargar el idioma desde localStorage
+  loadStoredLanguage() {
+    try {
+      const storedLanguage = localStorage.getItem(LanguageSelector.STORAGE_KEY);
+      return storedLanguage || TranslateText.currentLanguage; // Retorna el almacenado o el predeterminado
+    } catch (e) {
+      console.warn('No se pudo cargar el idioma desde localStorage:', e);
+      return TranslateText.currentLanguage;
+    }
+  }
+
+  static updateAllSelectors(newLanguage, exclude = null) {
+    LanguageSelector.instances.forEach(selector => {
+      if (selector !== exclude) {
+        selector.shadowRoot.querySelector('select').value = newLanguage;
+      }
+    });
+  }
+
+  // Método público para obtener el idioma actual
+  getValue() {
+    return this.shadowRoot.querySelector('select').value;
+  }
+
+  // Método público para obtener la etiqueta del idioma actual
+  getLanguageLabel() {
+    const currentLanguage = this.getValue();
+    return LanguageSelector.languageLabels[currentLanguage];
+  }
+
+  render() {
+    const style = `
+      <style>
+        select {
+          padding: 8px;
+          border-radius: 4px;
+          border: 1px solid #ccc;
+          font-size: 14px;
+        }
+      </style>
+    `;
+
+    const currentId = this.getAttribute('id');
+    const selectId = currentId ? `id="${currentId}-select"` : '';
+
+    this.shadowRoot.innerHTML = `
+      ${style}
+      <select ${selectId}>
+        ${Object.entries(LanguageSelector.languageLabels).map(([code, label]) => 
+          `<option value="${code}">${label}</option>`
+        ).join('')}
+      </select>
+    `;
+  }
+}
+
+// Configuración global
+TranslateText.currentLanguage = 'es';
+TranslateText.translations = {
+  es: {
+    hello: 'Hola',
+    world: 'Mundo',
+    select1: 'Selector 1',
+    select2: 'Selector 2',
+    select3: 'Selector 3',
+    currentLang: 'Idioma actual',
+    selectedLanguage: 'Idioma seleccionado'
+  },
+  en: {
+    hello: 'Hello',
+    world: 'World',
+    select1: 'Selector 1',
+    select2: 'Selector 2',
+    select3: 'Selector 3',
+    currentLang: 'Current language',
+    selectedLanguage: 'Selected language'
+  },
+  fr: {
+    hello: 'Bonjour',
+    world: 'Monde',
+    select1: 'Sélecteur 1',
+    select2: 'Sélecteur 2',
+    select3: 'Sélecteur 3',
+    currentLang: 'Langue actuelle',
+    selectedLanguage: 'Langue sélectionnée'
+  }
+};
+
+// Registro de los componentes
+customElements.define('translate-text', TranslateText);
+customElements.define('language-selector', LanguageSelector);
+
+// Ejemplo de uso con múltiples selectores
+// Ejemplo de cómo acceder a los selectores y sus eventos
+document.addEventListener('DOMContentLoaded', () => {
+  // Obtener referencias a los selectores
+  const selector1 = document.getElementById('selector1');
+  const selector2 = document.getElementById('selector2');
+  const selector3 = document.getElementById('selector3');
+  const languageInfo = document.getElementById('languageInfo');
+
+  // Ejemplo de escucha de eventos en un selector específico
+  selector1.addEventListener('languageChange', (e) => {
+    console.log(`Selector ${e.detail.selectorId} cambió a: ${e.detail.label} (${e.detail.language})`);
+    // Actualizar la información del idioma actual
+    languageInfo.innerHTML = `
+      <translate-text key="selectedLanguage"></translate-text>: 
+      ${e.detail.label} (${e.detail.language})
+    `;
+  });
+
+  // Mostrar el idioma inicial
+  const initialLabel = selector1.getLanguageLabel();
+  const initialLanguage = selector1.getValue();
+  languageInfo.innerHTML = `
+    <translate-text key="selectedLanguage"></translate-text>: 
+    ${initialLabel} (${initialLanguage})
+  `;
+});
+
+// Función para obtener el idioma actual y su etiqueta
+function getCurrentLanguage(selectorId) {
+  const selector = document.getElementById(selectorId);
+  if (selector) {
+    return {
+      code: selector.getValue(),
+      label: selector.getLanguageLabel()
+    };
+  }
+  return null;
+}
+</script>
 </body>
 </html>
