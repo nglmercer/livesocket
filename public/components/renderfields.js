@@ -477,7 +477,7 @@ class DynamicRow {
   createRadioElement(key, subKey, value, typeConfig, HtmlContainer) {
     const divElement = document.createElement('div');
     divElement.classList.add('div-radio-group');
-
+    const uniquename = key + '_' + Math.random().toString(36).substring(2, 15);
     if (typeConfig.options) {
         typeConfig.options.forEach(option => {
             const radioWrapper = document.createElement('div');
@@ -485,7 +485,7 @@ class DynamicRow {
             
             const radioElement = document.createElement('input');
             radioElement.type = 'radio';
-            radioElement.name = key;
+            radioElement.name = uniquename;
             radioElement.id = `${key}_${option.value}`; // Unique ID for each radio
             radioElement.value = typeof option.value === 'object' ? option.value.index : option.value;
             radioElement.checked = radioElement.value == value; // Marca como seleccionado si coincide con el valor actual

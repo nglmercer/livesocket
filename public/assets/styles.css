@@ -520,8 +520,16 @@ optgroup option {
   }
 }
 table {
+  padding: 0.5rem 0;
+  margin: 0.5rem 0;
+  gap: 1rem;
+  border: 1px solid var(--dark-border);
   width: 100%;
   thead {
     width: 100%;
   }
+}
+.radio-default {
+  width: 100%;
+  margin: 0.5rem;
 }

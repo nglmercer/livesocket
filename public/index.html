@@ -48,19 +48,22 @@
               <section id="settings">
                 <h2>Configuración</h2>
                 <div class="containerbox relative">
+
+
+                  </div>
+                  <div class="containerbox relative">
+                      <h3>Tabla de Eventos</h3>
+                      <button id="EventsModalButton">Event Add</button>
+                      <custom-modal modal-type="form" id="EventsModal">
+                        <div id="EventsModalContainer"></div>
+                      </custom-modal>
+                      <div id="table-containerEvent" class="dynamic-table1"></div>
+                    <h3>Tabla de Acciones</h3>
                     <button id="ActionModalButton">Action Add</button>
                     <custom-modal modal-type="form" id="ActionModal">
                       <div id="ActionModalContainer"></div>
                     </custom-modal>
-                    <button id="EventsModalButton">Event Add</button>
-                    <custom-modal modal-type="form" id="EventsModal">
-                      <div id="EventsModalContainer"></div>
-                    </custom-modal>
-                  </div>
-                  <div class="containerbox relative">
-                    <h3>Tables de datos</h3>
                     <div id="table-containerAction" class="dynamic-table1"></div>
-                    <div id="table-containerEvent" class="dynamic-table1"></div>
                 </div>
               </section>
               <section id="dashboard">

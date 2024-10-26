@@ -95,17 +95,17 @@ const editcallback = async (data,modifiedData) => {
   
   const results = compareObjects(modifiedData, alldata, keysToCheck, callbackFunction);
   console.log("results",results)
-  if (results.validResults.length >= 1 && !modifiedData.id) {
-    console.log(modifiedData.id,"id de la base de datos")
-    showAlert('error','ya existe un elemento en la base de datos igual')
-  } else if (modifiedData.id) {
+  if (!results.validResults.length >= 1 && !modifiedData.id) {
+    EventsModal.close();
+    EventsManager.saveData(modifiedData)
+    showAlert('success','Se ha guardado el evento')
+  } else if (modifiedData.id && results.validResults.length <= 1) {
     EventsModal.close();
     EventsManager.updateData(modifiedData)
     showAlert('success','Se ha guardado el evento')
   } else {
-    EventsModal.close();
-    EventsManager.saveData(modifiedData)
-    showAlert('success','Se ha guardado el evento')
+    console.log(modifiedData.id,"id de la base de datos")
+    showAlert('error','ya existe un elemento en la base de datos igual')
   }
 }
 const deletecallback = async (data,modifiedData) => {
@@ -154,6 +154,14 @@ const configtable = {
       class: 'input-default',
       type: 'textarea',
       returnType: 'string',
+    },     
+    eventType: {
+      class: 'radio-default',
+      type: 'radio',
+      toggleoptions: true,
+      returnType: 'string',
+      options: [{ value: 'chat', label: 'Chat' }, { value: 'follow', label: 'Seguimiento' },{ value: 'like', label: 'like'},
+      {value: 'share', label: 'compartir'}, { value: 'subscribe', label: 'suscripcion' }, { value: 'gift', label: 'Gift' }],
     }
 }
 const tableconfigcallback = {
@@ -185,13 +193,13 @@ ObserverEvents.subscribe(async (action, data) => {
     }); */
   }
   else if (action === "update") {
-    // table.clearRows();
-    // const dataupdate = await EventsManager.getAllData();
-    // dataupdate.forEach((data) => {
-    //   table.addRow(data);
-    // });
+    table.clearRows();
+    const dataupdate = await EventsManager.getAllData();
+    dataupdate.forEach((data) => {
+      table.addRow(data);
+    });
     showAlert ('info', "Actualizado", "1000");
   }
 });
 
-export { getEventconfig }
+export { getEventconfig, EventsManager }

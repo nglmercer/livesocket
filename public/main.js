@@ -1,7 +1,9 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Counter } from './utils/utils.js';
+import { Counter, compareObjects } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
+import { ActionsManager } from './features/Actions.js';
+import { EventsManager } from './features/Events.js';
 const socket = io();
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
@@ -139,3 +141,21 @@ function handlegift(data) {
 function Readtext(eventType = 'chat',data) {
   Replacetextoread(eventType, data);
 }
+async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
+  const keysToCheck = [
+    { key: 'eventType', compare: 'isEqual' },
+/*       { key: 'gift', compare: 'isEqual' },
+*/      { key: eventType, compare: comparison }
+  ];    
+  const callbackFunction = (matchingObject, index, results) => {
+    console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
+  };
+  const results = compareObjects(data, await EventsManager.getAllData(), keysToCheck, callbackFunction);
+  console.log("results HandleAccionEvent",results)
+  if (results.validResults.length >= 1 ) {
+
+  }
+}
+setTimeout(() => {
+  HandleAccionEvent('chat',{nombre: "coloca tu nombre",eventType: "chat",chat: "default text",like: 10,gift: 5655,Actions: [],id: undefined})
+}, 1000);
