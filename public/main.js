@@ -153,7 +153,47 @@ async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
   const results = compareObjects(data, await EventsManager.getAllData(), keysToCheck, callbackFunction);
   console.log("results HandleAccionEvent",results)
   if (results.validResults.length >= 1 ) {
-
+    results.validResults.forEach(result => {
+      processAction(result)
+    });
+  }
+}
+function processAction(data) {
+  console.log("procesar accion",data)
+  if (data.Actions.length > 0) {
+    data.Actions.forEach(action => {
+      Actionsprocessmanager(action)
+    });
+  }
+}
+const processActioncallbacks = {
+  minecraft: (data) => handleMinecraft(data),
+  tts: (data) => handletts(data),
+}
+async function Actionsprocessmanager(id) {
+  console.log("accionesprocessmanager",id)
+  const action = await ActionsManager.getDataById(id)
+  console.log("accionesprocessmanager",action)
+  if (action) {
+    Object.keys(processActioncallbacks).forEach(key => {
+      if (action[key]) {
+        processActioncallbacks[key](action[key])
+      }
+    });
+  }
+}
+function handleMinecraft(data) {
+  if (data?.check) {
+    console.log("minecraft check",data)
+  } else {
+    console.log("minecraft no check",data)
+  }
+}
+function handletts(data) {
+  if (data?.check) {
+    console.log("tts check",data)
+  } else {
+    console.log("tts no check",data)
   }
 }
 setTimeout(() => {

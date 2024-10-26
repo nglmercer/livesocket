@@ -218,7 +218,7 @@ class DynamicRow {
         objectContainer.appendChild(summary);
 
         Object.keys(typeConfig).forEach(subKey => {
-          if (subKey === 'type') return;
+          if (subKey === 'type' || subKey === 'open') return;
 
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;

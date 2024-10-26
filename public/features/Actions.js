@@ -14,6 +14,8 @@ const actionsconfig = {
   }, 
   minecraft:{
     type: 'object',
+    label: 'Minecraft Comands',
+    open: true,
     check: {
       class: 'filled-in',
       label: 'check',
@@ -30,6 +32,7 @@ const actionsconfig = {
   tts: {
     label: 'TTS',
     type: 'object',
+    open: true,
     check: {
       class: 'filled-in',
       label: 'check',
@@ -38,7 +41,6 @@ const actionsconfig = {
     },
     text: {
       class: 'input-default',
-      label: 'leer texto',
       type: 'text',
       returnType: 'string',
     },
