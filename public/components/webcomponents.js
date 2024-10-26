@@ -1,3 +1,5 @@
+// import en el lado del cliente... html
+
 class CustomSelect extends HTMLElement {
     constructor() {
         super();
@@ -908,6 +910,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       select3: 'Selector 3',
       currentLang: 'Idioma actual',
       selectedLanguage: 'Idioma seleccionado',
+      config: 'configuracion',
       configuration: 'Configuración',
       confirm: 'Confirmar',
       cancel: 'Cancelar',
@@ -918,6 +921,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       edit: 'Editar',
       remove: 'Eliminar',
       select: 'Seleccionar',
+      home: 'inicio',
     },
     en: {
       hello: 'Hello',
@@ -928,6 +932,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       currentLang: 'Current language',
       selectedLanguage: 'Selected language',
       configuration: 'Configuration',
+      config: 'configuration',
       confirm: 'Confirm',
       cancel: 'Cancel',
       save: 'Save',
@@ -937,6 +942,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       edit: 'Edit',
       remove: 'Remove',
       select: 'Select',
+      home: 'home',
     },
     fr: {
       hello: 'Bonjour',
@@ -947,6 +953,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       currentLang: 'Langue actuelle',
       selectedLanguage: 'Langue sélectionnée',
       configuration: 'Configuration',
+      config: 'configure',
       confirm: 'Confirmer',
       cancel: 'Annuler',
       save: 'Enregistrer',
@@ -956,6 +963,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       edit: 'Modifier',
       remove: 'Supprimer',
       select: 'Sélectionner',
+      home: 'home',
     }
   };
   
