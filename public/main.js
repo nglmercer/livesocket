@@ -109,6 +109,8 @@ const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-
 newChatContainer.addMessage(message1);
 newGiftContainer.addMessage(message2);
 newEventsContainer.addMessage(message3);
+const arrayevents = ["like", "gift", "chat"];
+
 function handlechat(data) {
     const parsedchatdata = {
       content: {
@@ -141,12 +143,13 @@ function handlegift(data) {
 function Readtext(eventType = 'chat',data) {
   Replacetextoread(eventType, data);
 }
+const generateobject = (eventType,comparison ) => {
+  return arrayevents.includes(eventType) 
+    ? [{ key: eventType, compare: comparison },{ key: 'eventType', compare: 'isEqual' }] 
+    : [{ key: 'eventType', compare: 'isEqual' }]
+};
 async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
-  const keysToCheck = [
-    { key: 'eventType', compare: 'isEqual' },
-/*       { key: 'gift', compare: 'isEqual' },
-*/      { key: eventType, compare: comparison }
-  ];    
+  const keysToCheck = generateobject(eventType,comparison)
   const callbackFunction = (matchingObject, index, results) => {
     console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
   };
