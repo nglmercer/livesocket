@@ -109,11 +109,14 @@ function updatedataformmodal(data = testdata) {
 }
 
 /*tabla de Actions para modificar y renderizar todos los datos*/
-const callbacktable = async (data,modifiedData) => {
+const callbacktable = async (index,data,modifiedData) => {
   console.log("callbacktable",data,modifiedData);
+  ActionsManager.updateData(modifiedData)
 }
-const callbacktabledelete = async (data,modifiedData) => {
+const callbacktabledelete = async (index,data,modifiedData) => {
   console.log("callbacktabledelete",data,modifiedData);
+  table.removeRow(table.getRowIndex(data));
+  ActionsManager.deleteData(data.id)
 }
 const tableconfigcallback = {
   callback: callbacktable,
@@ -129,4 +132,27 @@ const table = new DynamicTable('#table-containerAction',tableconfigcallback,acti
   });
   console.log("alldata render table",alldata);
 })  (); 
+ObserverActions.subscribe(async (action, data) => {
+  if (action === "save") {
+    table.clearRows();
+    const dataupdate = await ActionsManager.getAllData();
+    dataupdate.forEach((data) => {
+      table.addRow(data);
+    });
+  } else if (action === "delete") {
+/*     table.clearRows();
+    const dataupdate = await ActionsManager.getAllData();
+    dataupdate.forEach((data) => {
+      table.addRow(data);
+    }); */
+  }
+  else if (action === "update") {
+    // table.clearRows();
+    // const dataupdate = await ActionsManager.getAllData();
+    // dataupdate.forEach((data) => {
+    //   table.addRow(data);
+    // });
+    showAlert ('info', "Actualizado", "1000");
+  }
+});
 export { actionsconfig,ActionsManager }

@@ -570,11 +570,11 @@ ObserverEvents.subscribe(async (action, data) => {
       table.addRow(data);
     });
   } else if (action === "delete") {
-    table.clearRows();
+/*     table.clearRows();
     const dataupdate = await AccionEventsDBManager.getAllData();
     dataupdate.forEach((data) => {
       table.addRow(data);
-    });
+    }); */
   }
   else if (action === "update") {
     // table.clearRows();

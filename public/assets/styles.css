@@ -194,19 +194,19 @@ input {
   position: fixed;
   top: 1%;
   right: 1%;
-  z-index: 100;
-  .alert-success {
-    background-color: var(--succes-green);
-  }  
-  .alert-info {
-    background-color: var(--info);
-  }
-  .alert-warning {
-    background-color: var(--warning-yellow);
-  }
-  .alert-error {
-    background-color: var(--error-red);
-  }
+  z-index: 1001;
+}
+.alert-success {
+  background-color: var(--succes-green);
+}  
+.alert-info {
+  background-color: var(--info);
+}
+.alert-warning {
+  background-color: var(--warning-yellow);
+}
+.alert-error {
+  background-color: var(--error-red);
 }
 /* Estilos base */
 .dynamic-row-container {
@@ -517,5 +517,11 @@ optgroup option {
   
   select[multiple] option {
     padding: 10px 12px;
+  }
+}
+table {
+  width: 100%;
+  thead {
+    width: 100%;
   }
 }

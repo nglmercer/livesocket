@@ -25,54 +25,58 @@ async function EventsManagermap(data) {
   const mapedevents = await EventsManagermap()
   console.log("mapedevents",mapedevents)
 })()
-const eventsconfig = {
-  nombre: {
-    class: 'input-default',
-    type: 'textarea',
-    returnType: 'string',
-  },
-  eventType: {
-    class: 'radio-default',
-    type: 'radio',
-    toggleoptions: true,
-    returnType: 'string',
-    options: [{ value: 'chat', label: 'Chat' }, { value: 'follow', label: 'Seguimiento' },{ value: 'like', label: 'like'},
-    {value: 'share', label: 'compartir'}, { value: 'subscribe', label: 'suscripcion' }, { value: 'gift', label: 'Gift' }],
-  },
-  chat: {
-    label: '',
-    class: 'input-default',
-    type: 'textarea',
-    returnType: 'string',
-    dataAssociated: 'chat',
-  },
-  like: {
-    label: '',
-    class: 'input-default',
-    type: 'number',
-    returnType: 'number',
-    dataAssociated: 'like',
-  },
-  gift: {
-    class: 'input-default',
-    label: '',
-    type: 'select2',
-    returnType: 'number',
-    options: mapselectgift,
-    dataAssociated: 'gift',
-  },
-  Actions: {
-    class: 'input-default',
-    type: 'multiSelect',
-    returnType: 'array',
-    options: await EventsManagermap(),
-  },
-  id: {
-    type: 'number',
-    returnType: 'number',
-    hidden: true,
-  }
-};
+
+async function getEventconfig(eventType) {
+  const eventsconfig = {
+    nombre: {
+      class: 'input-default',
+      type: 'textarea',
+      returnType: 'string',
+    },
+    eventType: {
+      class: 'radio-default',
+      type: 'radio',
+      toggleoptions: true,
+      returnType: 'string',
+      options: [{ value: 'chat', label: 'Chat' }, { value: 'follow', label: 'Seguimiento' },{ value: 'like', label: 'like'},
+      {value: 'share', label: 'compartir'}, { value: 'subscribe', label: 'suscripcion' }, { value: 'gift', label: 'Gift' }],
+    },
+    chat: {
+      label: '',
+      class: 'input-default',
+      type: 'textarea',
+      returnType: 'string',
+      dataAssociated: 'chat',
+    },
+    like: {
+      label: '',
+      class: 'input-default',
+      type: 'number',
+      returnType: 'number',
+      dataAssociated: 'like',
+    },
+    gift: {
+      class: 'input-default',
+      label: '',
+      type: 'select2',
+      returnType: 'number',
+      options: mapselectgift,
+      dataAssociated: 'gift',
+    },
+    Actions: {
+      class: 'input-default',
+      type: 'multiSelect',
+      returnType: 'array',
+      options: await EventsManagermap(),
+    },
+    id: {
+      type: 'number',
+      returnType: 'number',
+      hidden: true,
+    }
+  };
+  return eventsconfig
+}
 const EventsModal = document.getElementById('EventsModal');
 const Buttonform  = document.getElementById('EventsModalButton');
 const editcallback = async (data,modifiedData) => {
@@ -91,8 +95,13 @@ const editcallback = async (data,modifiedData) => {
   
   const results = compareObjects(modifiedData, alldata, keysToCheck, callbackFunction);
   console.log("results",results)
-  if (results.validResults.length >= 1) {
+  if (results.validResults.length >= 1 && !modifiedData.id) {
+    console.log(modifiedData.id,"id de la base de datos")
     showAlert('error','ya existe un elemento en la base de datos igual')
+  } else if (modifiedData.id) {
+    EventsModal.close();
+    EventsManager.updateData(modifiedData)
+    showAlert('success','Se ha guardado el evento')
   } else {
     EventsModal.close();
     EventsManager.saveData(modifiedData)
@@ -108,20 +117,81 @@ const callbackconfig = {
   callbacktext: 'Guardar cambios',
   deletecallbacktext: 'cerrar',
 };
-const Formelement = new EditModal('#EventsModalContainer',callbackconfig,eventsconfig);
 const testdata = {
   nombre: "coloca tu nombre",
   eventType: "chat",
   chat: "default text",
   like: 10,
   gift: 5655,
+  Actions: [],
   id: undefined,
 }
-Formelement.render(testdata);
+const Formelement = new EditModal('#EventsModalContainer',callbackconfig,await getEventconfig());
+
 
 Buttonform.className = 'open-modal-btn';
-Buttonform.onclick = () => {
-  Formelement.updateData(testdata)
-  setTimeout(() => {EventsModal.open()}, 100);
+Buttonform.onclick = async () => {
+  Formelement.updateconfig(await getEventconfig())
+  Formelement.render(testdata);
+  Formelement.updateData(testdata) 
+  setTimeout(() => {EventsModal.open()}, 200);
 };
-export { eventsconfig}
+/*tabla de Eventos para modificar y renderizar todos los datos*/
+const callbacktable = async (index,data,modifiedData) => {
+  console.log("callbacktable",index,data,modifiedData);
+  Formelement.updateconfig(await getEventconfig())
+  Formelement.render(modifiedData);
+  Formelement.updateData(modifiedData) 
+  setTimeout(() => {EventsModal.open()}, 200);
+}
+const callbacktabledelete = async (index,data,modifiedData) => {
+  console.log("callbacktabledelete",index,data,modifiedData);
+  table.removeRow(table.getRowIndex(data));
+  EventsManager.deleteData(data.id)
+}
+const configtable = {
+    nombre: {
+      class: 'input-default',
+      type: 'textarea',
+      returnType: 'string',
+    }
+}
+const tableconfigcallback = {
+  callback: callbacktable,
+  deletecallback: callbacktabledelete,
+  callbacktext: 'Editar',
+  deletecallbacktext: 'eliminar',
+}
+const table = new DynamicTable('#table-containerEvent',tableconfigcallback,configtable);
+(async () => {
+  const alldata = await EventsManager.getAllData()
+  alldata.forEach((data) => {
+    table.addRow(data);
+  });
+  console.log("alldata render table",alldata);
+})  (); 
+ObserverEvents.subscribe(async (action, data) => {
+  if (action === "save") {
+    table.clearRows();
+    const dataupdate = await EventsManager.getAllData();
+    dataupdate.forEach((data) => {
+      table.addRow(data);
+    });
+  } else if (action === "delete") {
+/*     table.clearRows();
+    const dataupdate = await EventsManager.getAllData();
+    dataupdate.forEach((data) => {
+      table.addRow(data);
+    }); */
+  }
+  else if (action === "update") {
+    // table.clearRows();
+    // const dataupdate = await EventsManager.getAllData();
+    // dataupdate.forEach((data) => {
+    //   table.addRow(data);
+    // });
+    showAlert ('info', "Actualizado", "1000");
+  }
+});
+
+export { getEventconfig }

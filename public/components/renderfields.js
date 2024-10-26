@@ -1,16 +1,17 @@
 class DynamicTable {
   constructor(containerSelector, callback, config = {}) {
-    this.config = config;
-    this.callback = callback;
-    this.container = document.querySelector(containerSelector);
-    this.columns = this.getOrderedColumns(config); // Establece las columnas en el orden deseado
-    this.HtmlContainer = document.createElement('table');
-    this.HtmlContainer.classList.add('dynamic-table');
-    this.container.appendChild(this.HtmlContainer);
-    this.canClear = true; // Bandera para controlar la limpieza
-
-    this.createHeader();
+      this.config = config;
+      this.callback = callback;
+      this.container = document.querySelector(containerSelector);
+      this.columns = this.getOrderedColumns(config);
+      this.HtmlContainer = document.createElement('table');
+      this.HtmlContainer.classList.add('dynamic-table');
+      this.container.appendChild(this.HtmlContainer);
+      this.canClear = true;
+      this.rows = []; // Array para mantener referencia a las filas
+      this.createHeader();
   }
+
 
 
   getOrderedColumns(config) {
@@ -43,8 +44,13 @@ class DynamicTable {
   addRow(data) {
     const row = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
     row.render();
-    this.fillEmptyFields(data);
-  }
+    this.rows.push({
+        data: this.fillEmptyFields(data),
+        htmlRow: row,
+        index: this.rows.length
+    });
+    return this.rows.length - 1; // Retorna el índice de la fila añadida
+}
   fillEmptyFields(data) {
     const filledData = { ...data }; // Copia los datos recibidos sin modificarlos
 
@@ -86,22 +92,91 @@ class DynamicTable {
     }
   }
 
-  updateRows(data, clearInterval = 2000) {
-    if (this.canClear) {
-      this.clearRows(); // Limpiar antes de añadir nuevas filas
-      this.canClear = false; // Desactivar la limpieza por 10 segundos
-      setTimeout(() => {
-        this.canClear = true; // Reactivar la limpieza después de 10 segundos
-      }, clearInterval);
-    }
-      this.addRow(data); // Añadir las filas después de limpiar
-  }
-
   clearRows() {
     while (this.HtmlContainer.rows.length > 1) {
       this.HtmlContainer.deleteRow(1);
     }
   }
+  addRow(data) {
+    const row = new DynamicRow(this.HtmlContainer, data, this.columns, this.config, this.callback);
+    row.render();
+    this.rows.push({
+        data: this.fillEmptyFields(data),
+        htmlRow: row,
+        index: this.rows.length
+    });
+    return this.rows.length - 1; // Retorna el índice de la fila añadida
+}
+
+removeRow(index) {
+    if (index >= 0 && index <= this.rows.length) {
+        // Eliminar la fila del DOM
+        this.HtmlContainer.deleteRow(index + 1); // +1 porque el índice 0 es el header
+        
+        // Eliminar la fila del array de filas
+        this.rows.splice(index, 1);
+        
+        // Actualizar los índices de las filas restantes
+        this.rows.forEach((row, i) => {
+            row.index = i;
+        });
+        
+        return true;
+    }
+    return false;
+}
+
+replaceRow(index, newData) {
+    if (index >= 0 && index <= this.rows.length) {
+        // Eliminar la fila existente
+        this.HtmlContainer.deleteRow(index + 1);
+        
+        // Crear la nueva fila
+        const row = new DynamicRow(this.HtmlContainer, newData, this.columns, this.config, this.callback);
+        
+        // Insertar la nueva fila en la posición correcta
+        const targetRow = this.HtmlContainer.insertRow(index + 1);
+        row.render(targetRow);
+        
+        // Actualizar el array de filas
+        this.rows[index] = {
+            data: this.fillEmptyFields(newData),
+            htmlRow: row,
+            index: index
+        };
+        
+        return true;
+    }
+    return false;
+}
+
+getRowAt(index) {
+    if (index >= 0 && index <= this.rows.length) {
+        return this.rows[index].data;
+    }
+    return null;
+}
+
+getRowIndex(searchData) {
+    // Buscar una fila que coincida con los datos proporcionados
+    return this.rows.findIndex(row => {
+        return Object.keys(searchData).every(key => {
+            return JSON.stringify(row.data[key]) === JSON.stringify(searchData[key]);
+        });
+    });
+}
+
+
+updateRows(data, clearInterval = 2000) {
+    if (this.canClear) {
+        this.clearRows();
+        this.canClear = false;
+        setTimeout(() => {
+            this.canClear = true;
+        }, clearInterval);
+    }
+    return this.addRow(data);
+}
 }
 class DynamicRow {
   constructor(table, data, columns, config, callback) {
@@ -151,15 +226,7 @@ class DynamicRow {
 
           if (inputElement) {
             const wrapper = document.createElement('div');
-            if (subConfig.label) {
-              const label = document.createElement('label');
-              label.classList.add('grid-1fr-1fr-align-center');
-              const span = document.createElement('span');
-              span.textContent = subConfig.label;
-              label.appendChild(inputElement);
-              label.appendChild(span);
-              wrapper.appendChild(label);
-            } else {
+            if (subConfig) {
               wrapper.appendChild(inputElement);
             }
             objectContainer.appendChild(wrapper);
@@ -475,7 +542,7 @@ class DynamicRow {
     const inputElement = document.createElement('input');
     inputElement.type = 'checkbox';
     inputElement.checked = value;
-    inputElement.id = `${key}_${subKey}`; // Generar un id único
+    inputElement.id = `${key}_${subKey}_${Math.random().toString(36).substring(2, 15)}`; // Generar un id único
     inputElement.className = 'checkbox-4';
     const labelElement = document.createElement('label');
     labelElement.setAttribute('for', inputElement.id); // Relacionar el label con el checkbox
@@ -713,6 +780,9 @@ export class EditModal {
   }
   updateData(newData) {
     this.renderelement.updateData(newData)
+  }
+  updateconfig(newConfig) {
+    this.config = newConfig
   }
 }
 

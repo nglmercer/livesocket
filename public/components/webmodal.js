@@ -56,14 +56,14 @@ class CustomModal extends HTMLElement {
                     top: 10px;
                     right: 10px;
                     background-color: #dc3545;
-                    width: 24px;
-                    height: 24px;
+                    width: 36px;
+                    height: 36px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 14px;
                     padding: 0;
-                    border-radius: 50%;
+                    border-radius: 25%;
                 }
                 .close-button:hover {
                     background-color: #c82333;
