@@ -805,7 +805,7 @@ class ResponsiveNavSidebar extends HTMLElement {
         
         // Guardar en localStorage
         this.saveLanguage(newLanguage);
-        
+        localStorage.setItem('selectedLanguage', newLanguage);
         // Actualizar todos los selectores
         LanguageSelector.updateAllSelectors(newLanguage, this);
         
@@ -898,7 +898,7 @@ class ResponsiveNavSidebar extends HTMLElement {
   }
   
   // Configuración global
-  TranslateText.currentLanguage = 'es';
+  TranslateText.currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
   TranslateText.translations = {
     es: {
       hello: 'Hola',
@@ -907,7 +907,17 @@ class ResponsiveNavSidebar extends HTMLElement {
       select2: 'Selector 2',
       select3: 'Selector 3',
       currentLang: 'Idioma actual',
-      selectedLanguage: 'Idioma seleccionado'
+      selectedLanguage: 'Idioma seleccionado',
+      configuration: 'Configuración',
+      confirm: 'Confirmar',
+      cancel: 'Cancelar',
+      save: 'Guardar',
+      close: 'Cerrar',
+      delete: 'Eliminar',
+      add: 'Agregar',
+      edit: 'Editar',
+      remove: 'Eliminar',
+      select: 'Seleccionar',
     },
     en: {
       hello: 'Hello',
@@ -916,7 +926,17 @@ class ResponsiveNavSidebar extends HTMLElement {
       select2: 'Selector 2',
       select3: 'Selector 3',
       currentLang: 'Current language',
-      selectedLanguage: 'Selected language'
+      selectedLanguage: 'Selected language',
+      configuration: 'Configuration',
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+      save: 'Save',
+      close: 'Close',
+      delete: 'Delete',
+      add: 'Add',
+      edit: 'Edit',
+      remove: 'Remove',
+      select: 'Select',
     },
     fr: {
       hello: 'Bonjour',
@@ -925,7 +945,17 @@ class ResponsiveNavSidebar extends HTMLElement {
       select2: 'Sélecteur 2',
       select3: 'Sélecteur 3',
       currentLang: 'Langue actuelle',
-      selectedLanguage: 'Langue sélectionnée'
+      selectedLanguage: 'Langue sélectionnée',
+      configuration: 'Configuration',
+      confirm: 'Confirmer',
+      cancel: 'Annuler',
+      save: 'Enregistrer',
+      close: 'Fermer',
+      delete: 'Supprimer',
+      add: 'Ajouter',
+      edit: 'Modifier',
+      remove: 'Supprimer',
+      select: 'Sélectionner',
     }
   };
   

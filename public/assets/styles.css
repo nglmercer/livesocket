@@ -3,6 +3,8 @@ body {
     padding: 0;
     height: 100%;
     font-style: system-ui, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: var(--white-font);
+    background-color: var(--black-font);
 }
 :root {
     --black-font: #212121;
@@ -31,6 +33,9 @@ input {
   max-width: auto;
   max-height: auto;
 }
+button {
+  border: none;
+}
 .grid {
   display: grid;
 }
@@ -38,8 +43,7 @@ input {
   display: flex;
 }
 * {
-    color: var(--white-font);
-    background-color: var(--black-font);
+
     box-sizing: border-box;
     field-sizing: content;
     width: auto;

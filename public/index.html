@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,12 +27,12 @@
 
         <!-- Items adicionales del menú -->
         <div slot="menu-items">
-            <div class="menu-item" data-target="#users">Usuarios</div>
+            <div class="menu-item" data-target="#users"><translate-text key="select1"></translate-text></div>
             <div class="menu-item" data-target="#settings">Configuración</div>
             <div class="menu-item" data-target="#dashboard">Dashboard</div>
             
 <div>
-    <h2><translate-text key="select1"></translate-text></h2>
+    <h2></h2>
     <language-selector id="selector1"></language-selector>
   </div>
   
@@ -444,7 +444,43 @@
     }, { threshold: 0.6 });
 
     sections.forEach(section => observer.observe(section));
-  </script>
+        // Obtener referencias a los selectores
+        const selector1 = document.getElementById('selector1');
+        const selector2 = document.getElementById('selector2');
+        const selector3 = document.getElementById('selector3');
+        const languageInfo = document.getElementById('languageInfo');
+
+        // Ejemplo de escucha de eventos en un selector específico
+        selector1.addEventListener('languageChange', (e) => {
+          console.log(`Selector ${e.detail.selectorId} cambió a: ${e.detail.label} (${e.detail.language})`);
+          // Actualizar la información del idioma actual
+          languageInfo.innerHTML = `
+            <translate-text key="selectedLanguage"></translate-text>: 
+            ${e.detail.label} (${e.detail.language})
+          `;
+        });
+
+        // Mostrar el idioma inicial
+        const initialLabel = selector1.getLanguageLabel();
+        const initialLanguage = selector1.getValue();
+        languageInfo.innerHTML = `
+          <translate-text key="selectedLanguage"></translate-text>: 
+          ${initialLabel} (${initialLanguage})
+        `;
+      
+
+      // Función para obtener el idioma actual y su etiqueta
+      function getCurrentLanguage(selectorId) {
+        const selector = document.getElementById(selectorId);
+        if (selector) {
+          return {
+            code: selector.getValue(),
+            label: selector.getLanguageLabel()
+          };
+        }
+        return null;
+      }
+    </script>
     <script type="module" src="./audio/tts.js"></script>
     <script type="module" src="./features/Actions.js"></script>
     <script type="module" src="./features/Events.js"></script>
