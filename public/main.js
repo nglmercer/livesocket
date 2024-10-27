@@ -15,8 +15,8 @@ if (userProfile.state.connected) {
 userProfile.addEventListener('userConnected', (e) => {
     console.log('Usuario conectado:', e.detail.username, e);
     userProfile.setConnectionStatus('away');
-    //joinRoom(e.detail.username);
-  });
+    joinRoom(e.detail.username);
+  }); 
 
 userProfile.addEventListener('userDisconnected', (e) => {
     console.log('Usuario desconectado',e);
@@ -41,7 +41,7 @@ const newEventsContainer = new ChatContainer('.eventscontainer', 200);
 events.forEach(event => {
     socket.on(event, (data) => {
       Readtext(event, data);
-
+        localStorage.setItem('last'+event, JSON.stringify(data));
         switch (event) {
             case 'chat':
                 handlechat(data);

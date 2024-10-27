@@ -1,5 +1,5 @@
 import express from 'express';
-import { WebcastPushConnection } from 'tiktok-live-connector';
+import { WebcastPushConnection, signatureProvider } from 'tiktok-live-connector';
 import { Server } from 'socket.io';
 import http from 'http';
 import cors from 'cors';
@@ -24,11 +24,32 @@ const LiveEvents = [
     'like', 'social', 'emote', 'envelope', 'questionNew',
     'subscribe', 'follow', 'share', 'streamEnded'
 ];
-
+signatureProvider.config.extraParams.apiKey = "NmYzMGMwNmMzODQ5YmUxYjkzNTI0OTIyMzBlOGZlMjgwNTJhY2JhMWQ0MzhhNWVmMGZmMjgy";
 class TiktokLiveControl {
     constructor(uniqueId, options) {
         this.uniqueId = this.normalizeUniqueId(uniqueId);
-        this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId);
+        this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId , {
+            processInitialData: false,
+            enableExtendedGiftInfo: true,
+            enableWebsocketUpgrade: true,
+            requestPollingIntervalMs: 2000,
+            clientParams: {
+                "app_language": "en-US",
+                "device_platform": "web"
+            },
+            requestHeaders: {
+                "headerName": "headerValue"
+            },
+            websocketHeaders: {
+                "headerName": "headerValue"
+            },
+            requestOptions: {
+                timeout: 10000
+            },
+            websocketOptions: {
+                timeout: 10000
+            },
+        });
         this.isConnected = null;
         this.options = options;
     }
