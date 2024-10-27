@@ -408,6 +408,98 @@ function getComparisonValues(obj, keysToCheck) {
 
   return result;
 }
+class Logger {
+  constructor(categories = {}, showCategoryName = true) {
+      this.categories = categories; // Objeto para almacenar las categorías de log
+      this.showCategoryName = showCategoryName; // Control para mostrar el nombre de la categoría al inicio del log
+  }
+
+  // Método para agregar una nueva categoría y su estado inicial (activada/desactivada)
+  addCategory(category, enabled = true) {
+      if (!this.categories.hasOwnProperty(category)) {
+          this.categories[category] = enabled;
+      } else {
+          console.warn(`La categoría '${category}' ya existe.`);
+      }
+  }
+
+  // Método para activar o desactivar logs de una categoría específica
+  toggleCategory(category, enabled) {
+      if (this.categories.hasOwnProperty(category)) {
+          this.categories[category] = enabled;
+      } else {
+          console.warn(`La categoría '${category}' no existe. Usa addCategory() para agregarla.`);
+      }
+  }
+
+  // Método para activar o desactivar la visualización del nombre de la categoría en los logs
+  toggleShowCategoryName(show) {
+      this.showCategoryName = show;
+  }
+
+  // Método para verificar si una categoría está habilitada
+  isCategoryEnabled(category) {
+      return !!this.categories[category];
+  }
+
+  // Método para crear un log en una categoría específica, soporta varios tipos de datos
+  log(category, ...messages) {
+      if (this.isCategoryEnabled(category)) {
+          console.group(`[${category.toUpperCase()}]`);
+          messages.forEach(message => {
+              let logMessage = this.showCategoryName ? `${category}: ` : '';
+              
+              if (typeof message === 'object') {
+                  console.log(message); // Formato tabular para arrays y objetos
+              } else {
+                  console.log(logMessage + message);  // Agrega prefijo de categoría en el caso de strings y otros tipos
+              }
+          });
+          console.groupEnd();
+      }
+  }
+
+  // Método para listar todas las categorías de log existentes
+  listCategories() {
+      return Object.keys(this.categories);
+  }
+}
+
+// Ejemplo de uso:
+const logger = new Logger({debug: true, info: true}, false);
+
+
+// Añadir categorías dinámicamente
+// logger.addCategory('datos'); // Habilitada por defecto
+// logger.addCategory('valores'); // Habilitada por defecto
+logger.addCategory('speechchat', true);
+logger.addCategory('minecraft', true);
+logger.addCategory('Event', true);
+logger.addCategory('Action', true);
+logger.addCategory('EventAction', true);
+logger.toggleCategory('debug', false);
+logger.toggleCategory('speechchat', false);
+console.log(logger.listCategories());
+// // Logs en diferentes categorías
+// logger.log('datos', 'Este es un mensaje de la categoría datos', {
+// aasdasd: 'asdasdaaaa',
+// basdasd: 'asdasdaaaa',
+// });
+// logger.log('valores', 'Este es un mensaje de la categoría valores', [1, 2, 3]);
+
+// // Desactivar la categoría "datos"
+// logger.toggleCategory('datos', false);
+
+// // Este log no se imprimirá porque la categoría "datos" está desactivada
+// logger.log('datos', 'Este mensaje no se mostrará');
+
+// // Activar y loggear en "debug"
+// logger.toggleCategory('debug', true);
+// logger.log('debug', 'Mensaje de depuración', { x: 10, y: 20 }, [1, 2, 3],123123123);
+
+// // Listar todas las categorías
+// console.log('Categorías disponibles:', logger.listCategories());
+
 // Crear múltiples contadores con diferentes intervalos
 // const counter1 = new Counter(0, 1000); // Genera ID cada 1 segundo
 // // Usar los IDs generados
@@ -433,5 +525,5 @@ console.log(tracker.comboCounters);
 
 // Total acumulado de todos los combos (likes + comentarios)
 console.log('Total de combos acumulados:', tracker.getTotalCombos()); // 12 */
-export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects };
+export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects, logger };
   

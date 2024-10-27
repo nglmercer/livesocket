@@ -1,5 +1,5 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Counter, compareObjects, replaceVariables } from './utils/utils.js';
+import { Counter, compareObjects, replaceVariables, logger } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
 import { ActionsManager } from './features/Actions.js';
@@ -8,8 +8,10 @@ import { sendcommandmc } from './features/Minecraftconfig.js';
 const socket = io();
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
+userProfile.setConnectionStatus('offline');
 if (userProfile.state.connected) {
-    //joinRoom(userProfile.state.username);
+    userProfile.setConnectionStatus('away');
+    joinRoom(userProfile.state.username);
 }
 // Escuchar eventos
 userProfile.addEventListener('userConnected', (e) => {
@@ -43,6 +45,10 @@ events.forEach(event => {
       Readtext(event, data);
         localStorage.setItem('last'+event, JSON.stringify(data));
         switch (event) {
+            case 'member':
+                HandleAccionEvent('welcome',data)
+                handlemember(data);
+                break;
             case 'chat':
                 handlechat(data);
                 HandleAccionEvent(event,data)
@@ -51,17 +57,24 @@ events.forEach(event => {
                 handlegift(data);
                 HandleAccionEvent(event,data)
                 break;
+            case 'like':
+                handlelike(data);
+                HandleAccionEvent(event,data)
+                break;
             case 'connected':
                 userProfile.setConnectionStatus('online');
                 if (data.roomInfo?.owner) localStorage.setItem('ownerdata',JSON.stringify(data.roomInfo.owner));
                 const lastownerdata = localStorage.getItem('ownerdata');
                 if (lastownerdata) userProfile.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
+                console.log(event, data);
                 showAlert('success', `Connected`);
                 break;
             case 'streamEnd':
             case 'disconnected':
+            case 'error':
                 userProfile.setConnectionStatus('offline');
                 showAlert('error', `${event}`);
+                console.log(event, data);
                 break;
             default:
                 HandleAccionEvent(event,data) 
@@ -184,7 +197,34 @@ function handlegift(data) {
     newGiftContainer.addMessage(newMessage);
     showAlert('info', `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`, 5000);
   }
+function handlemember(data) {
+    //eventype member = welcome
+    const parsedmemberdata = {
+      content: {
+        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
+        2: ["text", 'welcome',"gold"],
+        // 3: ["text", "!","gold"],
+      },
+      comment: '',
+    };
+    const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedmemberdata);
+    newEventsContainer.addMessage(newMessage);
+}
+function handlelike(data) {
+    const parsedlikedata = {
+      content: {
+        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
+        2: ["text", data.likeCount,"gold"],
+        3: ["text", "likes","white"],
+      },
+      comment: '',
+    };
+    const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedlikedata);
+    newEventsContainer.addMessage(newMessage);
+}
 function Readtext(eventType = 'chat',data) {
+  // especial case if roomuser is welcome
+  if (eventType === 'member') eventType = 'welcome';
   Replacetextoread(eventType, data);
 }
 const generateobject = (eventType,comparison ) => {
@@ -198,7 +238,7 @@ async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
     console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
   };
   const results = compareObjects(data, await EventsManager.getAllData(), keysToCheck, callbackFunction);
-  console.log("results HandleAccionEvent",results)
+  logger.log('debug',"results HandleAccionEvent",results)
   if (results.validResults.length >= 1 ) {
     results.validResults.forEach(result => {
       processAction(result,data)

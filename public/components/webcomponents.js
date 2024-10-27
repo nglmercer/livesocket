@@ -248,6 +248,17 @@ class UserProfile extends HTMLElement {
                       away: 'Away',
                       busy: 'Busy'
                   }
+              },
+              fr: {
+                  connect: 'Se connecter',
+                  disconnect: 'Se déconnecter',
+                  placeholder: 'Entrez votre nom',
+                  status: {
+                      offline: 'Hors ligne',
+                      online: 'En ligne',
+                      away: 'Absent',
+                      busy: 'Occupé'
+                  }
               }
           };
           

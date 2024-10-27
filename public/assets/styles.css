@@ -537,3 +537,36 @@ table {
   width: 100%;
   margin: 0.5rem;
 }
+.message-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  align-self: flex-start;
+}
+
+.message-text {
+  margin: 0;
+  padding: 10px 15px;
+  background-color: #050504;
+  border-radius: 18px;
+  position: relative;
+}
+
+.message-text::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #1a1818;
+}

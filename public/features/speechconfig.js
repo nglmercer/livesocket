@@ -1,5 +1,5 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
-import {replaceVariables} from '../utils/utils.js';
+import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 const keys = [
     { key: 'chat', text: "uniqueId dice comment", check: true },
@@ -63,10 +63,9 @@ const testdata = {
 }
 function Replacetextoread(eventType = 'chat',data) {
     const configtts = getTTSdatastore();
-    console.log(configtts);
     if (!configtts[eventType] || !configtts[eventType].check) return;
     const textoread = replaceVariables(configtts[eventType].text, data);
-    console.log(textoread,configtts[eventType].text);
+    logger.log('speechchat',configtts,textoread,configtts[eventType].text)
     handleleermensaje(textoread);
 }
 export { Replacetextoread}
