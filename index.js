@@ -52,6 +52,7 @@ class TiktokLiveControl {
         });
         this.isConnected = null;
         this.options = options;
+        this.state = {}
     }
 
     // Método para normalizar el uniqueId
@@ -80,17 +81,20 @@ class TiktokLiveControl {
     async connect() {
         try {
             const state = await this.tiktokLiveConnection.connect();
-            console.log(`Connected to roomId ${state.roomId}`, state);
+            console.log(`Connected to roomId ${state.roomId}`);
             this.isConnected = true;
             this.initializeEventHandlers();
+            this.state = state;
             return state;
         } catch (err) {
             console.error('Failed to connect', this.uniqueId, err);
             this.isConnected = false;
-            throw err;
+            return err;
         }
     }
-
+    getState() {
+        return this.state;
+    }
     initializeEventHandlers() {
         LiveEvents.forEach(event => {
             this.tiktokLiveConnection.on(event, (data) => {
@@ -112,7 +116,7 @@ class TiktokLiveControl {
 }
 
 // Función para obtener o crear una instancia de TiktokLiveControl
-async function getOrCreateLiveConnection(uniqueId) {
+async function getOrCreateLiveConnection(uniqueId,socket) {
     // Normalizar el uniqueId
     const normalizedId = uniqueId.startsWith('@') ? uniqueId : '@' + uniqueId;
     
@@ -123,11 +127,13 @@ async function getOrCreateLiveConnection(uniqueId) {
         // Si existe pero no está conectada, reconectar
         if (!existingConnection.isConnected) {
             try {
-                await existingConnection.connect();
+                existingConnection.connect();
+                if (socket) {socket.emit('connected',existingConnection.getState())}
             } catch (err) {
                 throw new Error(`Failed to reconnect to ${normalizedId}: ${err.message}`);
             }
         }
+        if (socket) {socket.emit('connected',existingConnection.getState())}
         return existingConnection;
     }
 
@@ -140,6 +146,7 @@ async function getOrCreateLiveConnection(uniqueId) {
     const newConnection = new TiktokLiveControl(normalizedId);
     try {
         await newConnection.connect();
+        if (socket) {socket.emit('connected',newConnection.getState())}
         Livescreated.set(normalizedId, newConnection);
         return newConnection;
     } catch (err) {
@@ -153,7 +160,7 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', async ({ uniqueId }) => {
         try {
-            const connection = await getOrCreateLiveConnection(uniqueId);
+            const connection = await getOrCreateLiveConnection(uniqueId,socket);
             
             // Unir al usuario a la sala normalizada
             socket.join(connection.uniqueId);
