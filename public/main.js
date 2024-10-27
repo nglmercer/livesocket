@@ -53,9 +53,12 @@ events.forEach(event => {
                 break;
             case 'connected':
                 userProfile.setConnectionStatus('online');
+                if (data.roomInfo?.owner) localStorage.setItem('ownerdata',JSON.stringify(data.roomInfo.owner));
+                const lastownerdata = localStorage.getItem('ownerdata');
+                if (lastownerdata) userProfile.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
                 showAlert('success', `Connected`);
                 break;
-            case '':
+            case 'streamEnd':
             case 'disconnected':
                 userProfile.setConnectionStatus('offline');
                 showAlert('error', `${event}`);
@@ -69,7 +72,40 @@ events.forEach(event => {
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
+function getAvatarUrl(avatarData, preferredSize = 'large') {
+  // Mapeo de nombres de tamaños a keys del objeto
+  const sizeMap = {
+      'large': 'avatar_large',
+      'medium': 'avatar_medium',
+      'thumb': 'avatar_thumb'
+  };
 
+  // Orden de fallback para los tamaños
+  const sizeOrder = ['large', 'medium', 'thumb'];
+  
+  // Si se proporciona un tamaño preferido, reordenar para intentar ese primero
+  if (preferredSize && sizeOrder.includes(preferredSize)) {
+      const index = sizeOrder.indexOf(preferredSize);
+      sizeOrder.unshift(...sizeOrder.splice(index, 1));
+  }
+
+  // Intentar obtener URL del tamaño preferido, con fallback a otros tamaños
+  for (const size of sizeOrder) {
+      const avatarKey = sizeMap[size];
+      const avatarInfo = avatarData[avatarKey];
+
+      if (avatarInfo && 
+          avatarInfo.url_list && 
+          Array.isArray(avatarInfo.url_list) && 
+          avatarInfo.url_list.length > 0) {
+          // Preferir WebP si está disponible
+          const webpUrl = avatarInfo.url_list.find(url => url.endsWith('.webp'));
+          return webpUrl || avatarInfo.url_list[0];
+      }
+  }
+
+  return ''; // Retornar string vacío si no se encuentra ninguna URL
+}
 const textcontent = {
     content: {
       1: ["text", "nombre de usuario = ","white"],

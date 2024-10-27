@@ -451,6 +451,8 @@
             <translate-text key="selectedLanguage"></translate-text>: 
             ${e.detail.label} (${e.detail.language})
           `;
+          const userProfile = document.querySelector('user-profile');
+          userProfile.setLanguage(e.detail.language);
         });
 
       // Función para obtener el idioma actual y su etiqueta
