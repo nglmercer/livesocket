@@ -22,27 +22,17 @@ const LiveEvents = [
     'chat', 'gift', 'connected', 'disconnected',
     'websocketConnected', 'error', 'member', 'roomUser',
     'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share', 'streamEnded'
+    'subscribe', 'follow', 'share', 'streamEnd'
 ];
 signatureProvider.config.extraParams.apiKey = "NmYzMGMwNmMzODQ5YmUxYjkzNTI0OTIyMzBlOGZlMjgwNTJhY2JhMWQ0MzhhNWVmMGZmMjgy";
 class TiktokLiveControl {
     constructor(uniqueId, options) {
         this.uniqueId = this.normalizeUniqueId(uniqueId);
         this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId , {
-            processInitialData: false,
+            processInitialData: true,
             enableExtendedGiftInfo: true,
             enableWebsocketUpgrade: true,
             requestPollingIntervalMs: 2000,
-            clientParams: {
-                "app_language": "en-US",
-                "device_platform": "web"
-            },
-            requestHeaders: {
-                "headerName": "headerValue"
-            },
-            websocketHeaders: {
-                "headerName": "headerValue"
-            },
             requestOptions: {
                 timeout: 10000
             },

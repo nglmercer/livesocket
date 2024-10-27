@@ -28,7 +28,7 @@ function joinRoom(roomid) {
 const events = ['chat', 'gift', 'connected', 'disconnected',
     'websocketConnected', 'error', 'member', 'roomUser',
     'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share', 'streamEnded'];
+    'subscribe', 'follow', 'share', 'streamEnd'];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
 const countershare = new Counter(0, 1000);
@@ -55,7 +55,7 @@ events.forEach(event => {
                 userProfile.setConnectionStatus('online');
                 showAlert('success', `Connected`);
                 break;
-            case 'streamEnded':
+            case '':
             case 'disconnected':
                 userProfile.setConnectionStatus('offline');
                 showAlert('error', `${event}`);
