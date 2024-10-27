@@ -22,7 +22,7 @@ const LiveEvents = [
     'chat', 'gift', 'connected', 'disconnected',
     'websocketConnected', 'error', 'member', 'roomUser',
     'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share'
+    'subscribe', 'follow', 'share', 'streamEnded'
 ];
 
 class TiktokLiveControl {

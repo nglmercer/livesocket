@@ -14,6 +14,7 @@ if (userProfile.state.connected) {
 // Escuchar eventos
 userProfile.addEventListener('userConnected', (e) => {
     console.log('Usuario conectado:', e.detail.username, e);
+    userProfile.setConnectionStatus('away');
     //joinRoom(e.detail.username);
   });
 
@@ -27,7 +28,7 @@ function joinRoom(roomid) {
 const events = ['chat', 'gift', 'connected', 'disconnected',
     'websocketConnected', 'error', 'member', 'roomUser',
     'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share'];
+    'subscribe', 'follow', 'share', 'streamEnded'];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
 const countershare = new Counter(0, 1000);
@@ -44,17 +45,23 @@ events.forEach(event => {
         switch (event) {
             case 'chat':
                 handlechat(data);
+                HandleAccionEvent(event,data)
                 break;
             case 'gift':
                 handlegift(data);
+                HandleAccionEvent(event,data)
                 break;
             case 'connected':
+                userProfile.setConnectionStatus('online');
                 showAlert('success', `Connected`);
                 break;
+            case 'streamEnded':
             case 'disconnected':
-                showAlert('error', `Disconnected`);
+                userProfile.setConnectionStatus('offline');
+                showAlert('error', `${event}`);
                 break;
             default:
+                HandleAccionEvent(event,data) 
                 console.log(event, data);
                 //showAlert('success', `Event ${event}`);
                 break;  
@@ -206,6 +213,6 @@ function handletts(data,userdata) {
     console.log("tts no check",data)
   }
 }
-setTimeout(() => {
-  HandleAccionEvent('chat',{nombre: "coloca tu nombre",eventType: "chat",chat: "default text",like: 10,gift: 5655,Actions: [],id: undefined})
-}, 1000);
+// setTimeout(() => {
+//   HandleAccionEvent('chat',{nombre: "coloca tu nombre",eventType: "chat",chat: "default text",like: 10,gift: 5655,Actions: [],id: undefined})
+// }, 1000);
