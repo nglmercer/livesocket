@@ -29,6 +29,8 @@ const minecraftconfig = {
   }
   const minecraftcallback = async (data,modifiedData) => {
     console.log("minecraftcallback",data,modifiedData);
+    localStorage.setItem("MinecraftPluginServer",JSON.stringify(modifiedData));
+    handlebotconnect("connect-plugin",modifiedData);
     }
     const deletecallback =  async (data,modifiedData) => {
       console.log("deletecallback",data,modifiedData);
@@ -36,18 +38,20 @@ const minecraftconfig = {
     const callbackconfig = {
       callback: minecraftcallback,
       deletecallback:  deletecallback,
-      callbacktext: 'Guardar cambios',
+      callbacktext: 'Conectar',
       deletecallbacktext: 'cerrar',
     }
     const Aformelement = new EditModal('#MinecraftModalContainer',callbackconfig,minecraftconfig);
-    Aformelement.render(minecraftdata);
   if (localStorage.getItem("MinecraftPluginServer")) {
     const data = JSON.parse(localStorage.getItem("MinecraftPluginServer"));
     console.log("MinecraftPluginServer", data);
-    handlebotconnect("connect-plugin",data);
+    Aformelement.updateData(data);
     setTimeout(function () {
       handlebotconnect("connect-plugin",data);
     }, 1000);
+  } else {
+  Aformelement.render(minecraftdata);
+
   }
 //   document.getElementById('sendcommandmc').addEventListener('submit', function(e) {
 //     e.preventDefault();
@@ -133,7 +137,7 @@ const minecraftconfig = {
   }
   function pluginconnect(data) {
     let defaultOptions = {
-      host: data.host || "localhost",
+      host: data.ip || "localhost",
       port: data.port || 4567,
       password: data.password || "change_me",
     }
@@ -143,3 +147,4 @@ const minecraftconfig = {
       ws.sendCommand(`/say conectado `);
     }, 1000);
   }
+  export { sendcommandmc };

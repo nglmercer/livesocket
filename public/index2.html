@@ -662,13 +662,6 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   });
 
-  // Mostrar el idioma inicial
-  const initialLabel = selector1.getLanguageLabel();
-  const initialLanguage = selector1.getValue();
-  languageInfo.innerHTML = `
-    <translate-text key="selectedLanguage"></translate-text>: 
-    ${initialLabel} (${initialLanguage})
-  `;
 });
 
 // Función para obtener el idioma actual y su etiqueta

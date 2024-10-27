@@ -1,9 +1,10 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Counter, compareObjects } from './utils/utils.js';
+import { Counter, compareObjects, replaceVariables } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
 import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
+import { sendcommandmc } from './features/Minecraftconfig.js';
 const socket = io();
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
@@ -157,44 +158,50 @@ async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
   console.log("results HandleAccionEvent",results)
   if (results.validResults.length >= 1 ) {
     results.validResults.forEach(result => {
-      processAction(result)
+      processAction(result,data)
     });
   }
 }
-function processAction(data) {
+function processAction(data,userdata) {
   console.log("procesar accion",data)
   if (data.Actions.length > 0) {
     data.Actions.forEach(action => {
-      Actionsprocessmanager(action)
+      Actionsprocessmanager(action,userdata)
     });
   }
 }
 const processActioncallbacks = {
-  minecraft: (data) => handleMinecraft(data),
-  tts: (data) => handletts(data),
+  minecraft: (data,userdata) => handleMinecraft(data,userdata),
+  tts: (data,userdata) => handletts(data,userdata),
 }
-async function Actionsprocessmanager(id) {
+async function Actionsprocessmanager(id,userdata) {
   console.log("accionesprocessmanager",id)
   const action = await ActionsManager.getDataById(id)
   console.log("accionesprocessmanager",action)
   if (action) {
     Object.keys(processActioncallbacks).forEach(key => {
       if (action[key]) {
-        processActioncallbacks[key](action[key])
+        processActioncallbacks[key](action[key],userdata)
       }
     });
   }
 }
-function handleMinecraft(data) {
+function handleMinecraft(data,userdata) {
   if (data?.check) {
     console.log("minecraft check",data)
+    const replacecommand = replaceVariables(data.command,userdata);
+    console.log("replacecommand",replacecommand)
+    sendcommandmc(replacecommand);
   } else {
     console.log("minecraft no check",data)
   }
 }
-function handletts(data) {
+function handletts(data,userdata) {
   if (data?.check) {
     console.log("tts check",data)
+    const replacecommand = replaceVariables(data.text,userdata);
+    console.log("replacecommand",replacecommand)
+    handleleermensaje(replacecommand);
   } else {
     console.log("tts no check",data)
   }

@@ -210,49 +210,62 @@ class CustomSelect extends HTMLElement {
 
 customElements.define('custom-select', CustomSelect);
 class UserProfile extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        
-        // Singleton instance
-        if (!UserProfile.instance) {
-            UserProfile.instance = this;
-            
-            this.state = {
-                connected: false,
-                username: '',
-                imageUrl: 'https://via.placeholder.com/100/1a1a2e',
-                language: 'es'
-            };
+  constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      
+      // Singleton instance
+      if (!UserProfile.instance) {
+          UserProfile.instance = this;
+          
+          this.state = {
+              connected: false,
+              username: '',
+              imageUrl: 'https://via.placeholder.com/100/1a1a2e',
+              language: 'es',
+              connectionStatus: 'offline' // nuevo: 'offline', 'online', 'away', 'busy'
+          };
 
-            this.translations = {
-                es: {
-                    connect: 'Conectar',
-                    disconnect: 'Desconectar',
-                    placeholder: 'Ingresa tu nombre'
-                },
-                en: {
-                    connect: 'Connect',
-                    disconnect: 'Disconnect',
-                    placeholder: 'Enter your name'
-                }
-            };
-            
-            this.loadFromLocalStorage();
-        }
+          this.translations = {
+              es: {
+                  connect: 'Conectar',
+                  disconnect: 'Desconectar',
+                  placeholder: 'Ingresa tu nombre',
+                  status: {
+                      offline: 'Desconectado',
+                      online: 'En línea',
+                      away: 'Ausente',
+                      busy: 'Ocupado'
+                  }
+              },
+              en: {
+                  connect: 'Connect',
+                  disconnect: 'Disconnect',
+                  placeholder: 'Enter your name',
+                  status: {
+                      offline: 'Offline',
+                      online: 'Online',
+                      away: 'Away',
+                      busy: 'Busy'
+                  }
+              }
+          };
+          
+          this.loadFromLocalStorage();
+      }
 
-        // Registro de instancias
-        if (!UserProfile.instances) {
-            UserProfile.instances = new Set();
-        }
-        UserProfile.instances.add(this);
+      // Registro de instancias
+      if (!UserProfile.instances) {
+          UserProfile.instances = new Set();
+      }
+      UserProfile.instances.add(this);
 
-        // Cada instancia mantiene sus propios listeners
-        this.activeListeners = new Set();
+      // Cada instancia mantiene sus propios listeners
+      this.activeListeners = new Set();
 
-        this.render();
-        return this;
-    }
+      this.render();
+      return this;
+  }
 
     static get observedAttributes() {
         return ['minimal'];
@@ -288,7 +301,32 @@ class UserProfile extends HTMLElement {
                     border-radius: 8px;
                     color: #fff;
                 }
+                 .status-indicator {
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    border: 2px solid #1a1a2e;
+                    transition: all 0.3s ease;
+                }
 
+                .status-indicator[data-status="offline"] {
+                    background-color: #808080;
+                }
+
+                .status-indicator[data-status="online"] {
+                    background-color: #4CAF50;
+                }
+
+                .status-indicator[data-status="away"] {
+                    background-color: #FFC107;
+                }
+
+                .status-indicator[data-status="busy"] {
+                    background-color: #f44336;
+                }
                 /* Estilos para modo minimal */
                 :host([minimal]) .container {
                     flex-direction: row;
@@ -311,6 +349,13 @@ class UserProfile extends HTMLElement {
                     width: 36px;
                     height: 36px;
                     border-width: 2px;
+                }
+                :host([minimal]) .status-indicator {
+                    width: 12px;
+                    height: 12px;
+                    bottom: 0;
+                    right: 0;
+                    border-width: 1px;
                 }
 
                 .profile-image:hover {
@@ -388,38 +433,47 @@ class UserProfile extends HTMLElement {
                 button.connected:hover {
                     background: linear-gradient(135deg, #f25672 0%, #d4405f 100%);
                 }
+            .profile-wrapper {
+                    position: relative;
+                    display: inline-block;
+                }
             </style>
         `;
     }
 
     render() {
-        const state = UserProfile.instance.state;
-        const currentTranslations = UserProfile.instance.translations[state.language];
-        
-        this.shadowRoot.innerHTML = `
-            ${this.getStyles()}
-            <div class="container ${state.connected ? 'connected' : ''}">
-                <img 
-                    class="profile-image" 
-                    src="${state.imageUrl}"
-                    alt="Profile"
-                />
-                <input 
-                    type="text"
-                    placeholder="${currentTranslations.placeholder}"
-                    value="${state.username}"
-                    ${state.connected ? 'disabled' : ''}
-                />
-                <button class="${state.connected ? 'connected' : ''}">
-                    ${state.connected ? currentTranslations.disconnect : currentTranslations.connect}
-                </button>
-            </div>
-        `;
+      const state = UserProfile.instance.state;
+      const currentTranslations = UserProfile.instance.translations[state.language];
+      
+      this.shadowRoot.innerHTML = `
+          ${this.getStyles()}
+          <div class="container ${state.connected ? 'connected' : ''}">
+              <div class="profile-wrapper">
+                  <img 
+                      class="profile-image" 
+                      src="${state.imageUrl}"
+                      alt="Profile"
+                  />
+                  <div 
+                      class="status-indicator" 
+                      data-status="${state.connectionStatus}"
+                      title="${currentTranslations.status[state.connectionStatus]}"
+                  ></div>
+              </div>
+              <input 
+                  type="text"
+                  placeholder="${currentTranslations.placeholder}"
+                  value="${state.username}"
+                  ${state.connected ? 'disabled' : ''}
+              />
+              <button class="${state.connected ? 'connected' : ''}">
+                  ${state.connected ? currentTranslations.disconnect : currentTranslations.connect}
+              </button>
+          </div>
+      `;
 
-        // Configurar listeners para cada instancia después de renderizar
-        this.setupEventListeners();
-    }
-
+      this.setupEventListeners();
+  }
     setupEventListeners() {
         // Limpia los listeners anteriores de esta instancia
         this.activeListeners.forEach(({ element, type, handler }) => {
@@ -462,29 +516,46 @@ class UserProfile extends HTMLElement {
         localStorage.setItem('userProfileState', JSON.stringify(this.state));
     }
 
+    setConnectionStatus(status) {
+      if (this !== UserProfile.instance) return;
+      
+      if (['offline', 'online', 'away', 'busy'].includes(status)) {
+          this.state.connectionStatus = status;
+          this.saveToLocalStorage();
+          UserProfile.updateAllInstances();
+          
+          this.dispatchEvent(new CustomEvent('connectionStatusChanged', { 
+              detail: { status: this.state.connectionStatus }
+          }));
+      }
+  }
     connect(username) {
-        if (this !== UserProfile.instance) return;
-        
-        this.state.connected = true;
-        this.state.username = username;
-        this.state.imageUrl = 'https://via.placeholder.com/100/4d7cff';
-        this.saveToLocalStorage();
-        UserProfile.updateAllInstances();
-        this.dispatchEvent(new CustomEvent('userConnected', { 
-            detail: { username: this.state.username }
-        }));
-    }
+      if (this !== UserProfile.instance) return;
+      
+      this.state.connected = true;
+      this.state.username = username;
+      this.state.imageUrl = 'https://via.placeholder.com/100/4d7cff';
+      this.state.connectionStatus = 'online'; // Automáticamente establece online al conectar
+      this.saveToLocalStorage();
+      UserProfile.updateAllInstances();
+      this.dispatchEvent(new CustomEvent('userConnected', { 
+          detail: { username: this.state.username }
+      }));
+  }
+
 
     disconnect() {
-        if (this !== UserProfile.instance) return;
-        
-        this.state.connected = false;
-        this.state.imageUrl = 'https://via.placeholder.com/100/1a1a2e';
-        this.state.username = '';
-        this.saveToLocalStorage();
-        UserProfile.updateAllInstances();
-        this.dispatchEvent(new CustomEvent('userDisconnected'));
-    }
+      if (this !== UserProfile.instance) return;
+      
+      this.state.connected = false;
+      this.state.imageUrl = 'https://via.placeholder.com/100/1a1a2e';
+      this.state.username = '';
+      this.state.connectionStatus = 'offline'; // Automáticamente establece offline al desconectar
+      this.saveToLocalStorage();
+      UserProfile.updateAllInstances();
+      this.dispatchEvent(new CustomEvent('userDisconnected'));
+  }
+
 
     setLanguage(lang) {
         if (this !== UserProfile.instance) return;
@@ -922,6 +993,18 @@ class ResponsiveNavSidebar extends HTMLElement {
       remove: 'Eliminar',
       select: 'Seleccionar',
       home: 'inicio',
+      addaction: 'Añadir acción',
+      addevent: 'Añadir evento',
+      actiontable: 'Tabla de acciones',
+      eventtable: 'Tabla de eventos',
+      voicesettings: 'Configuración de voz',
+      selectvoice: 'Seleccionar voz',
+      allowedusers: 'Usuarios permitidos',
+      commenttypes: 'Tipos de comentarios',
+      commenttypes1: 'cualquier comentario',
+      commenttypes2: 'comentarios que empiezan con punto (.)',
+      commenttypes3: 'comentarios que empiezan con barra (/)',
+      commenttypes4: 'comandos que empiezan con comando:',
     },
     en: {
       hello: 'Hello',
@@ -943,6 +1026,18 @@ class ResponsiveNavSidebar extends HTMLElement {
       remove: 'Remove',
       select: 'Select',
       home: 'home',
+      addaction: 'Add action',
+      addevent: 'Add event',
+      actiontable: 'Action table',
+      eventtable: 'Event table',
+      voicesettings: 'Voice settings',
+      selectvoice: 'Select voice',
+      allowedusers: 'Allowed users',
+      commenttypes: 'Comment types',
+      commenttypes1: 'Any comment',
+      commenttypes2: 'Comments starting with dot (.)',
+      commenttypes3: 'Comments starting with slash (/)',
+      commenttypes4: 'Comments starting with Command:',
     },
     fr: {
       hello: 'Bonjour',
@@ -953,17 +1048,29 @@ class ResponsiveNavSidebar extends HTMLElement {
       currentLang: 'Langue actuelle',
       selectedLanguage: 'Langue sélectionnée',
       configuration: 'Configuration',
-      config: 'configure',
+      config: 'configurer',
       confirm: 'Confirmer',
       cancel: 'Annuler',
       save: 'Enregistrer',
       close: 'Fermer',
       delete: 'Supprimer',
       add: 'Ajouter',
-      edit: 'Modifier',
+      edit: 'Modifier le',
       remove: 'Supprimer',
       select: 'Sélectionner',
-      home: 'home',
+      home: 'Accueil',
+      addaction: 'Ajouter action',
+      addevent: 'Ajouter événement',
+      actiontable: 'Tableau d\'actions',
+      eventtable: 'Tableau d\'événements',
+      voicesettings: 'Paramètres de la voix',
+      selectvoice: 'Sélectionner la voix',
+      allowedusers: 'Utilisateurs autorisés',
+      commenttypes: 'Types de commentaires',
+      commenttypes1: 'N\'importe quel commentaire',
+      commenttypes2: 'Commentaires commençant par un point (.)',
+      commenttypes3: 'Commentaires commençant par un barre (/)',
+      commenttypes4: 'Commentaires commençant par un commande :',
     }
   };
   

@@ -61,25 +61,27 @@
             </section>
               <section id="settings">
                 <h2><translate-text key="configuration"></translate-text></h2>
-                <div class="containerbox relative">
-                    <div id="MinecraftModalContainer"></div>
-
-                  </div>
                   <div class="containerbox relative">
-                      <h3>Tabla de Eventos
-                          <button id="EventsModalButton">Event Add</button>
+                      <h3><translate-text key="eventtable"></translate-text>
+                          <button id="EventsModalButton"><translate-text key="addevent"></translate-text></button>
                       </h3>
                       <custom-modal modal-type="form" id="EventsModal">
                         <div id="EventsModalContainer"></div>
                       </custom-modal>
                       <div id="table-containerEvent" class="dynamic-table1"></div>
-                    <h3>Tabla de Acciones
-                        <button id="ActionModalButton">Action Add</button>
+                    <h3><translate-text key="actiontable"></translate-text>
+                        <button id="ActionModalButton"><translate-text key="addaction"></translate-text></button>
                     </h3>
                     <custom-modal modal-type="form" id="ActionModal">
                       <div id="ActionModalContainer"></div>
                     </custom-modal>
                     <div id="table-containerAction" class="dynamic-table1"></div>
+                </div>
+                <div class="containerbox relative">
+                  <h3><translate-text key="minecraftPlugin"></translate-text></h3>
+                  <div id="MinecraftModalContainer"></div>
+                  <div id="chatbotconfig" class="grid grid-cols-2 gap-4"></div>
+
                 </div>
               </section>
               <section id="dashboard">
@@ -89,10 +91,9 @@
                     <label for="show-more" class="show-more-label"><span></span></label>
                 
                     <div class="flexbox gap-1">
-                      <div id="chatbotconfig" class="card grid"></div>
                       <div class="card grid">
                           <div class="card-header">
-                              <h2 class="card-title">Voice Settings</h2>
+                              <h2 class="card-title"><translate-text key="voicesettings"></translate-text></h2>
                           </div>
                           <div class="card-content">
                                   <!-- <input type="checkbox" id="voiceenabled" checked>
@@ -104,8 +105,8 @@
                 
                                     <div id="voiceSelectContainer" class="relative m-3 content-center">
                                       <label for="voiceSelect1">
-                                        <span>select voice</span>
-                                          <select id="voiceSelect1" class="select select-info browser-default" style="width: 100%;" aria-label="Select Voice">select voice</select>
+                                        <span><translate-text key="selectvoice"></translate-text></span>
+                                          <select id="voiceSelect1" class="select select-info browser-default" style="width: 100%;" aria-label="Select Voice"> <translate-text key="selectvoice"></translate-text></span></select>
                                           </label>
                                           <label for="audiolist">
                                         <audio id="audio"></audio>
@@ -153,7 +154,7 @@
                       </div>
                       <div class="card">
                           <div class="card-header">
-                              <h2 class="card-title">Allowed Users</h2>
+                              <h2 class="card-title"><translate-text key="allowedusers"></translate-text></h2>
                           </div>
                           <div class="card-content space-y-4 text-lg">
                               <div class="flex items-center">
@@ -213,7 +214,7 @@
                       </div>
                       <div class="card">
                           <div class="card-header">
-                              <h2 class="card-title">Comment Types</h2>
+                              <h2 class="card-title"><translate-text key="commenttypes"></translate-text></h2>
                           </div>
                           <div class="card-content space-y-4">
                               <label>Read...</label>
@@ -221,22 +222,22 @@
                                   <div class="flex items-center">
                                     <label for="any-comment">
                                         <input type="radio" name="comment-type" value="any-comment" id="any-comment" class="radio checked:bg-blue-300" checked>
-                                        <span>Any comment</span></label>
+                                        <span><translate-text key="commenttypes1"></translate-text></span></label>
                                   </div>
                                   <div class="flex items-center">
                                     <label for="dot-comment">
                                         <input type="radio" name="comment-type" value="dot-comment" id="dot-comment" class="radio checked:bg-blue-300">
-                                        <span>Comments starting with dot (.)</span></label>
+                                        <span><translate-text key="commenttypes2"></translate-text></span></label>
                                   </div>
                                   <div class="flex items-center">
                                     <label for="slash-comment">
                                         <input type="radio" name="comment-type" value="slash-comment" id="slash-comment" class="radio checked:bg-blue-300">
-                                        <span>Comments starting with slash (/)</span></label>
+                                        <span><translate-text key="commenttypes3"></translate-text></span></label>
                                   </div>
                                   <div class="flex items-center">
                                     <label for="command-comment">
                                       <input type="radio" name="comment-type" value="command-comment" id="command-comment" class="radio checked:bg-blue-300">
-                                      <span>Comments starting with Command:</span></label>
+                                      <span><translate-text key="commenttypes4"></translate-text></span></label>
                                   </div>
                               </div>
                               <div class="space-y-2">
@@ -451,15 +452,6 @@
             ${e.detail.label} (${e.detail.language})
           `;
         });
-
-        // Mostrar el idioma inicial
-        const initialLabel = selector1.getLanguageLabel();
-        const initialLanguage = selector1.getValue();
-        languageInfo.innerHTML = `
-          <translate-text key="selectedLanguage"></translate-text>: 
-          ${initialLabel} (${initialLanguage})
-        `;
-      
 
       // Función para obtener el idioma actual y su etiqueta
       function getCurrentLanguage(selectorId) {
