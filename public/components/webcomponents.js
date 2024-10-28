@@ -259,7 +259,18 @@ class UserProfile extends HTMLElement {
                       away: 'Absent',
                       busy: 'Occupé'
                   }
-              }
+              },
+              pt: {
+                  connect: 'Conectar',
+                  disconnect: 'Desconectar',
+                  placeholder: 'Insira seu nome',
+                  status: {
+                      offline: 'Offline',
+                      online: 'Online',
+                      away: 'Ausente',
+                      busy: 'Ocupado'
+                  }
+                },
           };
           
           this.loadFromLocalStorage();
@@ -983,8 +994,9 @@ class ResponsiveNavSidebar extends HTMLElement {
   }
   
   // Configuración global
-  TranslateText.currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
-  if (!localStorage.getItem('selectedLanguage')) localStorage.setItem('selectedLanguage','es');
+  const currentLanguage = localStorage.getItem('selectedLanguage') || navigator.language.split('-')[0] || navigator.userLanguage.split('-')[0] || 'es';
+  TranslateText.currentLanguage = currentLanguage;
+  if (!localStorage.getItem('selectedLanguage')) localStorage.setItem('selectedLanguage',currentLanguage);
   TranslateText.translations = {
     es: {
       hello: 'Hola',
