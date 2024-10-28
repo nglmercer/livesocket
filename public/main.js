@@ -210,7 +210,7 @@ const eventcontent = {
 }
 const splitfilterwords = (data) => {
   console.log("Callback 1 ejecutado:", data);
-  if (data.comment) {
+  if (data?.comment) {
     const comments = data.comment.match(/.{1,10}/g) || [];
     console.log("comments", comments);
     comments.forEach(comment => {
@@ -221,7 +221,7 @@ const splitfilterwords = (data) => {
 };
 const filterwordadd = (data) => {
   console.log("Callback 2 ejecutado:", data);
-  if (data.comment && data.comment.length > 6) {
+  if (data?.comment && data?.comment.length > 6) {
     addfilterword(data.comment);
   }
 }
