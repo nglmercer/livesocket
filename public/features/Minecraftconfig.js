@@ -86,10 +86,22 @@ const minecraftconfig = {
         this.reconnectAttempts = 0;
         this.ws = null;
     }
-  
+    setCookie(password) {
+      // Set cookie with secure attributes
+      const cookieValue = password || 'change_me';
+      const secure = window.location.protocol === 'https:' ? 'Secure;' : '';
+      const cookieString = 
+          'x-servertap-key=' + cookieValue + '; ' +
+          'SameSite=Strict; ' +
+          secure + 
+          'Path=/; ' +
+          'HttpOnly;';
+      
+      document.cookie = cookieString;
+  }
     connect(wsurl,password) {
         this.ws = new WebSocket(wsurl);
-        document.cookie = password ||"x-servertap-key=change_me";
+        this.setCookie(password);
   
         this.ws.onopen = () => {
             console.log('Opened connection');
