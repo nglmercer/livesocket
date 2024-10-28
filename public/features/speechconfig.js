@@ -40,7 +40,9 @@ console.log(ttsconfig);
 console.log(ttsdata);
 
 function getTTSdatastore() {
-    return localStorage.getItem('ttsdatastore') ? JSON.parse(localStorage.getItem('ttsdatastore')) : ttsdata;
+    const ttsdatastore = localStorage.getItem('ttsdatastore');
+    if (!ttsdatastore) localStorage.setItem('ttsdatastore', JSON.stringify(ttsdata));
+    return ttsdatastore ? JSON.parse(ttsdatastore) : ttsdata;
 }
 const callbackconfig = { callback: async (data,modifiedData) => {
     console.log("editcallback", data,modifiedData);
