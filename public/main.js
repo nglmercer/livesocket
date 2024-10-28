@@ -1,5 +1,5 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Counter, compareObjects, replaceVariables, logger } from './utils/utils.js';
+import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
 import { Replacetextoread } from './features/speechconfig.js';
 import { ActionsManager } from './features/Actions.js';
@@ -10,8 +10,23 @@ const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
 userProfile.setConnectionStatus('offline');
 if (userProfile.state.connected) {
+  const trackerMultiple = new UserInteractionTracker();
+  trackerMultiple.addInteractionListener(event => {
+    const interacted = trackerMultiple.getAllInteractionsByArray([
+      'click', 
+      'touchstart', 
+      'keydown',
+    ]);
+    
+    
+    if (interacted) {
+      console.log('Usuario ha interactuado se conectara');
+      joinRoom(userProfile.state.username);
+      trackerMultiple.destroy()
+    }
+  });
+  
     userProfile.setConnectionStatus('away');
-    joinRoom(userProfile.state.username);
 }
 // Escuchar eventos
 userProfile.addEventListener('userConnected', (e) => {
@@ -39,7 +54,33 @@ const counterfollow = new Counter(0, 1000);
 const countermember = new Counter(0, 1000);
 const newChatContainer = new ChatContainer('.chatcontainer', 500);
 const newGiftContainer = new ChatContainer('.giftcontainer', 500);
-const newEventsContainer = new ChatContainer('.eventscontainer', 200);    
+const newEventsContainer = new ChatContainer('.eventscontainer', 200); 
+const containerConfig = {
+  chat: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.chatcontainer', 500)
+  },
+  gift: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.giftcontainer', 500)
+  },
+  share: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.eventscontainer', 200)
+  },
+  like: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.eventscontainer', 200)
+  },
+  follow: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.eventscontainer', 200)
+  },
+  member: {
+    counter: new Counter(0, 1000),
+    container: new ChatContainer('.eventscontainer', 200)
+  }
+};   
 events.forEach(event => {
     socket.on(event, (data) => {
       Readtext(event, data);
@@ -168,60 +209,148 @@ newGiftContainer.addMessage(message2);
 newEventsContainer.addMessage(message3);
 const arrayevents = ["like", "gift", "chat"];
 
-function handlechat(data) {
-    const parsedchatdata = {
+const messageTemplates = {
+  chat: {
+    template: (data) => ({
       content: {
-        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
-        2: ["text", data.comment,"white"],
-        // 3: ["text", "!","gold"],
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', data.comment, 'white']
       },
-      comment: data.comment,
-    };
-    const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedchatdata);
-    newChatContainer.addMessage(newMessage);
-    console.log("chat", data);
-    showAlert('info', `${data.uniqueId}: ${data.comment}`, 5000);
-}
-function handlegift(data) {
-    console.log("gift", data);
-    const parsedgiftdata = {
+      comment: data.comment
+    }),
+    alert: (data) => `${data.uniqueId}: ${data.comment}`
+  },
+
+  gift: {
+    template: (data) => ({
       content: {
-        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
-        2: ["text", "gifted","white"],
-        3: ["number", data.diamondCount,"gold"],
-        4: ["text", data.giftName,"gold"],
-        5: ["image", data.giftPictureUrl],
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', 'gifted', 'white'],
+        3: ['number', data.diamondCount, 'gold'],
+        4: ['text', data.giftName, 'gold'],
+        5: ['image', data.giftPictureUrl]
       }
-    }
-    const newMessage = new ChatMessage( `msg${countergift.increment()}`, data.profilePictureUrl, parsedgiftdata);
-    newGiftContainer.addMessage(newMessage);
-    showAlert('info', `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`, 5000);
+    }),
+    alert: (data) => `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`
+  },
+
+  member: {
+    template: (data) => ({
+      content: {
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', 'welcome', 'gold']
+      },
+      comment: ''
+    }),
+    alert: null
+  },
+
+  like: {
+    template: (data) => ({
+      content: {
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', data.likeCount, 'gold'],
+        3: ['text', 'likes', 'white']
+      },
+      comment: ''
+    }),
+    alert: null
+  },
+
+  follow: {
+    template: (data) => ({
+      content: {
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', 'followed', 'gold']
+      },
+      comment: ''
+    }),
+    alert: null
+  },
+
+  share: {
+    template: (data) => ({
+      content: {
+        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
+        2: ['text', 'shared', 'gold']
+      },
+      comment: ''
+    }),
+    alert: null
   }
-function handlemember(data) {
-    //eventype member = welcome
-    const parsedmemberdata = {
-      content: {
-        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
-        2: ["text", 'welcome',"gold"],
-        // 3: ["text", "!","gold"],
+};
+class MessageHandler {
+  constructor(containerConfig, messageTemplates) {
+    this.containerConfig = containerConfig;
+    this.messageTemplates = messageTemplates;
+    this.translations = {
+      es: {
+        gifted: 'regaló',
+        welcome: 'bienvenido',
+        likes: 'me gusta',
+        followed: 'siguió',
+        shared: 'compartió'
       },
-      comment: '',
+      en: {
+        gifted: 'gifted',
+        welcome: 'welcome',
+        likes: 'likes',
+        followed: 'followed',
+        shared: 'shared'
+      }
     };
-    const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedmemberdata);
-    newEventsContainer.addMessage(newMessage);
+    this.currentLang = 'es';
+  }
+
+  setLanguage(lang) {
+    if (this.translations[lang]) {
+      this.currentLang = lang;
+    }
+  }
+
+  getTranslation(key) {
+    return this.translations[this.currentLang]?.[key] || key;
+  }
+
+  handleMessage(type, data) {
+    const config = this.containerConfig[type];
+    const template = this.messageTemplates[type];
+
+    if (!config || !template) {
+      console.error(`Configuration not found for message type: ${type}`);
+      return;
+    }
+
+    const parsedData = template.template(data);
+    const counter = config.counter;
+    const container = config.container;
+
+    const newMessage = new ChatMessage(
+      `msg${counter.increment()}`,
+      data.profilePictureUrl,
+      parsedData
+    );
+
+    container.addMessage(newMessage);
+    console.log(type, data);
+
+    if (template.alert) {
+      showAlert('info', template.alert(data), 5000);
+    }
+  }
 }
-function handlelike(data) {
-    const parsedlikedata = {
-      content: {
-        1: ["url", `http://tiktok.com/@${data.uniqueId}`,"blue",`${data.nickname}`],
-        2: ["text", data.likeCount,"gold"],
-        3: ["text", "likes","white"],
-      },
-      comment: '',
-    };
-    const newMessage = new ChatMessage( `msg${counterchat.increment()}`, data.profilePictureUrl, parsedlikedata);
-    newEventsContainer.addMessage(newMessage);
-}
+
+// Crear instancia del manejador de mensajes
+const messageHandler = new MessageHandler(containerConfig, messageTemplates);
+messageHandler.setLanguage('es');
+// Funciones de manejo específicas
+const handlechat = (data) => messageHandler.handleMessage('chat', data);
+const handlegift = (data) => messageHandler.handleMessage('gift', data);
+const handlemember = (data) => messageHandler.handleMessage('member', data);
+const handlelike = (data) => messageHandler.handleMessage('like', data);
+const handleFollow = (data) => messageHandler.handleMessage('follow', data);
+const handleShare = (data) => messageHandler.handleMessage('share', data);
+
 function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome
   if (eventType === 'member') eventType = 'welcome';

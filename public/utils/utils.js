@@ -525,5 +525,143 @@ console.log(tracker.comboCounters);
 
 // Total acumulado de todos los combos (likes + comentarios)
 console.log('Total de combos acumulados:', tracker.getTotalCombos()); // 12 */
-export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects, logger };
+class UserInteractionTracker {
+  constructor(options = {}) {
+    // Estado de interacción general
+    this.hasInteracted = false;
+
+    // Mapa para seguir tipos específicos de interacciones
+    this.interactions = new Map();
+
+    // Lista de eventos que consideramos como interacción
+    this.interactionEvents = [
+      'click',
+      'touchstart',
+      'keydown',
+      'mousemove',
+      'scroll',
+      'input',
+    ];
+
+    // Callbacks almacenados
+    this.callbacks = new Set();
+
+    // Opciones de configuración
+    this.options = {
+      autoDestroy: false,  // Destruir automáticamente después de la primera interacción
+      destroyCondition: null,  // Función personalizada para determinar cuándo destruir
+      ...options
+    };
+
+    // Bind del método para mantener el contexto
+    this._handleInteraction = this._handleInteraction.bind(this);
+
+    // Inicializar listeners
+    this.initializeTracking();
+  }
+
+  initializeTracking() {
+    // Agregar listeners para cada tipo de evento
+    this.interactionEvents.forEach(eventType => {
+      document.addEventListener(eventType, this._handleInteraction);
+      this.interactions.set(eventType, false);
+    });
+  }
+
+  _handleInteraction(event) {
+    // Actualizar estado general
+    this.hasInteracted = true;
+
+    // Actualizar estado específico del tipo de evento
+    this.interactions.set(event.type, true);
+
+    // Disparar evento personalizado
+    this._dispatchInteractionEvent(event.type);
+
+    // Verificar si debemos destruir los listeners
+    if (this.shouldDestroy()) {
+      this.destroy();
+    }
+  }
+
+  shouldDestroy() {
+    if (this.options.destroyCondition) {
+      return this.options.destroyCondition(this.getAllInteractions());
+    }
+    
+    if (this.options.autoDestroy) {
+      return this.hasInteracted;
+    }
+
+    return false;
+  }
+
+  _dispatchInteractionEvent(type) {
+    const event = new CustomEvent('userInteraction', {
+      detail: {
+        type,
+        timestamp: new Date().getTime(),
+        interactions: this.getAllInteractions()
+      },
+    });
+    document.dispatchEvent(event);
+  }
+
+  hasUserInteracted() {
+    return this.hasInteracted;
+  }
+
+  hasSpecificInteraction(type) {
+    return this.interactions.get(type) || false;
+  }
+
+  getAllInteractions() {
+    return Object.fromEntries(this.interactions);
+  }
+
+  getAllInteractionsByArray(array) {
+    return array.some(eventType => this.interactions.get(eventType));
+  }
+
+  addInteractionListener(callback) {
+    document.addEventListener('userInteraction', callback);
+    this.callbacks.add(callback);
+  }
+
+  removeInteractionListener(callback) {
+    document.removeEventListener('userInteraction', callback);
+    this.callbacks.delete(callback);
+  }
+
+  destroy() {
+    // Eliminar todos los event listeners del documento
+    this.interactionEvents.forEach(eventType => {
+      document.removeEventListener(eventType, this._handleInteraction);
+    });
+
+    // Eliminar todos los callbacks registrados
+    this.callbacks.forEach(callback => {
+      document.removeEventListener('userInteraction', callback);
+    });
+    
+    this.callbacks.clear();
+    
+    // Disparar un evento final de destrucción
+    const destroyEvent = new CustomEvent('trackerDestroyed', {
+      detail: {
+        finalState: this.getAllInteractions(),
+        timestamp: new Date().getTime()
+      }
+    });
+    document.dispatchEvent(destroyEvent);
+  }
+
+  reset() {
+    this.hasInteracted = false;
+    this.interactionEvents.forEach(eventType => {
+      this.interactions.set(eventType, false);
+    });
+  }
+}
+export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects, logger, UserInteractionTracker };
   
