@@ -4,6 +4,7 @@ import { databases, IndexedDBManager, DBObserver } from '../database/indexdb.js'
 import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
 import showAlert from '../components/alerts.js';
 import { ActionsManager } from './Actions.js'
+import { getTranslation, translations } from '../translations.js';
 const ObserverEvents = new DBObserver();
 const EventsManager = new IndexedDBManager(databases.eventsDB,ObserverEvents);
 async function EventsManagermap(data) {
@@ -114,8 +115,8 @@ const deletecallback = async (data,modifiedData) => {
 }
 const callbackconfig = { 
   callback: editcallback, deletecallback:  deletecallback,
-  callbacktext: 'Guardar cambios',
-  deletecallbacktext: 'cerrar',
+  callbacktext: getTranslation('savechanges'),
+  deletecallbacktext: getTranslation('close'),
 };
 const testdata = {
   nombre: "coloca tu nombre",

@@ -2,6 +2,7 @@ import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { databases, IndexedDBManager, DBObserver } from '../database/indexdb.js'
 import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
 import showAlert from '../components/alerts.js';
+import { getTranslation, translations } from '../translations.js';
 const ObserverActions = new DBObserver();
 const ActionsManager = new IndexedDBManager(databases.ActionsDB,ObserverActions);
 
@@ -94,8 +95,8 @@ const deletecallback =  async (data,modifiedData) => {
 const callbackconfig = {
   callback: editcallback,
   deletecallback:  deletecallback,
-  callbacktext: 'Guardar cambios',
-  deletecallbacktext: 'cerrar',
+  callbacktext: getTranslation('savechanges'),
+  deletecallbacktext: getTranslation('close'),
 };
 const Aformelement = new EditModal('#ActionModalContainer',callbackconfig,actionsconfig);
 
@@ -123,8 +124,8 @@ const callbacktabledelete = async (index,data,modifiedData) => {
 const tableconfigcallback = {
   callback: callbacktable,
   deletecallback: callbacktabledelete,
-  callbacktext: 'Guardar cambios',
-  deletecallbacktext: 'eliminar',
+  callbacktext: getTranslation('savechanges'),
+  deletecallbacktext: getTranslation('delete'),
 }
 const table = new DynamicTable('#table-containerAction',tableconfigcallback,actionsconfig);
 (async () => {

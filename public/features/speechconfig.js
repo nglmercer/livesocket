@@ -2,6 +2,7 @@ import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { showAlert } from '../components/message.js';
 import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
+import { getTranslation, translations } from '../translations.js';
 const keys = [
     { key: 'chat', text: "uniqueId dice comment", check: true },
     { key: 'gift', text: "uniqueId regalo xrepeatcount giftName", check: true },
@@ -18,7 +19,7 @@ const createTTSConfig = (labelText,sumaryText='texto a leer') => ({
     label: sumaryText,
     check: {
         class: 'filled-in flex-reverse-column',
-        label: 'activar',
+        label: getTranslation('activate'),
         type: 'checkbox',
         returnType: 'boolean',
     },
@@ -31,7 +32,7 @@ const createTTSConfig = (labelText,sumaryText='texto a leer') => ({
 });
 
 const { ttsconfig, ttsdata } = keys.reduce((acc, { key, text, check }) => {
-    acc.ttsconfig[key] = createTTSConfig('texto a leer',`config ${key}`);
+    acc.ttsconfig[key] = createTTSConfig(getTranslation('texttoread'),`${getTranslation('config')} ${getTranslation(key)}`);
     acc.ttsdata[key] = { text, check };
     return acc;
 }, { ttsconfig: {}, ttsdata: {} });
@@ -69,7 +70,7 @@ function Replacetextoread(eventType = 'chat',data) {
     if (!configtts[eventType] || !configtts[eventType].check) return;
     const textoread = replaceVariables(configtts[eventType].text, data);
     logger.log('speechchat',configtts,textoread,configtts[eventType].text)
-    if (existwordinArray(textoread)) { showAlert('info',`filter word ${textoread} `); return; }
+    if (existwordinArray(textoread)) { showAlert('info',`${getTranslation('filterword')} ${textoread} `); return; }
     handleleermensaje(textoread);
 }
 class ArrayStorageManager {
@@ -138,8 +139,8 @@ class ArrayStorageManager {
                 <h2 class="modal-title"><translate-text key="${this.manager.storageKey}"></translate-text>
                 </h2>
                 <div class="input-container">
-                    <input type="text" id="itemInput" placeholder="Ingresa un elemento...">
-                    <button id="addButton" class="open-modal-btn">Agregar</button>
+                    <input type="text" id="itemInput" placeholder="${getTranslation('addelement')}">
+                    <button id="addButton" class="open-modal-btn">${getTranslation('add')}</button>
                 </div>
                 <div id="errorMessage" class="error-message">
                     El texto debe tener al menos 2 caracteres

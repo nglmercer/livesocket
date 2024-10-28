@@ -1,3 +1,4 @@
+import { getTranslation, translations } from '../translations.js';
 class DynamicTable {
   constructor(containerSelector, callback, config = {}) {
       this.config = config;
@@ -37,7 +38,7 @@ class DynamicTable {
     });
 
     const th = document.createElement('th');
-    th.textContent = 'Acciones';
+    th.textContent = getTranslation('Actions');
     headerRow.appendChild(th);
   }
 
@@ -188,8 +189,8 @@ class DynamicRow {
     this.originalData = { ...data }; // Guardamos los datos originales
     this.modifiedData = JSON.parse(JSON.stringify(data)); // Inicializamos modifiedData con una copia profunda de originalData
     this.deletecallback = callback.deletecallback;
-    this.deletecallbacktext = callback.deletecallbacktext || 'Eliminar';
-    this.callbacktext = callback.callbacktext || 'Guardar cambios';
+    this.deletecallbacktext = callback.deletecallbacktext || getTranslation('delete');
+    this.callbacktext = callback.callbacktext || getTranslation('savechanges');
   }
 
   render() {
@@ -213,7 +214,7 @@ class DynamicRow {
         }
         const summary = document.createElement('summary');
         //console.log("typeConfig summary", typeConfig, key);
-        summary.textContent = typeConfig.label || 'Mostrar ' + key;
+        summary.textContent = typeConfig.label || getTranslation('show') + getTranslation(key);
 
         objectContainer.appendChild(summary);
 
@@ -247,14 +248,14 @@ class DynamicRow {
 
     const actionCell = row.insertCell(cellIndex);
     const actionButton = document.createElement('button');
-    actionButton.textContent = this.callbacktext || 'Guardar cambios';
+    actionButton.textContent = this.callbacktext || getTranslation('savechanges');
     actionButton.className = 'savebutton custombutton';
     actionButton.addEventListener('click', () => {
       this.callback(row.rowIndex, this.originalData, this.modifiedData);
     });
     if (this.deletecallback) {
       const deleteButton = document.createElement('button');
-      deleteButton.textContent = this.deletecallbacktext || 'Eliminar';
+      deleteButton.textContent = this.deletecallbacktext || getTranslation('delete');
       deleteButton.className = 'deletebutton custombutton';
       deleteButton.addEventListener('click', () => {
         this.deletecallback(row.rowIndex, this.originalData, this.modifiedData);
@@ -286,7 +287,7 @@ class DynamicRow {
         const summary = document.createElement('summary');
         //console.log("typeConfig summary", typeConfig, key);
 
-        summary.textContent = typeConfig.label || 'Mostrar ' + key;
+        summary.textContent = typeConfig.label || getTranslation('show') + getTranslation(key);
 
         objectContainer.appendChild(summary);
 
@@ -330,7 +331,7 @@ class DynamicRow {
     actionContainer.classList.add('action-container');
 
     const saveButton = document.createElement('button');
-    saveButton.textContent  = this.callbacktext || 'Guardar cambios';
+    saveButton.textContent  = this.callbacktext || getTranslation('savechanges');
     
     saveButton.className = 'savebutton custombutton';
     saveButton.addEventListener('click', () => {
@@ -563,7 +564,8 @@ class DynamicRow {
     const inputElement = document.createElement('input');
     inputElement.type = 'number';
     inputElement.value = value;
-    inputElement.placeholder = key + ' ' + subKey;
+    const subkeylabel = subKey ? subKey : inputElement.type
+    inputElement.placeholder = key + ' ' + subkeylabel ;
 
     inputElement.addEventListener('input', () => {
       const returnValue = Number(inputElement.value);
@@ -577,7 +579,8 @@ class DynamicRow {
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
     inputElement.value = value || '';
-    inputElement.placeholder = key + ' ' + subKey;
+    const subkeylabel = subKey ? subKey : inputElement.type
+    inputElement.placeholder = key + ' ' +subkeylabel;
 
     inputElement.addEventListener('input', () => {
       const returnValue = inputElement.value;
@@ -590,7 +593,8 @@ class DynamicRow {
     const inputElement = document.createElement('textarea');
     inputElement.value = value || '';
     inputElement.autocomplete = 'on';
-    inputElement.placeholder = key + ' ' + subKey;
+    const subkeylabel = subKey ? subKey : inputElement.type
+    inputElement.placeholder = key + ' ' +subkeylabel;
     // console.log("createtexareaElement", key, subKey, value);
     inputElement.cols = 50;
     inputElement.addEventListener('input', () => {

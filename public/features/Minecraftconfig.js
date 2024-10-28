@@ -1,24 +1,29 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
+import { getTranslation, translations } from '../translations.js';
 const minecraftconfig = {
     ip: {
       class: 'input-default',
       type: 'text',
       returnType: 'string',
+      label: 'IP',
     },
     port: {
       class: 'input-default',
       type: 'number',
       returnType: 'number',
+      label: 'Puerto',
     },
     username: {
       class: 'input-default',
       type: 'text',
       returnType: 'string',
+      label: 'Usuario',
     },
     password: {
       class: 'input-default',
       type: 'password',
       returnType: 'string',
+      label: 'Contraseña',
     }
   }
   const minecraftdata = {
@@ -38,8 +43,8 @@ const minecraftconfig = {
     const callbackconfig = {
       callback: minecraftcallback,
       deletecallback:  deletecallback,
-      callbacktext: 'Conectar',
-      deletecallbacktext: 'cerrar',
+      callbacktext: getTranslation('connect'),
+      deletecallbacktext: getTranslation('close'),
     }
     const Aformelement = new EditModal('#MinecraftModalContainer',callbackconfig,minecraftconfig);
   if (localStorage.getItem("MinecraftPluginServer")) {

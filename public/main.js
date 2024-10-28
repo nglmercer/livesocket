@@ -1,7 +1,8 @@
-import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
 import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker } from './utils/utils.js';
-import { handleleermensaje } from './audio/tts.js';
+import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
 import { Replacetextoread, addfilterword } from './features/speechconfig.js';
+import { handleleermensaje } from './audio/tts.js';
+import { getTranslation, translations } from './translations.js';
 import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
@@ -170,9 +171,9 @@ function getAvatarUrl(avatarData, preferredSize = 'large') {
 }
 const textcontent = {
     content: {
-      1: ["text", "nombre de usuario = ","white"],
-      2: ["text", "uniqueId","gold"],
-      3: ["text", "comentario = ","white"],
+      1: ["text", getTranslation('username'),"white"],
+      2: ["text", "uniqueId","silver"],
+      3: ["text", "comentario = ","gold"],
       4: ["text", "comment","gold"],
       // 4: ["url", "https://example.com", "blue", "Click para ir a mi perfil"]
   
@@ -186,9 +187,9 @@ const textcontent = {
   }
 const numbercontent = {
   content: {
-    1: ["text", "nombre de usuario = ","white"],
-    2: ["text", "uniqueId","gold"],
-    3: ["number", 1,"white"],
+    1: ["text", getTranslation('username'),"white"],
+    2: ["text", "uniqueId","silver"],
+    3: ["number", 1,"gold"],
     4: ["text", "= repeatCount","gold"],
     5: ["text", "giftname = rose","cyan"],
   },
@@ -200,8 +201,7 @@ const numbercontent = {
 const eventcontent = {
   content: {
     1: ["text", "UniqueId","white"],
-    2: ["text", "te","white"],
-    3: ["text", "sigue!","yellow"],
+    2: ["text", getTranslation('followed'),"yellow"],
   },
   data: {
     number: 123,
@@ -310,23 +310,8 @@ class MessageHandler {
   constructor(containerConfig, messageTemplates) {
     this.containerConfig = containerConfig;
     this.messageTemplates = messageTemplates;
-    this.translations = {
-      es: {
-        gifted: 'regaló',
-        welcome: 'bienvenido',
-        likes: 'me gusta',
-        followed: 'siguió',
-        shared: 'compartió'
-      },
-      en: {
-        gifted: 'gifted',
-        welcome: 'welcome',
-        likes: 'likes',
-        followed: 'followed',
-        shared: 'shared'
-      }
-    };
-    this.currentLang = 'es';
+    this.translations = translations;
+    this.currentLang = localStorage.getItem('selectedLanguage') || 'es';
   }
 
   setLanguage(lang) {

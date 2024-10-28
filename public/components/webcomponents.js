@@ -858,7 +858,8 @@ class ResponsiveNavSidebar extends HTMLElement {
     static languageLabels = {
       es: 'Español',
       en: 'English',
-      fr: 'Français'
+      fr: 'Français',
+      pt: 'Português',
     };
   
     constructor() {
@@ -983,6 +984,7 @@ class ResponsiveNavSidebar extends HTMLElement {
   
   // Configuración global
   TranslateText.currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
+  if (!localStorage.getItem('selectedLanguage')) localStorage.setItem('selectedLanguage','es');
   TranslateText.translations = {
     es: {
       hello: 'Hola',
@@ -1079,7 +1081,47 @@ class ResponsiveNavSidebar extends HTMLElement {
       commenttypes3: 'Commentaires commençant par un barre (/)',
       commenttypes4: 'Commentaires commençant par un commande :',
       filterwords: 'Filtrer les mots',
-    }
+    },
+    pt: {
+      show: 'Mostrar',
+      activate: 'ativar',
+      texttoread: 'texto a ler',
+      addelement:"Insira um elemento...",
+      connect: 'Conectar',
+      close: 'Fechar',
+      selectlang: 'Selecionar idioma',
+      currentLang: 'Idioma atual',
+      selectedLanguage: 'Idioma selecionado',
+      configuration: 'Configuração',
+      config: 'configuração',
+      confirm: 'Confirmar',
+      cancel: 'Cancelar',
+      savechanges: 'Salvar alterações',
+      save: 'Salvar',
+      close: 'Fechar',
+      delete: 'Excluir',
+      add: 'Adicionar',
+      edit: 'Editar',
+      remove: 'Remover',
+      select: 'Selecionar',
+      home: 'home',
+      Actions: 'Acções',
+      Events: 'Eventos',
+      addaction: 'Adicionar ação',
+      addevent: 'Adicionar evento',
+      actiontable: 'Tabela de ações',
+      eventtable: 'Tabela de eventos',
+      voicesettings: 'Configurações de voz',
+      selectvoice: 'Selecionar voz',
+      allowedusers: 'Usuários permitidos',
+      commenttypes: 'Tipos de comentários',
+      commenttypes1: 'Qualquer comentário',
+      commenttypes2: 'Comentários que começam com ponto (.)',
+      commenttypes3: 'Comentários que começam com barra (/)',
+      commenttypes4: 'Comentários que começam com comando:',
+      filterwords: 'Filtrar palavras',
+    },
+    
   };
   
   // Registro de los componentes
