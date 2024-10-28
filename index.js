@@ -11,9 +11,9 @@ const io = new Server(server);
 
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
-});
+// app.get('/', (req, res) => {
+//     res.sendFile(__dirname + '/public/index.html');
+// });
 
 // Mapa para guardar las instancias de TikTokLiveControl por sala
 const Livescreated = new Map();
