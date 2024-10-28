@@ -75,7 +75,7 @@ class TiktokLiveControl {
             this.isConnected = true;
             this.initializeEventHandlers();
             this.state = state;
-            if (socket) {socket.emit('connected',existingConnection.getState())}
+            if (socket) {socket.emit('connected',this.getState())}
             return state;
         } catch (err) {
             console.error('Failed to connect', this.uniqueId, err);
@@ -87,7 +87,7 @@ class TiktokLiveControl {
         }
     }
     getState() {
-        return this.state ;
+        return this.state;
     }
     initializeEventHandlers() {
         LiveEvents.forEach(event => {
