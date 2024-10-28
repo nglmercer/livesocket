@@ -4,13 +4,13 @@ import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 import { getTranslation, translations } from '../translations.js';
 const keys = [
-    { key: 'chat', text: "uniqueId dice comment", check: true },
-    { key: 'gift', text: "uniqueId regalo xrepeatcount giftName", check: true },
-    { key: 'follow', text: "uniqueId te ah seguido", check: true },
-    { key: 'like', text: "uniqueId le ah dado like", check: false },
-    { key: 'share', text: "uniqueId ah compartido", check: false },
-    { key: 'subscribe', text: "uniqueId se ah suscrito", check: true },
-    { key: 'welcome', text: "bienvenido uniqueId", check: false }
+    { key: 'chat', text: `uniqueId ${getTranslation('dice')} comment`, check: true },
+    { key: 'gift', text:  `uniqueId ${getTranslation('regalo')} repeatcount giftName`, check: true },
+    { key: 'follow', text: `uniqueId ${getTranslation('te ah seguido')}`, check: true },
+    { key: 'like', text: `uniqueId ${getTranslation('le ah dado like')}`, check: false },
+    { key: 'share', text: `uniqueId ${getTranslation('ah compartido')}`, check: false },
+    { key: 'subscribe', text: `uniqueId ${getTranslation('se ah suscrito')}`, check: true },
+    { key: 'welcome', text:  `uniqueId ${getTranslation('bienvenido')}`, check: false }
 ];
 
 const createTTSConfig = (labelText,sumaryText='texto a leer') => ({

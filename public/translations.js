@@ -51,6 +51,13 @@ const translations = {
       password: 'contraseña',
       ip: 'ip',
       port: 'puerto',
+      dice: 'dice',
+      regalo: 'regalo',
+      te_ah_seguido: 'te ah seguido',
+      le_ah_dado_like: 'le ah dado like',
+      ah_compartido: 'ah compartido',
+      se_ah_suscrito: 'se ah suscrito',
+      bienvenido: 'bienvenido',
     },
     en: {
       show: 'Show',
@@ -104,6 +111,13 @@ const translations = {
       password: 'password',
       ip: 'ip',
       port: 'port',
+      dice: 'say',
+      regalo: 'gifted',
+      te_ah_seguido: 'followed',
+      le_ah_dado_like: 'liked',
+      ah_compartido: 'shared',
+      se_ah_suscrito: 'subscribed',
+      bienvenido: 'joined',
     },
     fr: {
       show: 'Afficher',
@@ -157,6 +171,13 @@ const translations = {
       password: 'password',
       ip: 'ip',
       port: 'port',
+      dice: 'dit',
+      regalo: 'cadeau',
+      te_ah_seguido: 'je tai suivi',
+      le_ah_dado_like: 'a aimé',
+      ah_compartido: 'oh partagé',
+      se_ah_suscrito: 'abonné',
+      bienvenido: 'accueillir',
     },
     pt: {
       show: 'Mostrar',
@@ -210,10 +231,19 @@ const translations = {
       password: 'senha',
       ip: 'ip',
       port: 'porta',
+      dice: 'diz',
+      regalo: 'presenteie',
+      te_ah_seguido: 'segui você',
+      le_ah_dado_like: 'ele gostou',
+      ah_compartido: 'ah, compartilhei',
+      se_ah_suscrito: 'se inscreveu',
+      bienvenido: 'bem-vindo',
     }
   };
   function getTranslation(key,lang=localStorage.getItem('selectedLanguage')) {
-    if (key.includes(' ')) key = key.replace(' ','_');
+    // if (key.includes(' ')) key = key.replace(' ','_');
+    // lo anterior solo reemplaza el primero espacio por _ y no todos para que reemplaze todos seria:
+    if (key.includes(' ')) key = key.replace(/ /g,'_');
     return translations[lang]?.[key] || key;
   }
 export { translations, getTranslation };

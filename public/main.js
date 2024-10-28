@@ -101,8 +101,8 @@ events.forEach(event => {
                 break;
             case 'like':
                 handlelike(data);
-                data.likeCount = EvaluerLikes.addLike(data)
-                console.log("likecount",data.likeCount) 
+                // object entry o map para modificar data.likeCount para que sea igual al valor de EvaluerLikes.addLike(data)
+                Object.assign(data, { likeCount: EvaluerLikes.addLike(data) });
                 HandleAccionEvent(event,data, 'isInRange')
                 break;
             case 'follow':
@@ -130,7 +130,7 @@ events.forEach(event => {
                 break;
             default:
                 HandleAccionEvent(event,data) 
-                console.log(event, data);
+                //console.log(event, data);
                 //showAlert('success', `Event ${event}`);
                 break;  
         }

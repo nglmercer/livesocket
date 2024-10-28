@@ -40,7 +40,7 @@ class TiktokLiveControl {
                 timeout: 10000
             },
         });
-        this.isConnected = null;
+        this.isConnected = false;
         this.options = options;
         this.state = {}
     }
@@ -140,6 +140,8 @@ async function getOrCreateLiveConnection(uniqueId,socket) {
     try {
         await newConnection.connect(socket);
         Livescreated.set(normalizedId, newConnection);
+        // set isconnected to true
+        newConnection.isConnected = true;
         return newConnection;
     } catch (err) {
         throw new Error(`Failed to create new connection for ${normalizedId}: ${err.message}`);
