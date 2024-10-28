@@ -1,4 +1,4 @@
-import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker } from './utils/utils.js';
+import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker, EvaluerLikes } from './utils/utils.js';
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
 import { Replacetextoread, addfilterword } from './features/speechconfig.js';
 import { handleleermensaje } from './audio/tts.js';
@@ -101,7 +101,9 @@ events.forEach(event => {
                 break;
             case 'like':
                 handlelike(data);
-                HandleAccionEvent(event,data)
+                data.likeCount = EvaluerLikes.addLike(data)
+                console.log("likecount",data.likeCount) 
+                HandleAccionEvent(event,data, 'isInRange')
                 break;
             case 'follow':
                 handleFollow(data);

@@ -663,5 +663,5 @@ class UserInteractionTracker {
     });
   }
 }
-export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects, logger, UserInteractionTracker };
+export { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects, logger, UserInteractionTracker, EvaluerLikes };
   
