@@ -68,22 +68,26 @@ class TiktokLiveControl {
         return uniqueId.length >= 2 && /^[a-zA-Z0-9._]+$/.test(uniqueId);
     }
 
-    async connect() {
+    async connect(socket) {
         try {
             const state = await this.tiktokLiveConnection.connect();
             console.log(`Connected to roomId ${state.roomId}`);
             this.isConnected = true;
             this.initializeEventHandlers();
             this.state = state;
+            if (socket) {socket.emit('connected',existingConnection.getState())}
             return state;
         } catch (err) {
             console.error('Failed to connect', this.uniqueId, err);
             this.isConnected = false;
-            return err;
+            const errorMessage = err.message || err.toString();
+            console.log(errorMessage);
+            if (socket) {socket.emit('streamEnd',errorMessage)}
+            return errorMessage;
         }
     }
     getState() {
-        return this.state;
+        return this.state ;
     }
     initializeEventHandlers() {
         LiveEvents.forEach(event => {
@@ -117,13 +121,12 @@ async function getOrCreateLiveConnection(uniqueId,socket) {
         // Si existe pero no está conectada, reconectar
         if (!existingConnection.isConnected) {
             try {
-                existingConnection.connect();
-                if (socket) {socket.emit('connected',existingConnection.getState())}
+                existingConnection.connect(socket);
             } catch (err) {
                 throw new Error(`Failed to reconnect to ${normalizedId}: ${err.message}`);
             }
         }
-        if (socket) {socket.emit('connected',existingConnection.getState())}
+        if (socket && existingConnection.isConnected) {socket.emit('connected',existingConnection.getState())}
         return existingConnection;
     }
 
@@ -135,8 +138,7 @@ async function getOrCreateLiveConnection(uniqueId,socket) {
     // Crear nueva instancia
     const newConnection = new TiktokLiveControl(normalizedId);
     try {
-        await newConnection.connect();
-        if (socket) {socket.emit('connected',newConnection.getState())}
+        await newConnection.connect(socket);
         Livescreated.set(normalizedId, newConnection);
         return newConnection;
     } catch (err) {

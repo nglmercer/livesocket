@@ -987,9 +987,7 @@ class ResponsiveNavSidebar extends HTMLElement {
     es: {
       hello: 'Hola',
       world: 'Mundo',
-      select1: 'Selector 1',
-      select2: 'Selector 2',
-      select3: 'Selector 3',
+      selectlang: 'Seleccionar idioma',
       currentLang: 'Idioma actual',
       selectedLanguage: 'Idioma seleccionado',
       config: 'configuracion',
@@ -1016,13 +1014,12 @@ class ResponsiveNavSidebar extends HTMLElement {
       commenttypes2: 'comentarios que empiezan con punto (.)',
       commenttypes3: 'comentarios que empiezan con barra (/)',
       commenttypes4: 'comandos que empiezan con comando:',
+      filterwords: 'Filtrar palabras',
     },
     en: {
       hello: 'Hello',
       world: 'World',
-      select1: 'Selector 1',
-      select2: 'Selector 2',
-      select3: 'Selector 3',
+      selectlang: 'Select language',
       currentLang: 'Current language',
       selectedLanguage: 'Selected language',
       configuration: 'Configuration',
@@ -1049,13 +1046,12 @@ class ResponsiveNavSidebar extends HTMLElement {
       commenttypes2: 'Comments starting with dot (.)',
       commenttypes3: 'Comments starting with slash (/)',
       commenttypes4: 'Comments starting with Command:',
+      filterwords: 'Filter words',
     },
     fr: {
       hello: 'Bonjour',
       world: 'Monde',
-      select1: 'Sélecteur 1',
-      select2: 'Sélecteur 2',
-      select3: 'Sélecteur 3',
+      selectlang: 'Sélectionner la langue',
       currentLang: 'Langue actuelle',
       selectedLanguage: 'Langue sélectionnée',
       configuration: 'Configuration',
@@ -1082,6 +1078,7 @@ class ResponsiveNavSidebar extends HTMLElement {
       commenttypes2: 'Commentaires commençant par un point (.)',
       commenttypes3: 'Commentaires commençant par un barre (/)',
       commenttypes4: 'Commentaires commençant par un commande :',
+      filterwords: 'Filtrer les mots',
     }
   };
   
