@@ -1,4 +1,5 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
+import { showAlert } from '../components/message.js';
 import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 const keys = [
@@ -66,7 +67,169 @@ function Replacetextoread(eventType = 'chat',data) {
     if (!configtts[eventType] || !configtts[eventType].check) return;
     const textoread = replaceVariables(configtts[eventType].text, data);
     logger.log('speechchat',configtts,textoread,configtts[eventType].text)
+    if (existwordinArray(textoread)) { showAlert('info',`filter word ${textoread} `); return; }
     handleleermensaje(textoread);
 }
-export { Replacetextoread}
+class ArrayStorageManager {
+    constructor(storageKey) {
+        this.storageKey = storageKey;
+        this.items = this.getAll();
+    }
+  
+    getAll() {
+        const stored = localStorage.getItem(this.storageKey);
+        return stored ? JSON.parse(stored) : [];
+    }
+  
+    saveToStorage() {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+    }
+  
+    validateInput(item) {
+        if (typeof item !== 'string') return false;
+        if (item.length <= 1) return false;
+        return true;
+    }
+  
+    existInItems(text) {
+        const normalizedText = text.toLowerCase();
+        return this.items.some(item =>
+            item.toLowerCase() === normalizedText
+        );
+    }
+  
+    add(item) {
+        if (!this.validateInput(item)) return false;
+        if (!this.existInItems(item)) {
+            this.items.push(item);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+  
+    remove(item) {
+        const initialLength = this.items.length;
+        this.items = this.items.filter(existingItem =>
+            existingItem.toLowerCase() !== item.toLowerCase()
+        );
+        if (this.items.length !== initialLength) {
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+  }
+  
+  // Clase para manejar la UI
+  class ArrayManagerUI {
+    constructor(storageManager, idelement) {
+        this.manager = storageManager;
+        this.setupModal();
+        this.setupEventListeners(idelement);
+    }
+  
+    setupModal() {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+          <custom-modal modal-type="form" id="ArrayManagerUI">
+                <h2 class="modal-title"><translate-text key="${this.manager.storageKey}"></translate-text>
+                </h2>
+                <div class="input-container">
+                    <input type="text" id="itemInput" placeholder="Ingresa un elemento...">
+                    <button id="addButton" class="open-modal-btn">Agregar</button>
+                </div>
+                <div id="errorMessage" class="error-message">
+                    El texto debe tener al menos 2 caracteres
+                </div>
+                <div id="itemsContainer" class="items-container">
+                </div>
+            </custom-modal>
+        `;
+        document.body.appendChild(modal);
+        this.modal = modal;
+    }
+  
+    setupEventListeners(idelement) {
+      const buttonid = idelement ||'openModal';
+        // Botón para abrir modal
+        document.getElementById(buttonid).addEventListener('click', () => {
+            this.openModal();
+        });
+  
+        // Agregar item
+        const input = this.modal.querySelector('#itemInput');
+        const addButton = this.modal.querySelector('#addButton');
+       
+        const addItem = () => {
+            const text = input.value.trim();
+            const errorMessage = this.modal.querySelector('#errorMessage');
+            errorMessage.style.display = 'none';
+           
+            if (this.manager.validateInput(text)) {
+                if (this.manager.add(text)) {
+                    this.createItemElement(text);
+                    input.value = '';
+                }
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        };
+  
+        addButton.addEventListener('click', addItem);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+    }
+  
+    createItemElement(text) {
+        const itemsContainer = this.modal.querySelector('#itemsContainer');
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+       
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+       
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-btn';
+        deleteButton.textContent = '×';
+        deleteButton.onclick = () => {
+            this.manager.remove(text);
+            itemDiv.remove();
+        };
+       
+        itemDiv.appendChild(textSpan);
+        itemDiv.appendChild(deleteButton);
+        itemsContainer.appendChild(itemDiv);
+    }
+  
+    loadItems() {
+        const itemsContainer = this.modal.querySelector('#itemsContainer');
+        itemsContainer.innerHTML = '';
+        this.manager.getAll().forEach(item => {
+            this.createItemElement(item);
+        });
+    }
+  
+    openModal() {
+        this.loadItems();
+        document.getElementById('ArrayManagerUI').open();
+    }
+  
+    closeModal() {
+        document.getElementById('ArrayManagerUI').close();
+  }
+  }
+  
+  // Inicialización
+  const manager = new ArrayStorageManager('filterwords');
+  const ui = new ArrayManagerUI(manager);
+  function addfilterword(word) {
+    manager.add(word);
+    ui.loadItems();
+  }
+  function existwordinArray(word) {
+    return manager.existInItems(word);
+  }
+export { Replacetextoread, addfilterword}
 // asdasd como seria un metodo para hacer un string a json

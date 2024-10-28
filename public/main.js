@@ -1,7 +1,7 @@
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
 import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker } from './utils/utils.js';
 import { handleleermensaje } from './audio/tts.js';
-import { Replacetextoread } from './features/speechconfig.js';
+import { Replacetextoread, addfilterword } from './features/speechconfig.js';
 import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
@@ -36,7 +36,7 @@ userProfile.addEventListener('userConnected', (e) => {
   }); 
 
 userProfile.addEventListener('userDisconnected', (e) => {
-    console.log('Usuario desconectado',e);
+    console.log('Usuario desconectado' ,e);
 });
 function joinRoom(roomid) {
     const roomId = roomid || document.getElementById('roomId').value;
@@ -208,7 +208,26 @@ const eventcontent = {
     text: "text",
   }
 }
-const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent);
+const splitfilterwords = (data) => {
+  console.log("Callback 1 ejecutado:", data);
+  if (data.comment) {
+    const comments = data.comment.match(/.{1,10}/g) || [];
+    console.log("comments", comments);
+    comments.forEach(comment => {
+      if (comment.length < 6) return;
+      addfilterword(comment);
+    });
+  }
+};
+const filterwordadd = (data) => {
+  console.log("Callback 2 ejecutado:", data);
+  if (data.comment && data.comment.length > 6) {
+    addfilterword(data.comment);
+  }
+}
+const callbacksmessage = [splitfilterwords,filterwordadd];
+const optionTexts = ['filtrar comentarios - dividir', 'filtrar comentario'];
+const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent, callbacksmessage,optionTexts);
 const message2 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', numbercontent);
 const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', eventcontent);
 // Crear callbacks
@@ -358,10 +377,16 @@ const handlemember = (data) => messageHandler.handleMessage('member', data);
 const handlelike = (data) => messageHandler.handleMessage('like', data);
 const handleFollow = (data) => messageHandler.handleMessage('follow', data);
 const handleShare = (data) => messageHandler.handleMessage('share', data);
-
+let lastcomment = ''
 function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome
   if (eventType === 'member') eventType = 'welcome';
+  if (eventType === 'chat') {
+    lastcomment = data.comment;
+    if(data.comment === lastcomment) {
+      return;
+    } 
+  }
   Replacetextoread(eventType, data);
 }
 const generateobject = (eventType,comparison ) => {
@@ -426,164 +451,7 @@ function handletts(data,userdata) {
     console.log("tts no check",data)
   }
 }
-class ArrayStorageManager {
-  constructor(storageKey) {
-      this.storageKey = storageKey;
-      this.items = this.getAll();
-  }
 
-  getAll() {
-      const stored = localStorage.getItem(this.storageKey);
-      return stored ? JSON.parse(stored) : [];
-  }
-
-  saveToStorage() {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.items));
-  }
-
-  validateInput(item) {
-      if (typeof item !== 'string') return false;
-      if (item.length <= 1) return false;
-      return true;
-  }
-
-  existInItems(text) {
-      const normalizedText = text.toLowerCase();
-      return this.items.some(item =>
-          item.toLowerCase() === normalizedText
-      );
-  }
-
-  add(item) {
-      if (!this.validateInput(item)) return false;
-      if (!this.existInItems(item)) {
-          this.items.push(item);
-          this.saveToStorage();
-          return true;
-      }
-      return false;
-  }
-
-  remove(item) {
-      const initialLength = this.items.length;
-      this.items = this.items.filter(existingItem =>
-          existingItem.toLowerCase() !== item.toLowerCase()
-      );
-      if (this.items.length !== initialLength) {
-          this.saveToStorage();
-          return true;
-      }
-      return false;
-  }
-}
-
-// Clase para manejar la UI
-class ArrayManagerUI {
-  constructor(storageManager, idelement) {
-      this.manager = storageManager;
-      this.setupModal();
-      this.setupEventListeners(idelement);
-  }
-
-  setupModal() {
-      const modal = document.createElement('div');
-      modal.innerHTML = `
-        <custom-modal modal-type="form" id="ArrayManagerUI">
-              <h2 class="modal-title"><translate-text key="${this.manager.storageKey}"></translate-text>
-              </h2>
-              <div class="input-container">
-                  <input type="text" id="itemInput" placeholder="Ingresa un elemento...">
-                  <button id="addButton" class="open-modal-btn">Agregar</button>
-              </div>
-              <div id="errorMessage" class="error-message">
-                  El texto debe tener al menos 2 caracteres
-              </div>
-              <div id="itemsContainer" class="items-container">
-              </div>
-          </custom-modal>
-      `;
-      document.body.appendChild(modal);
-      this.modal = modal;
-  }
-
-  setupEventListeners(idelement) {
-    const buttonid = idelement ||'openModal';
-      // Botón para abrir modal
-      document.getElementById(buttonid).addEventListener('click', () => {
-          this.openModal();
-      });
-
-      // Agregar item
-      const input = this.modal.querySelector('#itemInput');
-      const addButton = this.modal.querySelector('#addButton');
-     
-      const addItem = () => {
-          const text = input.value.trim();
-          const errorMessage = this.modal.querySelector('#errorMessage');
-          errorMessage.style.display = 'none';
-         
-          if (this.manager.validateInput(text)) {
-              if (this.manager.add(text)) {
-                  this.createItemElement(text);
-                  input.value = '';
-              }
-          } else {
-              errorMessage.style.display = 'block';
-          }
-      };
-
-      addButton.addEventListener('click', addItem);
-      input.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') addItem();
-      });
-  }
-
-  createItemElement(text) {
-      const itemsContainer = this.modal.querySelector('#itemsContainer');
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'item';
-     
-      const textSpan = document.createElement('span');
-      textSpan.textContent = text;
-     
-      const deleteButton = document.createElement('button');
-      deleteButton.className = 'delete-btn';
-      deleteButton.textContent = '×';
-      deleteButton.onclick = () => {
-          this.manager.remove(text);
-          itemDiv.remove();
-      };
-     
-      itemDiv.appendChild(textSpan);
-      itemDiv.appendChild(deleteButton);
-      itemsContainer.appendChild(itemDiv);
-  }
-
-  loadItems() {
-      const itemsContainer = this.modal.querySelector('#itemsContainer');
-      itemsContainer.innerHTML = '';
-      this.manager.getAll().forEach(item => {
-          this.createItemElement(item);
-      });
-  }
-
-  openModal() {
-      this.loadItems();
-      document.getElementById('ArrayManagerUI').open();
-  }
-
-  closeModal() {
-      document.getElementById('ArrayManagerUI').close();
-}
-}
-
-// Inicialización
-const manager = new ArrayStorageManager('filterwords');
-const ui = new ArrayManagerUI(manager);
-function addfilterword(word) {
-  manager.add(word);
-  ui.loadItems();
-}
 // setTimeout(() => {
 //   HandleAccionEvent('chat',{nombre: "coloca tu nombre",eventType: "chat",chat: "default text",like: 10,gift: 5655,Actions: [],id: undefined})
 // }, 1000);
