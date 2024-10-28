@@ -1,5 +1,5 @@
-import express from 'express';
 import { WebcastPushConnection, signatureProvider } from 'tiktok-live-connector';
+import express from 'express';
 import { Server } from 'socket.io';
 import http from 'http';
 import cors from 'cors';
