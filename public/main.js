@@ -247,7 +247,9 @@ const messageTemplates = {
       },
       comment: data.comment
     }),
-    alert: (data) => `${data.uniqueId}: ${data.comment}`
+    alert: null,
+    options: callbacksmessage,
+    optionTexts: optionTexts,
   },
 
   gift: {
@@ -343,7 +345,7 @@ class MessageHandler {
       `msg${counter.increment()}`,
       data.profilePictureUrl,
       parsedData,
-      callbacksmessage,optionTexts
+      template.options,template.optionTexts
     );
 
     container.addMessage(newMessage);
