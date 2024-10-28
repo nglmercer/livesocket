@@ -355,7 +355,8 @@ class MessageHandler {
     const newMessage = new ChatMessage(
       `msg${counter.increment()}`,
       data.profilePictureUrl,
-      parsedData
+      parsedData,
+      callbacksmessage,optionTexts
     );
 
     container.addMessage(newMessage);
