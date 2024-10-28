@@ -383,10 +383,10 @@ function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome
   if (eventType === 'member') eventType = 'welcome';
   if (eventType === 'chat') {
-    lastcomment = data.comment;
     if(data.comment === lastcomment) {
       return;
     } 
+    lastcomment = data.comment;
   }
   Replacetextoread(eventType, data);
 }
