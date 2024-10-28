@@ -7,18 +7,7 @@
       }
     ],
     "routes": [
-      {
-        "src": "/assets/(.*)",
-        "dest": "/public/assets/$1"
-      },
-      {
-        "src": "/components/(.*)",
-        "dest": "/public/components/$1"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "/index.js"
-      }
+      { "src": "/(.*)", "dest": "/" }
     ]
   }
   
