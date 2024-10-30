@@ -58,6 +58,10 @@ const translations = {
       ah_compartido: 'ah compartido',
       se_ah_suscrito: 'se ah suscrito',
       bienvenido: 'bienvenido',
+      nombre_del_evento: 'nombre del evento',
+      nombre_de_la_accion: 'nombre de la accion',
+      command_mc: '/say coloca tu comando',
+      texttoread: 'texto a leer',
     },
     en: {
       show: 'Show',
@@ -118,6 +122,10 @@ const translations = {
       ah_compartido: 'shared',
       se_ah_suscrito: 'subscribed',
       bienvenido: 'joined',
+      nombre_del_evento: 'event name',
+      nombre_de_la_accion: 'action name',
+      command_mc: '/say place your command',
+      texttoread: 'text to read',
     },
     fr: {
       show: 'Afficher',
@@ -178,6 +186,10 @@ const translations = {
       ah_compartido: 'oh partagé',
       se_ah_suscrito: 'abonné',
       bienvenido: 'accueillir',
+      nombre_del_evento: 'nom du event',
+      nombre_de_la_accion: 'nom de l\'action',
+      command_mc: '/say coloquez votre commande',
+      texttoread: 'texte à lire',
     },
     pt: {
       show: 'Mostrar',
@@ -238,6 +250,10 @@ const translations = {
       ah_compartido: 'ah, compartilhei',
       se_ah_suscrito: 'se inscreveu',
       bienvenido: 'bem-vindo',
+      nombre_del_evento: 'nome do evento',
+      nombre_de_la_accion: 'nome da ação',
+      command_mc: '/say coloque seu comando',
+      texttoread: 'texto a ler',
     }
   };
   function getTranslation(key,lang=localStorage.getItem('selectedLanguage')) {

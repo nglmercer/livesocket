@@ -205,4 +205,7 @@ const voicelist = {
     "Pattara (Thai)": "Pattara",
     "An (Vietnamese)": "An"
     }
-export { voicelist };
+// metodo para mapear voicelist en un array donde el key sea value y el value sea label
+const voicelistmap = Object.entries(voicelist).map(([key, value]) => ({ value, label: key }));
+console.log("voicelistmap",voicelistmap);
+export { voicelist, voicelistmap };

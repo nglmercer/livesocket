@@ -52,17 +52,18 @@ const actionsconfig = {
     hidden: true,
   }
 } 
+
 const ActionModal = document.getElementById('ActionModal');
 const Buttonform  = document.getElementById('ActionModalButton');
 const testdata = {
-  nombre: "coloca tu nombre",
+  nombre: getTranslation('nombre de la accion'),
   minecraft: {
     check: true,
-    command: "/say coloca tu comando",
+    command: getTranslation('command_mc'),
   },
   tts: {
     check: true,
-    text: "texto a leer",
+    text: getTranslation('texttoread'),
   },
   id: undefined,
 }

@@ -1,6 +1,6 @@
 const TTS_API_ENDPOINT = 'https://api.streamelements.com/kappa/v2/speech?';
 import {Queue, Controlmedia, AudioPlayer } from './mediacontrol.js';
-import { voicelist } from './voiceoptions.js';
+import { voicelist, voicelistmap } from './voiceoptions.js';
 const audioPlayer = new AudioPlayer('audio',
 () => controlmedia.playPreviousAudio(),
 () => controlmedia.nextaudio()
@@ -14,7 +14,11 @@ let audioMap = {};
 let audioKeys = [];
 let isPlaying = false;
 // let audio = document.getElementById('audio');
-
+function getttsconfig() {
+    const ttsconfig = JSON.parse(localStorage.getItem('voicedatastore'));
+    console.log("ttsconfig",ttsconfig);
+    return ttsconfig;
+}
 async function fetchAudio(txt) {
     try {
         if (txt === lastReadText) {
@@ -28,7 +32,7 @@ async function fetchAudio(txt) {
         }
 
         const params = new URLSearchParams({
-            voice: getVoiceFromVoiceSelect(),
+            voice: getttsconfig().voice1.selectvoice || 'Conchita',
             text: txt
         });
 
@@ -50,16 +54,6 @@ async function fetchAudio(txt) {
     }
 }
 
-function getVoiceFromVoiceSelect() {
-    let voiceSelect = document.querySelector('#voiceSelectContainer select');
-    if (voiceSelect) {
-        return voiceSelect.value;
-    } else {
-        console.error('Voice select element not found');
-        return null;
-    }
-}
-
 function skipAudio() {
     audioPlayer.audio.pause();
     audioPlayer.audio.currentTime = 0;
@@ -70,12 +64,16 @@ function skipAudio() {
         isPlaying = false;
     }
 }
-
+const speaktext = document.getElementById('speaktext');
+const speakbutton = document.getElementById('speakbutton');
+speakbutton.addEventListener('click', () => {
+    handleleermensaje(speaktext.value);
+});
 function leerMensajes(text) {
     console.log('leerMensajes', text);
     if (text) {
         fetchAudio(text).then(audioUrl => {
-          if (document.getElementById('audiolist').checked) {
+          if (getttsconfig().voice1.audioQueue) {
             controlmedia.addSong(audioUrl);
           } else {
             const newaudio = new Audio(audioUrl);
@@ -87,30 +85,34 @@ function leerMensajes(text) {
 export class TTS {
     constructor(message) {
         this.speak(message);
+        this.config = getttsconfig();
     }
 
     async speak(message) {
         console.log('TTS speak', message);
         const voices = speechSynthesis.getVoices();
         console.log("voices", voices);
-        let voiceSelect = document.getElementById('voiceSelect');
-        let selectedVoice = voices.find(voice => voice.name === voiceSelect.selectedOptions[0].getAttribute("data-name"));
+        this.config = getttsconfig();
+        let voiceSelect = this.config.voice2.selectvoice;
+        let selectedVoice = voices.find(voice => voice.name === voiceSelect);
 
-        if (document.getElementById('randomVoice').checked) {
+        if (this.config.voice2.Randomvoice || !selectedVoice) {
             selectedVoice = setRandomVoice(voices);
         }
+        // el simbolo para que sea este o este es // no tengo en mi teclado pero es el simbolo de la barra diagonal
+        // if (!selectedVoice or !this.config ) return; en este ejemplo or es || y no ||
 
-        let speed = document.getElementById('randomSpeedValue').value;
-        if (document.getElementById('randomSpeed').checked) {
+        let speed = this.config.voice2.defaultspeed;
+        if (this.config.voice2.randomspeed) {
             speed = setRandomSpeed();
         }
 
-        let pitch = document.getElementById('randomPitchValue').value;
-        if (document.getElementById('randomPitch').checked) {
+        let pitch = this.config.voice2.defaultpitch;
+        if (this.config.voice2.randompitch) {
             pitch = setRandomPitch();
         }
 
-        const volume = document.querySelector('#volume').value;
+        const volume = this.config.voice2.volume;
 
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.voice = selectedVoice;
@@ -144,92 +146,38 @@ function setRandomPitch() {
     return (Math.random() * (1.5 - 0.5) + 0.5).toFixed(1);
 }
 async function handleleermensaje(text) {
-  const selectedVoice = document.querySelector('input[name="selectvoice"]:checked');
-  const selectedCommentType = document.querySelector('input[name="comment-type"]:checked').value;
-  let shouldRead = false;
+    const selectedvoicedata = getttsconfig();
+    console.log("newselectedVoice",selectedvoicedata);
+    const selectedCommentType = document.querySelector('input[name="comment-type"]:checked').value;
+    let shouldRead = false;
 
-  switch (selectedCommentType) {
-      case 'any-comment':
-          shouldRead = true;
-          break;
-      case 'dot-comment':
-          shouldRead = text.startsWith('.');
-          break;
-      case 'slash-comment':
-          shouldRead = text.startsWith('/');
-          break;
-      case 'command-comment':
-          const commandPrefix = document.getElementById('command').value;
-          if (text.startsWith(commandPrefix)) {
-              shouldRead = true;
-              text = text.replace(commandPrefix, '');
-          }
-          break;
-  }
+    switch (selectedCommentType) {
+        case 'any-comment':
+            shouldRead = true;
+            break;
+        case 'dot-comment':
+            shouldRead = text.startsWith('.');
+            break;
+        case 'slash-comment':
+            shouldRead = text.startsWith('/');
+            break;
+        case 'command-comment':
+            const commandPrefix = document.getElementById('command').value;
+            if (text.startsWith(commandPrefix)) {
+                shouldRead = true;
+                text = text.replace(commandPrefix, '');
+            }
+            break;
+    }
 
-  if (selectedVoice.id === 'selectvoice2') {
-      new TTS(text);
-  } else {
-      leerMensajes(text);
-  }
+    if (selectedvoicedata.selectvoiceoption === 'selectvoice2') {
+        new TTS(text);
+    } else {
+        leerMensajes(text);
+    }
 
-  return true;
+    return true;
 }
 
-
-const voiceSelectContainer = document.getElementById('voiceSelectContainer');
-const voiceSelect1option = document.getElementById('voiceSelect1');
-
-Object.keys(voicelist).forEach((key) => {
-  // console.log(key);
-  const option = document.createElement('option');
-  option.value = voicelist[key];
-  // console.log(voicelist[key]);
-  option.text = key;
-  voiceSelect1option.appendChild(option);
-});
-voiceSelect1option.addEventListener('change', (e) => {
-  console.log(e.target.value);
-  handleleermensaje(e.target.value);
-});
-
-function populateVoiceList() {
-  if (typeof speechSynthesis === "undefined") return;
-
-  const voices = speechSynthesis.getVoices();
-  const voiceSelect = document.getElementById("voiceSelect");
-  console.log("populateVoiceList", voices);
-
-  // Limpiar opciones anteriores
-  voiceSelect.innerHTML = '';
-
-  voices.forEach(voice => {
-    const option = document.createElement("option");
-    option.textContent = `${voice.name} (${voice.lang})`;
-    option.setAttribute("data-lang", voice.lang);
-    option.setAttribute("data-name", voice.name);
-    voiceSelect.appendChild(option);
-  });
-}
-
-// Función para verificar si las voces están disponibles
-function checkVoices() {
-    if (typeof speechSynthesis === "undefined") return;
-    
-    if (speechSynthesis.getVoices().length > 0) {
-      console.log("speechSynthesis.getVoices()",speechSynthesis.getVoices());
-    clearInterval(voiceCheckInterval);
-    populateVoiceList();
-  }
-}
-
-// Verificar si las voces están disponibles al cargar la página
-if (typeof speechSynthesis !== "undefined" && speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoiceList;
-  setTimeout(populateVoiceList,1000);
-}
-
-// Usar un intervalo para verificar si las voces están disponibles
-const voiceCheckInterval = setInterval(checkVoices, 100);
 
 export { leerMensajes, skipAudio, handleleermensaje };

@@ -27,7 +27,7 @@ async function EventsManagermap(data) {
   console.log("mapedevents",mapedevents)
 })()
 
-async function getEventconfig(eventType) {
+async function getEventconfig() {
   const eventsconfig = {
     nombre: {
       class: 'input-default',
@@ -78,6 +78,7 @@ async function getEventconfig(eventType) {
   };
   return eventsconfig
 }
+
 const EventsModal = document.getElementById('EventsModal');
 const Buttonform  = document.getElementById('EventsModalButton');
 const editcallback = async (data,modifiedData) => {
@@ -119,7 +120,7 @@ const callbackconfig = {
   deletecallbacktext: getTranslation('close'),
 };
 const testdata = {
-  nombre: "coloca tu nombre",
+  nombre: getTranslation('nombre_del_evento'),
   eventType: "chat",
   chat: "default text",
   like: 10,

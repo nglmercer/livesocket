@@ -293,7 +293,11 @@ class DynamicRow {
 
         Object.keys(typeConfig).forEach(subKey => {
           if (subKey === 'type' || subKey === 'open') return;
-
+          if(subKey === 'dataAssociated') {
+            console.log("subKey dataAssociated",subKey,typeConfig[subKey])
+            objectContainer.setAttribute('data-associated', typeConfig[subKey]);
+            return;
+          }
           const subConfig = typeConfig[subKey];
           const subValue = value ? value[subKey] : undefined;
           const inputElement = this.createInputElement(key, subKey, subValue, subConfig, itemContainer);
@@ -526,6 +530,7 @@ class DynamicRow {
     inputElement.type = 'range';
     inputElement.min = typeConfig.min || 0;
     inputElement.max = typeConfig.max || 100;
+    inputElement.step = typeConfig.step || inputElement.max / 10;
     inputElement.value = value;
 
     inputElement.addEventListener('input', () => {

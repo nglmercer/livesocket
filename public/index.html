@@ -85,71 +85,15 @@
               <section id="dashboard">
                 <h2>Dashboard</h2>
                 <div class="containerbox relative">
+                  <input type="text" id="speaktext" placeholder="Speak" class="default-input">
+                  <button id="speakbutton" class="button default-button">Speak</button>
+                    <div id="voiceconfig" class="grid grid-cols-2 gap-4"></div>
+                    <audio id="audio"></audio>
+
                     <input type="checkbox" id="show-more" style="display:none;">
                     <label for="show-more" class="show-more-label"><span></span></label>
                 
                     <div class="flexbox gap-1">
-                      <div class="card grid">
-                          <div class="card-header">
-                              <h2 class="card-title"><translate-text key="voicesettings"></translate-text></h2>
-                          </div>
-                          <div class="card-content">
-                                  <!-- <input type="checkbox" id="voiceenabled" checked>
-                                  <label for="voiceenabled">Enabled</label> -->
-                
-                                  <div class="card-subcontent">
-                
-                                    <label class="flex" for="selectvoice1"><input type="radio" name="selectvoice" id="selectvoice1" class="radio checked:bg-blue-300 float-start" checked><span>Voz1</span></label>
-                
-                                    <div id="voiceSelectContainer" class="relative m-3 content-center">
-                                      <label for="voiceSelect1">
-                                        <span>select voice</span>
-                                          <select id="voiceSelect1" class="select select-info browser-default" style="width: 100%;" aria-label="Select Voice"> select voice</span></select>
-                                          </label>
-                                          <label for="audiolist">
-                                        <audio id="audio"></audio>
-                                        <input type="checkbox" id="audiolist" class="filled-in" checked>
-                                        <span>Cola de audio</span>
-                                        </label>
-                
-                                    </div>
-                
-                
-                                    <label class="flex" for="selectvoice2">
-                                      <input type="radio" name="selectvoice" id="selectvoice2" class="radio checked:bg-blue-500 float-start">
-                                      <span>Voz2</span></label>
-                                <div class="grid">
-                                    <select id="voiceSelect" class="select select-info browser-default"></select>
-                
-                                      <label for="randomVoice"><input type="checkbox" id="randomVoice" checked><span>Random Voice</span></label>
-                
-                                        <label for="randomSpeed">
-                                        <input type="checkbox" id="randomSpeed">
-                                        <span>random speed</span>
-                                        </label>
-                                        <input type="range" class="range range-sm" id="randomSpeedValue" name="randomSpeedValue" value="1" min="0.1" max="2" step="0.1">
-                
-                                        </div>
-                                    <div class="flex">
-                                      <label for="randomPitch">
-                                        <input type="checkbox" id="randomPitch">
-                                        <span>random pitch</span></label>
-                                        <input type="range" class="range range-sm" id="randomPitchValue" name="randomPitchValue" value="1" min="0.1" max="2" step="0.1">
-                                    </div>
-                                    <div class="flex">
-                                        <label for="default-speed">Default Speed</label>
-                                        <input type="range" id="default-speed" class="range range-sm">                                   </div>
-                                    <div class="flex">
-                                        <label for="default-pitch">Default Pitch</label>
-                                        <input type="range" id="default-pitch" class="range range-sm">                                   </div>
-                                    <small>Speech Volume</small>
-                                    <label for="volume">
-                                        <i class="bi bi-volume-up-fill"></i></label>
-                                        <input id="volume" type="range" min="0" max="1" value="1" step="0.1" class="range range-sm">
-                
-                                </div>
-                          </div>
-                      </div>
                       <div class="card">
                           <div class="card-header">
                               <h2 class="card-title"><translate-text key="allowedusers"></translate-text></h2>
@@ -244,8 +188,6 @@
                               </div>
                           </div>
                       </div>
-            
-            
                   </div>
                 
                   </div>

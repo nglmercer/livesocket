@@ -2,6 +2,7 @@ import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { showAlert } from '../components/message.js';
 import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
+import { voicelistmap } from '../audio/voiceoptions.js';
 import { getTranslation, translations } from '../translations.js';
 const keys = [
     { key: 'chat', text: `uniqueId ${getTranslation('dice')} comment`, check: true },
@@ -52,7 +53,154 @@ const callbackconfig = { callback: async (data,modifiedData) => {
   , deletecallback:  undefined };
 const configelement = new EditModal('#chatbotconfig',callbackconfig,ttsconfig);
 configelement.render(getTTSdatastore());
+let voicesList = [];
 
+// Función para mapear las voces
+function mapVoiceList() {
+    if (typeof speechSynthesis === "undefined" || speechSynthesis?.getVoices().length === 0) return [];
+    const voices = speechSynthesis.getVoices();
+    voicesList = voices.map(voice => ({
+        value: voice.name,
+        label: `${voice.name} (${voice.lang})`,
+    }));
+    updateVoiceConfig();
+    return voicesList;
+}
+
+// Función para actualizar la configuración cuando las voces estén disponibles
+function updateVoiceConfig() {
+    selectvoiceconfig.voice2.selectvoice.options = voicesList;
+}
+
+// Función para verificar las voces
+function checkVoices() {
+    if (typeof speechSynthesis === "undefined") return;
+    if (speechSynthesis.getVoices().length > 0) {
+        console.log("speechSynthesis.getVoices()", speechSynthesis.getVoices());
+        clearInterval(voiceCheckInterval);
+        mapVoiceList();
+    }
+}
+
+// Configuración inicial con array vacío
+const selectvoiceconfig = {
+    selectvoiceoption: {
+        class: 'radio-default',
+        type: 'radio',
+        returnType: 'string',
+        toggleoptions: true,
+        options: [{ value: 'selectvoice1', label: 'Voz1' }, { value: 'selectvoice2', label: 'Voz2' }],
+    },
+    voice1: {
+        class: 'input-default',
+        type: 'object',
+        dataAssociated: 'selectvoice1',
+        open: true,
+        selectvoice: {
+            class: 'select-default',
+            type: 'select2',
+            returnType: 'string',
+            options: voicelistmap, // Inicialmente vacío
+        },
+        audioQueue: {
+            class: 'input-default',
+            label: 'Cola de audio',
+            type: 'checkbox',
+            returnType: 'boolean',
+        },
+    },
+    voice2: {
+        class: 'input-default',
+        type: 'object',
+        dataAssociated: 'selectvoice2',
+        open: true,
+        selectvoice: {
+            class: 'select-default',
+            type: 'select2',
+            returnType: 'string',
+            options: voicesList, // Inicialmente vacío
+        },
+        Randomvoice: {
+            class: 'input-default',
+            label: 'Random Voice',
+            type: 'checkbox',
+            returnType: 'boolean',
+        },
+        randomspeed: {
+            class: 'input-default',
+            label: 'random speed',
+            type: 'checkbox',
+            returnType: 'boolean',
+        },
+        randompitch: {
+            class: 'input-default',
+            label: 'random pitch',
+            type: 'checkbox',
+            returnType: 'boolean',
+        },
+        defaultspeed: {
+            class: 'input-default',
+            label: 'Default Speed',
+            type: 'slider',
+            min: 0.1,
+            max: 2,
+            returnType: 'number',
+        },
+        defaultpitch: {
+            class: 'input-default',
+            label: 'Default Pitch',
+            type: 'slider',
+            min: 0.1,
+            max: 2,
+            returnType: 'number',
+        },
+        volume: {
+            class: 'max-width-90p',
+            label: 'Speech Volume',
+            type: 'slider',
+            min: 0,
+            max: 1,
+            returnType: 'number',
+        },
+    }
+};
+
+// Configuración de los event listeners
+if (typeof speechSynthesis !== "undefined" && speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = mapVoiceList;
+    setTimeout(mapVoiceList, 1000);
+}
+
+const voiceCheckInterval = setInterval(checkVoices, 100);
+const callbackvoice = { callback: async (data,modifiedData) => {
+  console.log("callbackvoice",data,modifiedData);
+  localStorage.setItem('voicedatastore', JSON.stringify(modifiedData));
+  }
+  , deletecallback:  undefined };
+const voiceelement = new EditModal('#voiceconfig',callbackvoice,selectvoiceconfig);
+const defaultvoicedata = JSON.parse(localStorage.getItem('voicedatastore')) || {
+    selectvoiceoption: 'selectvoice1', 
+    voice1: {
+      selectvoice: 'Conchita',
+      audioQueue: true,
+    },
+    voice2: {
+      selectvoice: 'es_ES',
+      Randomvoice: false,
+      randomspeed: false,
+      randompitch: false,
+      defaultspeed: 1,
+      defaultpitch: 1,
+      volume: 1,
+    },
+};
+if (!localStorage.getItem('voicedatastore')) localStorage.setItem('voicedatastore', JSON.stringify(defaultvoicedata));
+voiceelement.render(defaultvoicedata);
+setTimeout(() => {
+  if (mapVoiceList().length > 0) {
+    voiceelement.updateData(defaultvoicedata);
+  }
+}, 500);
 const testdata = {
     uniqueId: 'testUser',
     comment: 'testComment',
@@ -73,6 +221,10 @@ function Replacetextoread(eventType = 'chat',data) {
     if (existwordinArray(textoread)) { showAlert('info',`${getTranslation('filterword')} ${textoread} `); return; }
     handleleermensaje(textoread);
 }
+/* setTimeout(() => {
+  Replacetextoread('chat',{comment: "hola angelo con 8lo"})
+  Replacetextoread('chat',{comment: "este si se lee"})
+},3000) */
 class ArrayStorageManager {
     constructor(storageKey) {
         this.storageKey = storageKey;
@@ -100,7 +252,19 @@ class ArrayStorageManager {
             item.toLowerCase() === normalizedText
         );
     }
-  
+    // Verificar si algún item está contenido en el texto
+    containswordInitems(text) {
+        const normalizedText = text.toLowerCase();
+        return this.items.some(item =>
+            normalizedText.includes(item.toLowerCase())
+        );
+    }
+
+    // Verificar si el texto existe como item o contiene algún item
+    containword(text) {
+        if (!this.validateInput(text)) return false;
+        return this.existInItems(text) || this.containswordInitems(text);
+    }
     add(item) {
         if (!this.validateInput(item)) return false;
         if (!this.existInItems(item)) {
@@ -232,7 +396,9 @@ class ArrayStorageManager {
     ui.loadItems();
   }
   function existwordinArray(word) {
-    return manager.existInItems(word);
+    const response = manager.containword(word);
+    //console.log("existwordinArray",response,word)
+    return response;
   }
 export { Replacetextoread, addfilterword}
 // asdasd como seria un metodo para hacer un string a json
