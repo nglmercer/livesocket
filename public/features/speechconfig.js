@@ -104,7 +104,7 @@ const selectvoiceconfig = {
         },
         audioQueue: {
             class: 'input-default',
-            label: 'Cola de audio',
+            label: getTranslation('cola de audio'),
             type: 'checkbox',
             returnType: 'boolean',
         },
@@ -122,25 +122,25 @@ const selectvoiceconfig = {
         },
         Randomvoice: {
             class: 'input-default',
-            label: 'Random Voice',
+            label: getTranslation('random voice'),
             type: 'checkbox',
             returnType: 'boolean',
         },
         randomspeed: {
             class: 'input-default',
-            label: 'random speed',
+            label: getTranslation('random speed'),
             type: 'checkbox',
             returnType: 'boolean',
         },
         randompitch: {
             class: 'input-default',
-            label: 'random pitch',
+            label: getTranslation('random pitch'),
             type: 'checkbox',
             returnType: 'boolean',
         },
         defaultspeed: {
             class: 'input-default',
-            label: 'Default Speed',
+            label: getTranslation('default speed'),
             type: 'slider',
             min: 0.1,
             max: 2,
@@ -148,7 +148,7 @@ const selectvoiceconfig = {
         },
         defaultpitch: {
             class: 'input-default',
-            label: 'Default Pitch',
+            label: getTranslation('default pitch'),
             type: 'slider',
             min: 0.1,
             max: 2,
@@ -156,7 +156,7 @@ const selectvoiceconfig = {
         },
         volume: {
             class: 'max-width-90p',
-            label: 'Speech Volume',
+            label: getTranslation('speech volume'),
             type: 'slider',
             min: 0,
             max: 1,

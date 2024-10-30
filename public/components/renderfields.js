@@ -214,7 +214,7 @@ class DynamicRow {
         }
         const summary = document.createElement('summary');
         //console.log("typeConfig summary", typeConfig, key);
-        summary.textContent = typeConfig.label || getTranslation('show') + getTranslation(key);
+        summary.textContent = typeConfig.label || `${getTranslation('show')} ${getTranslation(key)}`;
 
         objectContainer.appendChild(summary);
 
@@ -287,7 +287,7 @@ class DynamicRow {
         const summary = document.createElement('summary');
         //console.log("typeConfig summary", typeConfig, key);
 
-        summary.textContent = typeConfig.label || getTranslation('show') + getTranslation(key);
+        summary.textContent = typeConfig.label || `${getTranslation('show')} ${getTranslation(key)}`;
 
         objectContainer.appendChild(summary);
 

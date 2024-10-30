@@ -6,7 +6,7 @@ const audioPlayer = new AudioPlayer('audio',
 () => controlmedia.nextaudio()
 );
 const controlmedia = new Controlmedia(audioPlayer);
-audioPlayer.setAudioInfo('voz1 player');
+audioPlayer.setAudioInfo('first player');
 
 let audioQueue = new Queue();
 let lastReadText = null;
@@ -14,7 +14,7 @@ let audioMap = {};
 let audioKeys = [];
 let isPlaying = false;
 // let audio = document.getElementById('audio');
-function getttsconfig() {
+function getTTSconfig() {
     const ttsconfig = JSON.parse(localStorage.getItem('voicedatastore'));
     console.log("ttsconfig",ttsconfig);
     return ttsconfig;
@@ -32,7 +32,7 @@ async function fetchAudio(txt) {
         }
 
         const params = new URLSearchParams({
-            voice: getttsconfig().voice1.selectvoice || 'Conchita',
+            voice: getTTSconfig().voice1.selectvoice || 'Conchita',
             text: txt
         });
 
@@ -73,7 +73,7 @@ function leerMensajes(text) {
     console.log('leerMensajes', text);
     if (text) {
         fetchAudio(text).then(audioUrl => {
-          if (getttsconfig().voice1.audioQueue) {
+          if (getTTSconfig().voice1.audioQueue) {
             controlmedia.addSong(audioUrl);
           } else {
             const newaudio = new Audio(audioUrl);
@@ -85,14 +85,14 @@ function leerMensajes(text) {
 export class TTS {
     constructor(message) {
         this.speak(message);
-        this.config = getttsconfig();
+        this.config = getTTSconfig();
     }
 
     async speak(message) {
         console.log('TTS speak', message);
         const voices = speechSynthesis.getVoices();
         console.log("voices", voices);
-        this.config = getttsconfig();
+        this.config = getTTSconfig();
         let voiceSelect = this.config.voice2.selectvoice;
         let selectedVoice = voices.find(voice => voice.name === voiceSelect);
 
@@ -146,7 +146,7 @@ function setRandomPitch() {
     return (Math.random() * (1.5 - 0.5) + 0.5).toFixed(1);
 }
 async function handleleermensaje(text) {
-    const selectedvoicedata = getttsconfig();
+    const selectedvoicedata = getTTSconfig();
     console.log("newselectedVoice",selectedvoicedata);
     const selectedCommentType = document.querySelector('input[name="comment-type"]:checked').value;
     let shouldRead = false;
