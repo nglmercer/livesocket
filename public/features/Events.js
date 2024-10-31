@@ -3,6 +3,7 @@ import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { databases, IndexedDBManager, DBObserver } from '../database/indexdb.js'
 import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects } from '../utils/utils.js'
 import showAlert from '../components/alerts.js';
+import { GiftElementsManager } from '../components/renderhtml.js'
 import { ActionsManager } from './Actions.js'
 import { getTranslation, translations } from '../translations.js';
 const ObserverEvents = new DBObserver();
@@ -203,5 +204,16 @@ ObserverEvents.subscribe(async (action, data) => {
     showAlert ('info', "Actualizado", "1000");
   }
 });
+
+const giftlistmanager = new GiftElementsManager(mapselectgift);
+
+// Callback de ejemplo
+const handleProductClick = (product) => {
+    console.log('Producto seleccionado:', product);
+};
+
+// Renderizar los productos
+giftlistmanager.renderToElement('giftmap', handleProductClick);
+
 
 export { getEventconfig, EventsManager }

@@ -209,6 +209,361 @@ class CustomSelect extends HTMLElement {
 }
 
 customElements.define('custom-select', CustomSelect);
+class CustomMultiSelect extends HTMLElement {
+  constructor(config) {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this.options = [];
+      this.selectedOptions = [];
+      this.searchTerm = '';
+      this.render();
+      this.config = config;
+      this.selectlabel = "Seleccione opciones";
+  }
+
+  connectedCallback() {
+      this.setupEventListeners();
+  }
+
+  // Getter para la propiedad 'value'
+  get value() {
+      return this.selectedOptions.map(opt => opt.value);
+  }
+
+  // Setter para la propiedad 'value'
+  set value(newValues) {
+      if (Array.isArray(newValues)) {
+          this.setValues(newValues);
+      }
+  }
+
+  setOptions(options) {
+      this.options = options;
+      this.renderOptions();
+  }
+
+  setValues(values) {
+      // Actualizar las opciones seleccionadas
+      this.selectedOptions = this.options.filter(opt => values.includes(opt.value));
+      
+      // Actualizar la visualización de las opciones seleccionadas en el área superior
+      this.renderSelectedOptions();
+      
+      // Actualizar los checkboxes en el dropdown
+      this.updateCheckboxes();
+
+      // Disparar el evento de cambio
+      this.dispatchEvent(new CustomEvent('change', { 
+          detail: {
+              values: this.value,
+              selectedOptions: this.selectedOptions
+          }
+      }));
+  }
+
+  updateCheckboxes() {
+      // Obtener todas las opciones en el dropdown
+      const optionElements = this.shadowRoot.querySelectorAll('.option');
+      
+      // Actualizar cada opción
+      optionElements.forEach(optionElement => {
+          const label = optionElement.querySelector('span').textContent;
+          const isSelected = this.selectedOptions.some(opt => opt.label === label);
+          
+          if (isSelected) {
+              optionElement.classList.add('selected');
+          } else {
+              optionElement.classList.remove('selected');
+          }
+      });
+  }
+
+  render() {
+      this.shadowRoot.innerHTML = `
+      <style>
+          :host {
+              --background-color: #1a1a1a;
+              --text-color: #e0e0e0;
+              --border-color: #333;
+              --option-hover-bg: #2a2a2a;
+              --input-bg: #252525;
+              --input-text-color: #e0e0e0;
+              --chip-bg: #333;
+              --chip-text: #fff;
+              --chip-hover: #444;
+              --scrollbar-thumb: #444;
+              --scrollbar-track: #1a1a1a;
+              --checkbox-checked-bg: #4a4a4a;
+              --checkbox-border: #555;
+          }
+
+          .select-wrapper {
+              position: relative;
+              width: 300px;
+              font-family: system-ui, -apple-system, sans-serif;
+          }
+
+          .selected-area {
+              min-height: 44px;
+              padding: 8px;
+              border: 1px solid var(--border-color);
+              background-color: var(--background-color);
+              color: var(--text-color);
+              cursor: pointer;
+              border-radius: 4px;
+              display: flex;
+              flex-wrap: wrap;
+              gap: 6px;
+              align-items: center;
+          }
+
+          .chip {
+              background-color: var(--chip-bg);
+              color: var(--chip-text);
+              padding: 4px 8px;
+              border-radius: 16px;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              font-size: 14px;
+          }
+
+          .chip img {
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+          }
+
+          .chip .remove {
+              cursor: pointer;
+              margin-left: 4px;
+              opacity: 0.7;
+          }
+
+          .chip .remove:hover {
+              opacity: 1;
+          }
+
+          .placeholder {
+              color: #666;
+          }
+
+          .dropdown {
+              display: none;
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              margin-top: 4px;
+              border: 1px solid var(--border-color);
+              border-radius: 4px;
+              background: var(--background-color);
+              z-index: 1000;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+          }
+
+          .dropdown.open {
+              display: block;
+          }
+
+          .search {
+              padding: 8px;
+              border-bottom: 1px solid var(--border-color);
+          }
+
+          .search input {
+              width: 100%;
+              padding: 8px;
+              background-color: var(--input-bg);
+              color: var(--input-text-color);
+              border: 1px solid var(--border-color);
+              border-radius: 4px;
+              outline: none;
+          }
+
+          .search input:focus {
+              border-color: #505050;
+          }
+
+          .options {
+              max-height: 200px;
+              overflow-y: auto;
+              padding: 4px 0;
+          }
+
+          .options::-webkit-scrollbar {
+              width: 8px;
+          }
+
+          .options::-webkit-scrollbar-thumb {
+              background: var(--scrollbar-thumb);
+              border-radius: 4px;
+          }
+
+          .options::-webkit-scrollbar-track {
+              background: var(--scrollbar-track);
+          }
+
+          .option {
+              display: flex;
+              align-items: center;
+              padding: 8px 12px;
+              cursor: pointer;
+              color: var(--text-color);
+              gap: 8px;
+          }
+
+          .option:hover {
+              background-color: var(--option-hover-bg);
+          }
+
+          .option.selected {
+              background-color: var(--checkbox-checked-bg);
+          }
+
+          .option img {
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+          }
+
+          .checkbox {
+              width: 16px;
+              height: 16px;
+              border: 2px solid var(--checkbox-border);
+              border-radius: 3px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: background-color 0.2s;
+          }
+
+          .option.selected .checkbox {
+              background-color: var(--chip-bg);
+              border-color: var(--chip-bg);
+          }
+
+          .option.selected .checkbox::after {
+              content: "✓";
+              color: var(--chip-text);
+              font-size: 12px;
+          }
+      </style>
+
+      <div class="select-wrapper">
+          <div class="selected-area">
+              <span class="placeholder">${this.selectlabel}</span>
+          </div>
+          <div class="dropdown">
+              <div class="search">
+                  <input type="text" placeholder="Buscar...">
+              </div>
+              <div class="options"></div>
+          </div>
+      </div>`;
+  }
+
+  renderOptions() {
+      const optionsContainer = this.shadowRoot.querySelector('.options');
+      optionsContainer.innerHTML = '';
+      
+      this.options
+          .filter(option => option.label.toLowerCase().includes(this.searchTerm.toLowerCase()))
+          .forEach(option => {
+              const optionElement = document.createElement('div');
+              optionElement.classList.add('option');
+              if (this.selectedOptions.some(selected => selected.value === option.value)) {
+                  optionElement.classList.add('selected');
+              }
+              
+              optionElement.innerHTML = `
+                  <div class="checkbox"></div>
+                  ${option.image ? `<img src="${option.image}" alt="${option.label}">` : ''}
+                  <span>${option.label}</span>
+              `;
+              
+              optionElement.addEventListener('click', () => this.toggleOption(option));
+              optionsContainer.appendChild(optionElement);
+          });
+  }
+
+  renderSelectedOptions() {
+      const selectedArea = this.shadowRoot.querySelector('.selected-area');
+      const placeholder = selectedArea.querySelector('.placeholder');
+      
+      // Eliminar los chips existentes
+      const existingChips = selectedArea.querySelectorAll('.chip');
+      existingChips.forEach(chip => chip.remove());
+
+      if (this.selectedOptions.length === 0) {
+          placeholder.style.display = 'block';
+      } else {
+          placeholder.style.display = 'none';
+          
+          this.selectedOptions.forEach(option => {
+              const chip = document.createElement('div');
+              chip.classList.add('chip');
+              chip.innerHTML = `
+                  ${option.image ? `<img src="${option.image}" alt="${option.label}">` : ''}
+                  <span>${option.label}</span>
+                  <span class="remove">✕</span>
+              `;
+              
+              chip.querySelector('.remove').addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  this.toggleOption(option);
+              });
+              
+              selectedArea.appendChild(chip);
+          });
+      }
+  }
+
+  setupEventListeners() {
+      const selectedArea = this.shadowRoot.querySelector('.selected-area');
+      const dropdown = this.shadowRoot.querySelector('.dropdown');
+      const searchInput = this.shadowRoot.querySelector('.search input');
+
+      selectedArea.addEventListener('click', () => {
+          dropdown.classList.toggle('open');
+          if (dropdown.classList.contains('open')) {
+              searchInput.focus();
+          }
+      });
+
+      searchInput.addEventListener('input', (e) => {
+          this.searchTerm = e.target.value;
+          this.renderOptions();
+      });
+
+      document.addEventListener('click', (e) => {
+          if (!this.contains(e.target)) {
+              dropdown.classList.remove('open');
+          }
+      });
+  }
+
+  toggleOption(option) {
+      const index = this.selectedOptions.findIndex(selected => selected.value === option.value);
+      
+      if (index === -1) {
+          this.selectedOptions.push(option);
+      } else {
+          this.selectedOptions.splice(index, 1);
+      }
+      
+      this.renderSelectedOptions();
+      this.renderOptions();
+      this.dispatchEvent(new CustomEvent('change', { 
+          detail: {
+              values: this.value,
+              selectedOptions: this.selectedOptions
+          }
+      }));
+  }
+}
+
+customElements.define('custom-multi-select', CustomMultiSelect);
 class UserProfile extends HTMLElement {
   constructor() {
       super();
