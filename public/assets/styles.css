@@ -119,6 +119,41 @@ button {
     grid-template-columns: repeat(auto-fit, minmax(18rem, 28rem));
     transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .grid-minmax-16rem-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, auto));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-20rem-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, auto));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-24rem-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24rem, auto));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-28rem-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(28rem, auto));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-18rem-28rem {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 28rem));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-24rem-32rem {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24rem, 32rem));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-minmax-28rem-36rem {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(28rem, 36rem));
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
   .relative {
     position: relative;
   }
