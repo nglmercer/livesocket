@@ -82,6 +82,7 @@ const containerConfig = {
     container: new ChatContainer('.eventscontainer', 200)
   }
 };   
+socket.on("allromuser",(data) => {console.log("allromuser",data)})
 events.forEach(event => {
     socket.on(event, (data) => {
       Readtext(event, data);

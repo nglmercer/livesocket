@@ -147,11 +147,20 @@ async function getOrCreateLiveConnection(uniqueId,socket) {
         throw new Error(`Failed to create new connection for ${normalizedId}: ${err.message}`);
     }
 }
+function getLivesInfo(livesMap) {
+    // Convertimos el Map a un array de objetos con la información requerida
+    return Array.from(livesMap).map(([uniqueId, liveControl]) => ({
+        uniqueId: liveControl.uniqueId,
+        isConnected: liveControl.isConnected,
+        state: liveControl.state
+    }));
+}
 
+// Ejemplo de uso:
 // Conexión con Socket.IO
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
+    console.log('A user connected:', socket.id, "disponible connections",Livescreated);
+    socket.emit('allromuser',getLivesInfo(Livescreated))
     socket.on('joinRoom', async ({ uniqueId }) => {
         try {
             const connection = await getOrCreateLiveConnection(uniqueId,socket);
