@@ -4,6 +4,7 @@ import {replaceVariables, logger} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 import { voicelistmap } from '../audio/voiceoptions.js';
 import { getTranslation, translations } from '../translations.js';
+import { filterworddefault } from '../assets/jsondata.js';
 const keys = [
     { key: 'chat', text: `uniqueId ${getTranslation('dice')} comment`, check: true },
     { key: 'gift', text:  `uniqueId ${getTranslation('regalo')} repeatcount giftName`, check: true },
@@ -298,13 +299,15 @@ class ArrayStorageManager {
   
     setupModal() {
         const modal = document.createElement('div');
+        const storageKeyname = this.manager.storageKey
         modal.innerHTML = `
           <custom-modal modal-type="form" id="ArrayManagerUI">
-                <h2 class="modal-title"><translate-text key="${this.manager.storageKey}"></translate-text>
+                <h2 class="modal-title"><translate-text key="${storageKeyname}"></translate-text>
                 </h2>
                 <div class="input-container">
                     <input type="text" id="itemInput" placeholder="${getTranslation('addelement')}">
                     <button id="addButton" class="open-modal-btn">${getTranslation('add')}</button>
+                    <button id="Initialdata" class="open-modal-btn">${getTranslation('default')} ${getTranslation(storageKeyname)}</button>
                 </div>
                 <div id="errorMessage" class="error-message">
                     El texto debe tener al menos 2 caracteres
@@ -327,9 +330,9 @@ class ArrayStorageManager {
         // Agregar item
         const input = this.modal.querySelector('#itemInput');
         const addButton = this.modal.querySelector('#addButton');
-       
-        const addItem = () => {
-            const text = input.value.trim();
+        const Initialdata = this.modal.querySelector('#Initialdata');
+        const addItem = (stringtext = input.value.trim()) => {
+            const text = stringtext;
             const errorMessage = this.modal.querySelector('#errorMessage');
             errorMessage.style.display = 'none';
            
@@ -342,7 +345,12 @@ class ArrayStorageManager {
                 errorMessage.style.display = 'block';
             }
         };
-  
+        const addDefault = () => {
+            filterworddefault.forEach(text => {
+                addItem(text);
+            });
+        };
+        Initialdata.addEventListener('click', addDefault);
         addButton.addEventListener('click', addItem);
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addItem();

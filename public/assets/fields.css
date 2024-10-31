@@ -273,6 +273,26 @@
     overflow-y: auto;
     overflow-x: hidden;
   }
+  .items-container {
+    max-height: 70dvh;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 280px));
+    overflow-y: auto;
+    gap: 0.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem;
+    .item {
+      text-overflow: ellipsis;
+      margin: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 12px;
+      background-color: var(--black-bg2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      gap: 0.5rem;
+    }
+  }
   /* Estilos para el contenedor de elementos predefinidos de un contenedor */
   .default-container {
     background-color: var(--black-bg);

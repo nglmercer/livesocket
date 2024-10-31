@@ -1123,7 +1123,8 @@ export const Giftsparsed =  {
 export const mapselectgift = Giftsparsed.availableGifts.map(gift => ({
     label: gift.name,
     value: gift.giftId,
-    image: gift.imageUrl
+    image: gift.imageUrl,
+    cost: gift.diamondcost
 }));
 /* const Giftsparsed: {
     availableGifts: {
