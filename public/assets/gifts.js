@@ -1119,7 +1119,7 @@ export const Giftsparsed =  {
         "imageUrl": "https://p19-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp"
     }
     ]
-}
+} // || localStorage.getItem("Giftsparsed");
 export const mapselectgift = Giftsparsed.availableGifts.map(gift => ({
     label: gift.name,
     value: gift.giftId,
