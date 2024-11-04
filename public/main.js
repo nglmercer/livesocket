@@ -6,7 +6,14 @@ import { getTranslation, translations } from './translations.js';
 import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
-const socket = io();
+const socket = new WebSocket("ws://localhost:3000");
+socket.onopen = () => {
+    console.log("Conexión establecida con el servidor WebSocket");
+};
+
+socket.onclose = () => {
+    console.log("Conexión cerrada");
+};
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
 userProfile.setConnectionStatus('offline');
@@ -40,8 +47,9 @@ userProfile.addEventListener('userDisconnected', (e) => {
     console.log('Usuario desconectado' ,e);
 });
 function joinRoom(roomid) {
-    const roomId = roomid || document.getElementById('roomId').value;
-    socket.emit('joinRoom', { uniqueId: roomId });
+    const roomId = roomid;
+    if (!roomId) return;
+    socket.send(JSON.stringify({ action: "joinRoom", uniqueId: roomId }));
 }
 const events = ['chat', 'gift', 'connected', 'disconnected',
     'websocketConnected', 'error', 'member', 'roomUser',
@@ -82,62 +90,64 @@ const containerConfig = {
     container: new ChatContainer('.eventscontainer', 200)
   }
 };   
-socket.on("allromuser",(data) => {console.log("allromuser",data)})
-events.forEach(event => {
-    socket.on(event, (data) => {
-      Readtext(event, data);
-        localStorage.setItem('last'+event, JSON.stringify(data));
-        switch (event) {
-            case 'member':
-                HandleAccionEvent('welcome',data)
-                handlemember(data);
-                break;
-            case 'chat':
-              HandleAccionEvent(event,data)
-              handlechat(data);
-                break;
-            case 'gift':
-                handlegift(data);
-                HandleAccionEvent(event,data)
-                break;
-            case 'like':
-                handlelike(data);
-                // object entry o map para modificar data.likeCount para que sea igual al valor de EvaluerLikes.addLike(data)
-                Object.assign(data, { likeCount: EvaluerLikes.addLike(data) });
-                HandleAccionEvent(event,data, 'isInRange')
-                break;
-            case 'follow':
-                handleFollow(data);
-                HandleAccionEvent(event,data)
-                break;
-            case 'share':
-                handleShare(data);
-                HandleAccionEvent(event,data)
-                break;
-            case 'connected':
-                userProfile.setConnectionStatus('online');
-                if (data.roomInfo?.owner) localStorage.setItem('ownerdata',JSON.stringify(data.roomInfo.owner));
-                const lastownerdata = localStorage.getItem('ownerdata');
-                if (lastownerdata) userProfile.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
-                console.log(event, data);
-                showAlert('success', `Connected`);
-                break;
-            case 'streamEnd':
-            case 'disconnected':
-            case 'error':
-                userProfile.setConnectionStatus('offline');
-                showAlert('error', `${event}`);
-                console.log(event, data);
-                break;
-            default:
-                HandleAccionEvent(event,data) 
-                //console.log(event, data);
-                //showAlert('success', `Event ${event}`);
-                break;  
-        }
-/*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
- */  });
-});
+socket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    const { type, data } = message;
+
+    switch (type) {
+        case 'allromuser':
+            console.log("allromuser", data);
+            break;
+        case 'member':
+            HandleAccionEvent('welcome', data);
+            handlemember(data);
+            break;
+        case 'chat':
+            HandleAccionEvent(type, data);
+            handlechat(data);
+            break;
+        case 'gift':
+            handlegift(data);
+            HandleAccionEvent(type, data);
+            break;
+        case 'like':
+            handlelike(data);
+            Object.assign(data, { likeCount: EvaluerLikes.addLike(data) });
+            HandleAccionEvent(type, data, 'isInRange');
+            break;
+        case 'follow':
+            handleFollow(data);
+            HandleAccionEvent(type, data);
+            break;
+        case 'share':
+            handleShare(data);
+            HandleAccionEvent(type, data);
+            break;
+        case 'connected':
+            userProfile.setConnectionStatus('online');
+            if (data.roomInfo?.owner) localStorage.setItem('ownerdata', JSON.stringify(data.roomInfo.owner));
+            const lastownerdata = localStorage.getItem('ownerdata');
+            if (lastownerdata) userProfile.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
+            console.log(type, data);
+            showAlert('success', `Connected`);
+            break;
+        case 'streamEnd':
+        case 'disconnected':
+        case 'error':
+            userProfile.setConnectionStatus('offline');
+            showAlert('error', `${type}`);
+            console.log(type, data);
+            break;
+        default:
+            HandleAccionEvent(type, data);
+            //console.log(type, data);
+            //showAlert('success', `Event ${type}`);
+            break;
+    }
+
+    // Actualizar visualización del último evento
+    document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
+};
 function getAvatarUrl(avatarData, preferredSize = 'large') {
   // Mapeo de nombres de tamaños a keys del objeto
   const sizeMap = {
