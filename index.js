@@ -1,19 +1,28 @@
-import { WebcastPushConnection, signatureProvider } from 'tiktok-live-connector';
-import express from 'express';
-import { Server } from 'socket.io';
-import http from 'http';
-import cors from 'cors';
+const { WebcastPushConnection, signatureProvider } = require('tiktok-live-connector');
+const http = require('http').createServer();
+const io = require("socket.io")(http);
+const { back } = require('androidjs')
+var localtunnel = require('localtunnel');
+let ip = undefined;
+http.listen(3001);
+var tunnel = localtunnel(3001, function(err, tunnel) {
+    if (err) throw err;
+    console.log(tunnel.url);
+    ip = tunnel.url;
+ });
+ tunnel.on('close', function() {
+    console.log('tunnel, closed');
+});
+back.on('get-ip', function () {
+    setTimeout(()=>{
+        if(ip !== undefined){
+            back.send('ip', ip);
+        }else{
+            back.send('ip', "Failed: to get url");
+        }
+    }, 4000);
+});
 
-const app = express();
-app.use(cors());
-const server = http.createServer(app);
-const io = new Server(server);
-
-app.use(express.static('public'));
-
-// app.get('/', (req, res) => {
-//     res.sendFile(__dirname + '/public/index.html');
-// });
 
 // Mapa para guardar las instancias de TikTokLiveControl por sala
 const Livescreated = new Map();
@@ -185,9 +194,4 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
-});
-
-const port = parseInt(process.env.PORT) || 9000;
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
 });

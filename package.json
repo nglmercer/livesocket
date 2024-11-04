@@ -1,25 +1,26 @@
 {
   "name": "node-express-api",
+  "package-name": "livecapp",
+  "app-name": "livechat",
   "description": "Simple api sample in Node",
+  "icon": "./assets/icon.png",
+  "project-type": "webview",
   "version": "1.0.0",
-  "private": true,
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "dev": "nodemon index.js",
     "start": "node index.js"
   },
-  "author": "Google LLC",
+  "permission": [
+    "android.permission.INTERNET"
+  ],
+  "dist-path": "./dist",
+  "author": "melserv",
   "license": "Apache-2.0",
   "dependencies": {
+    "androidjs": "^2.0.6",
     "axios": "^1.7.7",
-    "express": "^4.21.0",
-    "from": "^0.1.7",
-    "import": "^0.0.6",
+    "localtunnel": "^1.9.1",
     "socket.io": "^4.8.0",
     "tiktok-live-connector": "^1.2.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
   }
 }
