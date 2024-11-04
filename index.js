@@ -61,24 +61,29 @@ const server = Bun.serve({
         }
     }
 });
-server.publish("the-group-chat", "Hello world");
 console.log(`Server running at http://localhost:${PORT}`);
 
 // Define la clase y métodos para gestionar la conexión con TikTok
 class TiktokLiveControl {
     constructor(uniqueId) {
         this.uniqueId = this.normalizeUniqueId(uniqueId);
-        this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId, {
+        this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId , {
             processInitialData: true,
             enableExtendedGiftInfo: true,
-            enableWebsocketUpgrade: false,
+            enableWebsocketUpgrade: true,
             requestPollingIntervalMs: 2000,
-            requestOptions: { timeout: 10000 },
-            websocketOptions: { timeout: 10000 },
+            requestOptions: {
+                timeout: 10000
+            },
+            websocketOptions: {
+                timeout: 10000
+            },
         });
         this.isConnected = false;
-        this.state = {};
+        this.options = options;
+        this.state = {}
     }
+
 
     normalizeUniqueId(uniqueId) {
         uniqueId = uniqueId.trim();
@@ -89,7 +94,7 @@ class TiktokLiveControl {
         if (!uniqueId) return false;
         uniqueId = uniqueId.trim();
         if (uniqueId.startsWith('@')) uniqueId = uniqueId.substring(1);
-        return uniqueId.length >= 2 && /^[a-zA-Z0-9._]+$/.test(uniqueId);
+        return uniqueId.length >= 2;
     }
 
     async connect(ws) {
