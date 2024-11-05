@@ -1,6 +1,6 @@
-import { WebcastPushConnection, signatureProvider } from 'tiktok-live-connector';
 import express from 'express';
 import { Server } from 'socket.io';
+import { createClient } from "@retconned/kick-js";
 import http from 'http';
 import cors from 'cors';
 
@@ -19,30 +19,15 @@ app.use(express.static('public'));
 const Livescreated = new Map();
 
 const LiveEvents = [
-    'chat', 'gift', 'connected', 'disconnected',
-    'websocketConnected', 'error', 'member', 'roomUser',
-    'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share', 'streamEnd'
+    'ready', 'ChatMessage', 'Subscription', 'disconnected'
 ];
-signatureProvider.config.extraParams.apiKey = "NmYzMGMwNmMzODQ5YmUxYjkzNTI0OTIyMzBlOGZlMjgwNTJhY2JhMWQ0MzhhNWVmMGZmMjgy";
 class TiktokLiveControl {
     constructor(uniqueId, options) {
         this.uniqueId = this.normalizeUniqueId(uniqueId);
-        this.tiktokLiveConnection = new WebcastPushConnection(this.uniqueId , {
-            processInitialData: true,
-            enableExtendedGiftInfo: true,
-            enableWebsocketUpgrade: true,
-            requestPollingIntervalMs: 2000,
-            requestOptions: {
-                timeout: 10000
-            },
-            websocketOptions: {
-                timeout: 10000
-            },
-        });
+        this.kickliveconnector = createClient(uniqueId, { logger: true });
         this.isConnected = false;
         this.options = options;
-        this.state = {}
+        this.state = this.kickliveconnector.user;
     }
 
     // Método para normalizar el uniqueId
@@ -50,9 +35,6 @@ class TiktokLiveControl {
         // Eliminar espacios en blanco
         uniqueId = uniqueId.trim();
         // Asegurarse de que tenga @ al principio
-        if (!uniqueId.startsWith('@')) {
-            uniqueId = '@' + uniqueId;
-        }
         return uniqueId;
     }
 
@@ -60,38 +42,16 @@ class TiktokLiveControl {
     static isValidUniqueId(uniqueId) {
         if (!uniqueId) return false;
         uniqueId = uniqueId.trim();
-        // Eliminar @ si existe para la validación
-        if (uniqueId.startsWith('@')) {
-            uniqueId = uniqueId.substring(1);
-        }
         // Verificar que tenga al menos 2 caracteres y solo contenga caracteres válidos
         return uniqueId.length >= 2 && /^[a-zA-Z0-9._]+$/.test(uniqueId);
     }
 
-    async connect(socket) {
-        try {
-            const state = await this.tiktokLiveConnection.connect();
-            console.log(`Connected to roomId ${state.roomId}`);
-            this.isConnected = true;
-            this.initializeEventHandlers();
-            this.state = state;
-            if (socket) {socket.emit('connected',this.getState())}
-            return state;
-        } catch (err) {
-            console.error('Failed to connect', this.uniqueId, err);
-            this.isConnected = false;
-            const errorMessage = err.message || err.toString();
-            console.log(errorMessage);
-            if (socket) {socket.emit('streamEnd',errorMessage)}
-            return errorMessage;
-        }
-    }
     getState() {
         return this.state;
     }
     initializeEventHandlers() {
         LiveEvents.forEach(event => {
-            this.tiktokLiveConnection.on(event, (data) => {
+            this.kickliveconnector.on(event, (data) => {
                 io.to(this.uniqueId).emit(event, data);
                 if (event === 'disconnected') {
                     console.log(`${event} event for ${this.uniqueId}`);
@@ -102,9 +62,9 @@ class TiktokLiveControl {
     }
 
     disconnect() {
-        if (this.tiktokLiveConnection) {
-            this.tiktokLiveConnection.disconnect();
+        if (this.kickliveconnector) {
             this.isConnected = false;
+            this.kickliveconnector = null;
         }
     }
 }
@@ -112,20 +72,12 @@ class TiktokLiveControl {
 // Función para obtener o crear una instancia de TiktokLiveControl
 async function getOrCreateLiveConnection(uniqueId,socket) {
     // Normalizar el uniqueId
-    const normalizedId = uniqueId.startsWith('@') ? uniqueId : '@' + uniqueId;
+    const normalizedId = uniqueId.trim();
     
     // Verificar si ya existe una instancia
     let existingConnection = Livescreated.get(normalizedId);
     
     if (existingConnection) {
-        // Si existe pero no está conectada, reconectar
-        if (!existingConnection.isConnected) {
-            try {
-                existingConnection.connect(socket);
-            } catch (err) {
-                throw new Error(`Failed to reconnect to ${normalizedId}: ${err.message}`);
-            }
-        }
         if (socket && existingConnection.isConnected) {socket.emit('connected',existingConnection.getState())}
         return existingConnection;
     }
@@ -138,7 +90,6 @@ async function getOrCreateLiveConnection(uniqueId,socket) {
     // Crear nueva instancia
     const newConnection = new TiktokLiveControl(normalizedId);
     try {
-        await newConnection.connect(socket);
         Livescreated.set(normalizedId, newConnection);
         // set isconnected to true
         newConnection.isConnected = true;

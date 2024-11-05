@@ -43,10 +43,7 @@ function joinRoom(roomid) {
     const roomId = roomid || document.getElementById('roomId').value;
     socket.emit('joinRoom', { uniqueId: roomId });
 }
-const events = ['chat', 'gift', 'connected', 'disconnected',
-    'websocketConnected', 'error', 'member', 'roomUser',
-    'like', 'social', 'emote', 'envelope', 'questionNew',
-    'subscribe', 'follow', 'share', 'streamEnd'];
+const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error'];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
 const countershare = new Counter(0, 1000);
@@ -85,60 +82,9 @@ const containerConfig = {
 socket.on("allromuser",(data) => {console.log("allromuser",data)})
 events.forEach(event => {
     socket.on(event, (data) => {
-      Readtext(event, data);
+      //Readtext(event, data);
         localStorage.setItem('last'+event, JSON.stringify(data));
-        switch (event) {
-            case 'member':
-                HandleAccionEvent('welcome',data)
-                handlemember(data);
-                break;
-            case 'chat':
-              HandleAccionEvent(event,data)
-              handlechat(data);
-                break;
-            case 'gift':
-                handlegift(data);
-                HandleAccionEvent(event,data)
-                // create new eventType special case is bits of gift compare diamondcost
-                // if (data.diamondCost) {
-                //   HandleAccionEvent("bits",data)
-                // }
-                break;
-            case 'like':
-                handlelike(data);
-                // object entry o map para modificar data.likeCount para que sea igual al valor de EvaluerLikes.addLike(data)
-                Object.assign(data, { likeCount: EvaluerLikes.addLike(data) });
-                HandleAccionEvent(event,data, 'isInRange')
-                break;
-            case 'follow':
-                handleFollow(data);
-                HandleAccionEvent(event,data)
-                break;
-            case 'share':
-                handleShare(data);
-                HandleAccionEvent(event,data)
-                break;
-            case 'connected':
-                userProfile.setConnectionStatus('online');
-                if (data.roomInfo?.owner) localStorage.setItem('ownerdata',JSON.stringify(data.roomInfo.owner));
-                const lastownerdata = localStorage.getItem('ownerdata');
-                if (lastownerdata) userProfile.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
-                console.log(event, data);
-                showAlert('success', `Connected`);
-                break;
-            case 'streamEnd':
-            case 'disconnected':
-            case 'error':
-                userProfile.setConnectionStatus('offline');
-                showAlert('error', `${event}`);
-                console.log(event, data);
-                break;
-            default:
-                HandleAccionEvent(event,data) 
-                //console.log(event, data);
-                //showAlert('success', `Event ${event}`);
-                break;  
-        }
+        console.log("event",event,data)
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
