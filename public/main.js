@@ -99,6 +99,10 @@ events.forEach(event => {
             case 'gift':
                 handlegift(data);
                 HandleAccionEvent(event,data)
+                // create new eventType special case is bits of gift compare diamondcost
+                // if (data.diamondCost) {
+                //   HandleAccionEvent("bits",data)
+                // }
                 break;
             case 'like':
                 handlelike(data);
