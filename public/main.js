@@ -10,25 +10,7 @@ const socket = io();
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
 userProfile.setConnectionStatus('offline');
-if (userProfile.state.connected) {
-  const trackerMultiple = new UserInteractionTracker();
-  trackerMultiple.addInteractionListener(event => {
-    const interacted = trackerMultiple.getAllInteractionsByArray([
-      'click', 
-      'touchstart', 
-      'keydown',
-    ]);
-    
-    
-    if (interacted) {
-      console.log('Usuario ha interactuado se conectara');
-      joinRoom(userProfile.state.username);
-      trackerMultiple.destroy()
-    }
-  });
-  
-    userProfile.setConnectionStatus('away');
-}
+
 // Escuchar eventos
 userProfile.addEventListener('userConnected', (e) => {
     console.log('Usuario conectado:', e.detail.username, e);
@@ -43,7 +25,107 @@ function joinRoom(roomid) {
     const roomId = roomid || document.getElementById('roomId').value;
     socket.emit('joinRoom', { uniqueId: roomId });
 }
-const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error'];
+function getAvatarUrl(avatarData, preferredSize = 'large') {
+  // Mapeo de nombres de tamaños a keys del objeto
+  const sizeMap = {
+      'large': 'avatar_large',
+      'medium': 'avatar_medium',
+      'thumb': 'avatar_thumb'
+  };
+
+  // Orden de fallback para los tamaños
+  const sizeOrder = ['large', 'medium', 'thumb'];
+  
+  // Si se proporciona un tamaño preferido, reordenar para intentar ese primero
+  if (preferredSize && sizeOrder.includes(preferredSize)) {
+      const index = sizeOrder.indexOf(preferredSize);
+      sizeOrder.unshift(...sizeOrder.splice(index, 1));
+  }
+
+  // Intentar obtener URL del tamaño preferido, con fallback a otros tamaños
+  for (const size of sizeOrder) {
+      const avatarKey = sizeMap[size];
+      const avatarInfo = avatarData[avatarKey];
+
+      if (avatarInfo && 
+          avatarInfo.url_list && 
+          Array.isArray(avatarInfo.url_list) && 
+          avatarInfo.url_list.length > 0) {
+          // Preferir WebP si está disponible
+          const webpUrl = avatarInfo.url_list.find(url => url.endsWith('.webp'));
+          return webpUrl || avatarInfo.url_list[0];
+      }
+  }
+
+  return ''; // Retornar string vacío si no se encuentra ninguna URL
+}
+class GetAvatarUrlKick {
+  static async getInformation(username) {
+      const API = `https://kick.com/api/v1/users/${username}`;
+      
+      // Verificar si los datos ya están almacenados y coinciden con el usuario
+      if (localStorage.getItem("Lastuserinfo") && localStorage.getItem("Lastusername") === username) {
+          return JSON.parse(localStorage.getItem("Lastuserinfo"));
+      }
+
+      try {
+          const response = await fetch(API, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json'
+              }
+          });
+          
+          if (!response.ok) {
+              throw new Error(`Error al obtener datos: ${response.statusText}`);
+          }
+
+          const jsonObject = await response.json();
+          
+          // Guardar los datos una vez resueltos en localStorage
+          localStorage.setItem("Lastusername", username); // Guardar el nombre de usuario sin JSON.stringify
+          localStorage.setItem("Lastuserinfo", JSON.stringify(jsonObject));
+
+          console.log('JSON Object:', jsonObject);
+          return jsonObject;
+
+      } catch (error) {
+          console.error('Error al obtener la información:', error);
+      }
+  }
+
+  static async getProfilePic(username) {
+      // Obtener la información y luego devolver el campo "profilepic"
+      const userInfo = await GetAvatarUrlKick.getInformation(username);
+      return userInfo ? userInfo.profilepic : null;
+  }
+}
+
+if (userProfile.state.connected) {
+  const trackerMultiple = new UserInteractionTracker();
+  trackerMultiple.addInteractionListener(async event => {
+    try {
+    const interacted = trackerMultiple.getAllInteractionsByArray([
+      'click', 
+      'touchstart', 
+      'keydown',
+    ]);
+    
+    
+    if (interacted) {
+      console.log('Usuario ha interactuado se conectara');
+      joinRoom(userProfile.state.username);
+      trackerMultiple.destroy()
+    }
+    userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(userProfile.state.username));
+  } catch (error) {
+    console.error('Error al detectar interacción:', error);
+  }
+  });
+  
+    userProfile.setConnectionStatus('away');
+}
+const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error', 'allromuser'];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
 const countershare = new Counter(0, 1000);
@@ -79,48 +161,44 @@ const containerConfig = {
     container: new ChatContainer('.eventscontainer', 200)
   }
 };   
-socket.on("allromuser",(data) => {console.log("allromuser",data)})
 events.forEach(event => {
-    socket.on(event, (data) => {
+    socket.on(event, async (data) => {
       //Readtext(event, data);
         localStorage.setItem('last'+event, JSON.stringify(data));
-        console.log("event",event,data)
+        //console.log("event",event,data)
+        switch (event) {
+            case 'ready':
+                userProfile.setProfileImage(await GetAvatarUrlKick.getprofilepic(data.username));
+                break;
+            case 'ChatMessage':
+                const newdata = await mapChatMessagetochat(data);
+                HandleAccionEvent('chat',newdata)
+                handlechat(newdata);
+                Readtext('chat',newdata);
+                break;
+            default:
+              console.log("event",event,data)
+                break;
+        }
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
-function getAvatarUrl(avatarData, preferredSize = 'large') {
-  // Mapeo de nombres de tamaños a keys del objeto
-  const sizeMap = {
-      'large': 'avatar_large',
-      'medium': 'avatar_medium',
-      'thumb': 'avatar_thumb'
-  };
-
-  // Orden de fallback para los tamaños
-  const sizeOrder = ['large', 'medium', 'thumb'];
-  
-  // Si se proporciona un tamaño preferido, reordenar para intentar ese primero
-  if (preferredSize && sizeOrder.includes(preferredSize)) {
-      const index = sizeOrder.indexOf(preferredSize);
-      sizeOrder.unshift(...sizeOrder.splice(index, 1));
+(async () => {
+  const messagedata = JSON.parse(localStorage.getItem('lastChatMessage'));
+  const newdata = await mapChatMessagetochat(messagedata);
+  HandleAccionEvent('chat',newdata)
+  console.log("mapChatMessagetochat",newdata)
+  handlechat(newdata);
+})()
+async function mapChatMessagetochat(data) {
+  return {
+    comment: data.content,
+    type: data.type,
+    uniqueId: data.sender?.username,
+    nickname: data.sender?.slug,
+    color: data.sender?.indentity?.color,
+    profilePictureUrl: await GetAvatarUrlKick.getProfilePic(data.sender?.username),
   }
-
-  // Intentar obtener URL del tamaño preferido, con fallback a otros tamaños
-  for (const size of sizeOrder) {
-      const avatarKey = sizeMap[size];
-      const avatarInfo = avatarData[avatarKey];
-
-      if (avatarInfo && 
-          avatarInfo.url_list && 
-          Array.isArray(avatarInfo.url_list) && 
-          avatarInfo.url_list.length > 0) {
-          // Preferir WebP si está disponible
-          const webpUrl = avatarInfo.url_list.find(url => url.endsWith('.webp'));
-          return webpUrl || avatarInfo.url_list[0];
-      }
-  }
-
-  return ''; // Retornar string vacío si no se encuentra ninguna URL
 }
 const textcontent = {
     content: {

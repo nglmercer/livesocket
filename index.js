@@ -17,7 +17,7 @@ app.use(express.static('public'));
 
 // Mapa para guardar las instancias de TikTokLiveControl por sala
 const Livescreated = new Map();
-const LiveEvents = ['ready', 'ChatMessage', 'Subscription', 'disconnected'];
+const LiveEvents = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'login','close'];
 
 class TiktokLiveControl {
     constructor(uniqueId, options) {
@@ -25,7 +25,7 @@ class TiktokLiveControl {
         this.kickliveconnector = createClient(uniqueId, { logger: true });
         this.isConnected = false;
         this.options = options;
-        this.state = this.kickliveconnector.user || this.kickliveconnector || {};
+        this.state = this.kickliveconnector || {};
         this.emiteduser = new Map();
         this.eventHandlersInitialized = false; // Nuevo indicador
     }
