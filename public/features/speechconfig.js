@@ -5,6 +5,7 @@ import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 import { voicelistmap } from '../audio/voiceoptions.js';
 import { getTranslation, translations } from '../translations.js';
 import { filterworddefault } from '../assets/jsondata.js';
+
 const keys = [
     { key: 'chat', text: `uniqueId ${getTranslation('dice')} comment`, check: true },
     { key: 'gift', text:  `uniqueId ${getTranslation('regalo')} repeatcount giftName`, check: true },
@@ -47,13 +48,20 @@ function getTTSdatastore() {
     if (!ttsdatastore) localStorage.setItem('ttsdatastore', JSON.stringify(ttsdata));
     return ttsdatastore ? JSON.parse(ttsdatastore) : ttsdata;
 }
-const callbackconfig = { callback: async (data,modifiedData) => {
+const callbackconfig = { 
+    type: 'button',
+    label: getTranslation('savechanges'),
+    class: 'default-button',
+    callback: async (data,modifiedData) => {
     console.log("editcallback", data,modifiedData);
     localStorage.setItem('ttsdatastore', JSON.stringify(modifiedData));
   }
-  , deletecallback:  undefined };
-const configelement = new EditModal('#chatbotconfig',callbackconfig,ttsconfig);
-configelement.render(getTTSdatastore());
+ };
+const configelement = new EditModal({...ttsconfig,savebutton:callbackconfig});
+const newElement = document.createElement('div');
+newElement.textContent = 'Nuevo contenido';
+const htmlvoiceevents = configelement.ReturnHtml(getTTSdatastore());
+
 let voicesList = [];
 
 // Función para mapear las voces
@@ -163,6 +171,15 @@ const selectvoiceconfig = {
             max: 1,
             returnType: 'number',
         },
+    },
+    savebutton: {
+        class: 'default-button',
+        type: 'button',
+        label: getTranslation('savechanges'),
+        callback: async (data,modifiedData) => {
+            console.log("callbackconfig",data,modifiedData);
+            localStorage.setItem('voicedatastore', JSON.stringify(modifiedData));
+        },
     }
 };
 
@@ -173,12 +190,8 @@ if (typeof speechSynthesis !== "undefined" && speechSynthesis.onvoiceschanged !=
 }
 
 const voiceCheckInterval = setInterval(checkVoices, 100);
-const callbackvoice = { callback: async (data,modifiedData) => {
-  console.log("callbackvoice",data,modifiedData);
-  localStorage.setItem('voicedatastore', JSON.stringify(modifiedData));
-  }
-  , deletecallback:  undefined };
-const voiceelement = new EditModal('#voiceconfig',callbackvoice,selectvoiceconfig);
+
+const voiceelement = new EditModal(selectvoiceconfig);
 const defaultvoicedata = JSON.parse(localStorage.getItem('voicedatastore')) || {
     selectvoiceoption: 'selectvoice1', 
     voice1: {
@@ -196,7 +209,8 @@ const defaultvoicedata = JSON.parse(localStorage.getItem('voicedatastore')) || {
     },
 };
 if (!localStorage.getItem('voicedatastore')) localStorage.setItem('voicedatastore', JSON.stringify(defaultvoicedata));
-voiceelement.render(defaultvoicedata);
+const htmlvoice = voiceelement.ReturnHtml(defaultvoicedata);
+
 setTimeout(() => {
   if (mapVoiceList().length > 0) {
     voiceelement.updateData(defaultvoicedata);
@@ -291,114 +305,123 @@ class ArrayStorageManager {
   
   // Clase para manejar la UI
   class ArrayManagerUI {
-    constructor(storageManager, idelement) {
+    constructor(storageManager) {
         this.manager = storageManager;
-        this.setupModal();
-        this.setupEventListeners(idelement);
     }
-  
-    setupModal() {
-        const modal = document.createElement('div');
-        const storageKeyname = this.manager.storageKey
-        modal.innerHTML = `
-          <custom-modal modal-type="form" id="ArrayManagerUI">
-                <h2 class="modal-title"><translate-text key="${storageKeyname}"></translate-text>
+
+    // Retorna solo el HTML
+    getHTML() {
+        const storageKeyname = this.manager.storageKey;
+        return `
+            <div class="array-manager-container" data-component="array-manager">
+                <h2 class="modal-title">
+                    <translate-text key="${storageKeyname}"></translate-text>
                 </h2>
                 <div class="input-container">
-                    <input type="text" id="itemInput" placeholder="${getTranslation('addelement')}">
-                    <button id="addButton" class="open-modal-btn">${getTranslation('add')}</button>
-                    <button id="Initialdata" class="open-modal-btn">${getTranslation('default')} ${getTranslation(storageKeyname)}</button>
+                    <input type="text" class="array-manager-input" placeholder="${getTranslation('addelement')}">
+                    <button class="array-manager-add open-modal-btn">${getTranslation('add')}</button>
+                    <button class="array-manager-default open-modal-btn">${getTranslation('default')} ${getTranslation(storageKeyname)}</button>
                 </div>
-                <div id="errorMessage" class="error-message">
+                <div class="array-manager-error error-message">
                     El texto debe tener al menos 2 caracteres
                 </div>
-                <div id="itemsContainer" class="items-container">
+                <div class="array-manager-items items-container">
                 </div>
-            </custom-modal>
+            </div>
         `;
-        document.body.appendChild(modal);
-        this.modal = modal;
     }
-  
-    setupEventListeners(idelement) {
-      const buttonid = idelement ||'openModal';
-        // Botón para abrir modal
-        document.getElementById(buttonid).addEventListener('click', () => {
-            this.openModal();
-        });
-  
-        // Agregar item
-        const input = this.modal.querySelector('#itemInput');
-        const addButton = this.modal.querySelector('#addButton');
-        const Initialdata = this.modal.querySelector('#Initialdata');
-        const addItem = (stringtext = input.value.trim()) => {
-            const text = stringtext;
-            const errorMessage = this.modal.querySelector('#errorMessage');
+
+    // Método para inicializar los event listeners
+    initializeEventListeners(containerElement) {
+        if (!containerElement) {
+            console.error('No se proporcionó un elemento contenedor válido');
+            return;
+        }
+
+        const input = containerElement.querySelector('.array-manager-input');
+        const addButton = containerElement.querySelector('.array-manager-add');
+        const defaultButton = containerElement.querySelector('.array-manager-default');
+        const errorMessage = containerElement.querySelector('.array-manager-error');
+        const itemsContainer = containerElement.querySelector('.array-manager-items');
+
+        // Crear item element handler
+        const createItemElement = (text) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-btn';
+            deleteButton.textContent = '×';
+            
+            deleteButton.addEventListener('click', () => {
+                this.manager.remove(text);
+                itemDiv.remove();
+            });
+
+            itemDiv.appendChild(textSpan);
+            itemDiv.appendChild(deleteButton);
+            itemsContainer.appendChild(itemDiv);
+        };
+
+        // Add item handler
+        const handleAddItem = (text = input.value.trim()) => {
             errorMessage.style.display = 'none';
-           
+            
             if (this.manager.validateInput(text)) {
                 if (this.manager.add(text)) {
-                    this.createItemElement(text);
-                    input.value = '';
+                    createItemElement(text);
+                    if (text === input.value.trim()) {
+                        input.value = '';
+                    }
                 }
             } else {
                 errorMessage.style.display = 'block';
             }
         };
-        const addDefault = () => {
-            filterworddefault.forEach(text => {
-                addItem(text);
+
+        // Load existing items
+        const loadItems = () => {
+            itemsContainer.innerHTML = '';
+            this.manager.getAll().forEach(item => {
+                createItemElement(item);
             });
         };
-        Initialdata.addEventListener('click', addDefault);
-        addButton.addEventListener('click', addItem);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addItem();
-        });
-    }
-  
-    createItemElement(text) {
-        const itemsContainer = this.modal.querySelector('#itemsContainer');
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'item';
-       
-        const textSpan = document.createElement('span');
-        textSpan.textContent = text;
-       
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete-btn';
-        deleteButton.textContent = '×';
-        deleteButton.onclick = () => {
-            this.manager.remove(text);
-            itemDiv.remove();
+
+        // Add default items handler
+        const handleAddDefault = () => {
+            filterworddefault.forEach(text => {
+                handleAddItem(text);
+            });
         };
-       
-        itemDiv.appendChild(textSpan);
-        itemDiv.appendChild(deleteButton);
-        itemsContainer.appendChild(itemDiv);
-    }
-  
-    loadItems() {
-        const itemsContainer = this.modal.querySelector('#itemsContainer');
-        itemsContainer.innerHTML = '';
-        this.manager.getAll().forEach(item => {
-            this.createItemElement(item);
+
+        // Event Listeners
+        addButton.addEventListener('click', () => handleAddItem());
+        defaultButton.addEventListener('click', handleAddDefault);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAddItem();
         });
+
+        // Cargar items existentes
+        loadItems();
+
+        // Retornamos los métodos que podrían ser útiles externamente
+        return {
+            loadItems,
+            addItem: handleAddItem,
+            addDefault: handleAddDefault
+        };
     }
-  
-    openModal() {
-        this.loadItems();
-        document.getElementById('ArrayManagerUI').open();
-    }
-  
-    closeModal() {
-        document.getElementById('ArrayManagerUI').close();
-  }
-  }
-  
+}
+
   // Inicialización
   const manager = new ArrayStorageManager('filterwords');
   const ui = new ArrayManagerUI(manager);
+  
+  // Agregar al elemento con id 'container'
+  //ui.initializeEventListeners(document.getElementById('container123'));
   function addfilterword(word) {
     manager.add(word);
     ui.loadItems();
@@ -408,5 +431,5 @@ class ArrayStorageManager {
     //console.log("existwordinArray",response,word)
     return response;
   }
-export { Replacetextoread, addfilterword}
+export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents}
 // asdasd como seria un metodo para hacer un string a json
