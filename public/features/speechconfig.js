@@ -5,7 +5,7 @@ import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 import { voicelistmap } from '../audio/voiceoptions.js';
 import { getTranslation, translations } from '../translations.js';
 import { filterworddefault } from '../assets/jsondata.js';
-
+console.log("filterworddefault",filterworddefault)
 const keys = [
     { key: 'chat', text: `uniqueId ${getTranslation('dice')} comment`, check: true },
     { key: 'gift', text:  `uniqueId ${getTranslation('regalo')} repeatcount giftName`, check: true },
@@ -234,6 +234,7 @@ function Replacetextoread(eventType = 'chat',data) {
     const textoread = replaceVariables(configtts[eventType].text, data);
     logger.log('speechchat',configtts,textoread,configtts[eventType].text)
     if (existwordinArray(textoread)) { showAlert('info',`${getTranslation('filterword')} ${textoread} `); return; }
+    if (data.uniqueId && existuserinArray(data.uniqueId)) { showAlert('info',`${getTranslation('blacklistuser')} ${data.uniqueId} `); return; }
     handleleermensaje(textoread);
 }
 /* setTimeout(() => {
@@ -251,13 +252,13 @@ const ui = new ArrayManagerUI(manager,filterworddefault);
 // Uso del método getHTML para añadir el componente al DOM
 const uiElement = ui.getHTML();
 // appContainer.appendChild(uiElement);
-
-// Inicializar event listeners
 ui.initializeEventListeners(uiElement);
 
+const bluemanager = new ArrayStorageManager('blacklistusers');
+const blueui = new ArrayManagerUI(bluemanager,["kickbot","nightbot","examplebot"]);    
+const blueuiElement = blueui.getHTML();
+blueui.initializeEventListeners(blueuiElement);
 
-  // Agregar al elemento con id 'container'
-  //ui.initializeEventListeners(document.getElementById('container123'));
   function addfilterword(word) {
     manager.add(word);
     ui.loadItems();
@@ -267,6 +268,11 @@ ui.initializeEventListeners(uiElement);
     //console.log("existwordinArray",response,word)
     return response;
   }
+  function existuserinArray(word) {
+    const response = bluemanager.containword(word);
+    //console.log("existwordinArray",response,word)
+    return response;
+  }
   //existwordinArray("tedesku")
-export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents,uiElement}
+export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
 // asdasd como seria un metodo para hacer un string a json

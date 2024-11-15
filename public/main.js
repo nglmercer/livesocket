@@ -419,7 +419,7 @@ async function HandleAccionEvent(eventType,data,comparison = 'isEqual') {
     console.log(`Objeto coincidente encontrado en el índice ${index}:`, matchingObject, results);
   };
   const results = compareObjects(data, await EventsManager.getAllData(), keysToCheck, callbackFunction);
-  logger.log('debug',"results HandleAccionEvent",results)
+  console.log('debug',"results HandleAccionEvent",results)
   if (results.validResults.length >= 1 ) {
     results.validResults.forEach(result => {
       processAction(result,data)
