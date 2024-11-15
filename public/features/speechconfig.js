@@ -1,6 +1,6 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { showAlert } from '../components/message.js';
-import {replaceVariables, logger} from '../utils/utils.js';
+import {replaceVariables, logger, ArrayStorageManager, ArrayManagerUI} from '../utils/utils.js';
 import { leerMensajes, handleleermensaje } from '../audio/tts.js';
 import { voicelistmap } from '../audio/voiceoptions.js';
 import { getTranslation, translations } from '../translations.js';
@@ -240,186 +240,22 @@ function Replacetextoread(eventType = 'chat',data) {
   Replacetextoread('chat',{comment: "hola angelo con 8lo"})
   Replacetextoread('chat',{comment: "este si se lee"})
 },3000) */
-class ArrayStorageManager {
-    constructor(storageKey) {
-        this.storageKey = storageKey;
-        this.items = this.getAll();
-    }
-  
-    getAll() {
-        const stored = localStorage.getItem(this.storageKey);
-        return stored ? JSON.parse(stored) : [];
-    }
-  
-    saveToStorage() {
-        localStorage.setItem(this.storageKey, JSON.stringify(this.items));
-    }
-  
-    validateInput(item) {
-        if (typeof item !== 'string') return false;
-        if (item.length <= 1) return false;
-        return true;
-    }
-  
-    existInItems(text) {
-        const normalizedText = text.toLowerCase();
-        return this.items.some(item =>
-            item.toLowerCase() === normalizedText
-        );
-    }
-    // Verificar si algún item está contenido en el texto
-    containswordInitems(text) {
-        const normalizedText = text.toLowerCase();
-        return this.items.some(item =>
-            normalizedText.includes(item.toLowerCase())
-        );
-    }
 
-    // Verificar si el texto existe como item o contiene algún item
-    containword(text) {
-        if (!this.validateInput(text)) return false;
-        return this.existInItems(text) || this.containswordInitems(text);
-    }
-    add(item) {
-        if (!this.validateInput(item)) return false;
-        if (!this.existInItems(item)) {
-            this.items.push(item);
-            this.saveToStorage();
-            return true;
-        }
-        return false;
-    }
-  
-    remove(item) {
-        const initialLength = this.items.length;
-        this.items = this.items.filter(existingItem =>
-            existingItem.toLowerCase() !== item.toLowerCase()
-        );
-        if (this.items.length !== initialLength) {
-            this.saveToStorage();
-            return true;
-        }
-        return false;
-    }
-  }
   
   // Clase para manejar la UI
-  class ArrayManagerUI {
-    constructor(storageManager) {
-        this.manager = storageManager;
-    }
 
-    // Retorna solo el HTML
-    getHTML() {
-        const storageKeyname = this.manager.storageKey;
-        return `
-            <div class="array-manager-container" data-component="array-manager">
-                <h2 class="modal-title">
-                    <translate-text key="${storageKeyname}"></translate-text>
-                </h2>
-                <div class="input-container">
-                    <input type="text" class="array-manager-input" placeholder="${getTranslation('addelement')}">
-                    <button class="array-manager-add open-modal-btn">${getTranslation('add')}</button>
-                    <button class="array-manager-default open-modal-btn">${getTranslation('default')} ${getTranslation(storageKeyname)}</button>
-                </div>
-                <div class="array-manager-error error-message">
-                    El texto debe tener al menos 2 caracteres
-                </div>
-                <div class="array-manager-items items-container">
-                </div>
-            </div>
-        `;
-    }
+// Inicialización
+const manager = new ArrayStorageManager('filterwords');
+const ui = new ArrayManagerUI(manager,filterworddefault);
 
-    // Método para inicializar los event listeners
-    initializeEventListeners(containerElement) {
-        if (!containerElement) {
-            console.error('No se proporcionó un elemento contenedor válido');
-            return;
-        }
+// Uso del método getHTML para añadir el componente al DOM
+const uiElement = ui.getHTML();
+// appContainer.appendChild(uiElement);
 
-        const input = containerElement.querySelector('.array-manager-input');
-        const addButton = containerElement.querySelector('.array-manager-add');
-        const defaultButton = containerElement.querySelector('.array-manager-default');
-        const errorMessage = containerElement.querySelector('.array-manager-error');
-        const itemsContainer = containerElement.querySelector('.array-manager-items');
+// Inicializar event listeners
+ui.initializeEventListeners(uiElement);
 
-        // Crear item element handler
-        const createItemElement = (text) => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item';
 
-            const textSpan = document.createElement('span');
-            textSpan.textContent = text;
-
-            const deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-btn';
-            deleteButton.textContent = '×';
-            
-            deleteButton.addEventListener('click', () => {
-                this.manager.remove(text);
-                itemDiv.remove();
-            });
-
-            itemDiv.appendChild(textSpan);
-            itemDiv.appendChild(deleteButton);
-            itemsContainer.appendChild(itemDiv);
-        };
-
-        // Add item handler
-        const handleAddItem = (text = input.value.trim()) => {
-            errorMessage.style.display = 'none';
-            
-            if (this.manager.validateInput(text)) {
-                if (this.manager.add(text)) {
-                    createItemElement(text);
-                    if (text === input.value.trim()) {
-                        input.value = '';
-                    }
-                }
-            } else {
-                errorMessage.style.display = 'block';
-            }
-        };
-
-        // Load existing items
-        const loadItems = () => {
-            itemsContainer.innerHTML = '';
-            this.manager.getAll().forEach(item => {
-                createItemElement(item);
-            });
-        };
-
-        // Add default items handler
-        const handleAddDefault = () => {
-            filterworddefault.forEach(text => {
-                handleAddItem(text);
-            });
-        };
-
-        // Event Listeners
-        addButton.addEventListener('click', () => handleAddItem());
-        defaultButton.addEventListener('click', handleAddDefault);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleAddItem();
-        });
-
-        // Cargar items existentes
-        loadItems();
-
-        // Retornamos los métodos que podrían ser útiles externamente
-        return {
-            loadItems,
-            addItem: handleAddItem,
-            addDefault: handleAddDefault
-        };
-    }
-}
-
-  // Inicialización
-  const manager = new ArrayStorageManager('filterwords');
-  const ui = new ArrayManagerUI(manager);
-  
   // Agregar al elemento con id 'container'
   //ui.initializeEventListeners(document.getElementById('container123'));
   function addfilterword(word) {
@@ -431,5 +267,5 @@ class ArrayStorageManager {
     //console.log("existwordinArray",response,word)
     return response;
   }
-export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents}
+export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents,uiElement}
 // asdasd como seria un metodo para hacer un string a json

@@ -1,4 +1,4 @@
-import { htmlvoice, htmlvoiceevents} from './features/speechconfig.js';
+import { htmlvoice, htmlvoiceevents, uiElement} from './features/speechconfig.js';
 import { htmlminecraft } from './features/Minecraftconfig.js';
 //import { htmlobselement } from './features/obcontroller.js';
 import { getTranslation, translations } from './translations.js';
@@ -39,5 +39,7 @@ tabs.addContent(1,htmlvoice); // Agrega al segundo tab
 tabs.setTabTitle(1,`${getTranslation('voicesettings')}`);
 tabs.addContent(2,htmlminecraft); // Agrega al tercer tab
 tabs.setTabTitle(2,`${getTranslation('minecraft')}`);
+tabs.addContent(3,uiElement); // Agrega al tercer tab
+tabs.setTabTitle(3,`${getTranslation('filterwords')}`);
 //tabs.addContent(3,htmlobselement); // Agrega al tercer tab
 //tabs.setTabTitle(3,`${getTranslation('obs')}`);
