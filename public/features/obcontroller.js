@@ -1,6 +1,6 @@
 import DynamicTable, { EditModal } from '../components/renderfields.js';
 import { getTranslation, translations } from '../translations.js';
-import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects,UserInteractionTracker } from '../utils/utils.js'
+import { Counter, TypeofData,ComboTracker, replaceVariables, compareObjects,UserInteractionTracker, logger } from '../utils/utils.js'
 import socketManager from '../server/socketManager.js'
 const container = document.getElementById('container');
 const obsconnectdata = {
@@ -105,7 +105,7 @@ socketManager.on("responseobs",(response,key) => {
     if (key === "getInputList") renderavaibleinputs(response);
 });
 mapedarrayobs.forEach((value,key) => {
-    console.log("mapedarrayobs",key,value,value.value);
+    //logger.log("debug",key,value,value.value);
     socketManager.on(value.value, async (...args) => {
       console.log("socketemitkey",key,value.value,...args);
       localStorage.setItem(value.value,JSON.stringify(args));

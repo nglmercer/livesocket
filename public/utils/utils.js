@@ -478,8 +478,10 @@ logger.addCategory('minecraft', true);
 logger.addCategory('Event', true);
 logger.addCategory('Action', true);
 logger.addCategory('EventAction', true);
-logger.toggleCategory('debug', false);
-logger.toggleCategory('speechchat', false);
+logger.addCategory('renderhtml', true);
+logger.toggleCategory('renderhtml', false);
+logger.toggleCategory('debug', true);
+logger.toggleCategory('speechchat', true);
 console.log(logger.listCategories());
 // // Logs en diferentes categorías
 // logger.log('datos', 'Este es un mensaje de la categoría datos', {

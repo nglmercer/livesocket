@@ -1,4 +1,5 @@
 import { getTranslation, translations } from '../translations.js';
+import { logger } from '../utils/utils.js'
 class DynamicTable {
   constructor(containerSelector,config = {}) {
       this.config = config;
@@ -107,7 +108,7 @@ getRowAt(index) {
 // usando async y await
 
 async getRowIndex(searchData) {
-  console.log("getRowIndex", searchData);
+  logger.log("renderhtml","getRowIndex", searchData);
   
   for (let i = 0; i < this.rows.length; i++) {
       const row = this.rows[i];
@@ -221,7 +222,7 @@ class DynamicRow {
           objectContainer.setAttribute('open', '');
         }
         const summary = document.createElement('summary');
-        //console.log("typeConfig summary", typeConfig, key);
+        //logger.log("renderhtml","typeConfig summary", typeConfig, key);
         summary.textContent = typeConfig.label || `${getTranslation('show')} ${getTranslation(key)}`;
 
         objectContainer.appendChild(summary);
@@ -245,7 +246,7 @@ class DynamicRow {
         cell.appendChild(objectContainer);
       } else {
         const inputElement = this.createInputElement(key, null, value, typeConfig, cell);
-        //console.log("inputElement", inputElement);
+        //logger.log("renderhtml","inputElement", inputElement);
         if (inputElement) {
           cell.appendChild(inputElement);
         } else {
@@ -441,9 +442,9 @@ class DynamicRow {
     if (typeConfig.toggleoptions) setTimeout(this.handletoggleoptions(subKey, value, HtmlContainer), 500);
     // Añadir el evento change
     selectComponent.addEventListener('change', (e) => {
-        console.log('Seleccionado:', e.detail);
-        console.log('Valor:', selectComponent.getValue());
-        console.log('mySelect:', selectComponent.value);
+        logger.log("renderhtml",'Seleccionado:', e.detail);
+        logger.log("renderhtml",'Valor:', selectComponent.getValue());
+        logger.log("renderhtml",'mySelect:', selectComponent.value);
         this.updateModifiedData(key, subKey, selectComponent.value);
         if (typeConfig.toggleoptions) this.handletoggleoptions(subKey, selectComponent.value, HtmlContainer);
         
@@ -463,7 +464,7 @@ class DynamicRow {
     const divElement = document.createElement('div');
     divElement.classList.add('div-radio-group');
     const uniquename = key + '_' + Math.random().toString(36).substring(2, 15);
-    console.log("select",typeConfig);
+    logger.log("renderhtml","select",typeConfig);
 
     if (typeConfig.options) {
         typeConfig.options.forEach(async (option) => {
@@ -582,7 +583,7 @@ class DynamicRow {
     inputElement.autocomplete = 'on';
     const subkeylabel = subKey ? subKey : inputElement.type
     inputElement.placeholder = key + ' ' +subkeylabel;
-    // console.log("createtexareaElement", key, subKey, value);
+    // logger.log("renderhtml","createtexareaElement", key, subKey, value);
     inputElement.cols = 50;
     inputElement.addEventListener('input', () => {
       const returnValue = inputElement.value;
@@ -596,7 +597,7 @@ class DynamicRow {
       options: typeConfig.options,
       name: key,
     };
-    // console.log("createMultiSelectElement", fieldConfig,value);
+    // logger.log("renderhtml","createMultiSelectElement", fieldConfig,value);
     const multiSelectField = createMultiSelectField(fieldConfig, (selectedValues) => {
       this.updateModifiedData(key, subKey, selectedValues);
     }, value);
@@ -609,7 +610,7 @@ class DynamicRow {
       options: typeConfig.options,
       name: key,
     };
-    // console.log("createMultiSelectElement", fieldConfig,value);
+    // logger.log("renderhtml","createMultiSelectElement", fieldConfig,value);
     const colorField = createColorField(fieldConfig, (selectedColor) => {
       this.updateModifiedData(key, subKey, selectedColor);
     }, value);
@@ -709,7 +710,7 @@ function createMultiSelectField1(field, onChangeCallback, value) {
       gridSelect.appendChild(checkbox);
     });
   }
-  console.log("field",field)
+  logger.log("renderhtml","field",field)
   // Inicializar las opciones
   renderOptions(field.options);
 
@@ -858,7 +859,7 @@ export class EditModal {
     this.renderelement = new DynamicRow(data, this.columns, this.config);
     const renderhtml = this.renderelement.Renderall();
     if (HtmlContainer) document.querySelector(HtmlContainer).appendChild(renderhtml);
-    console.log("renderhtml", renderhtml);
+    logger.log("renderhtml","renderhtml", renderhtml);
   }
   ReturnHtml(data){
     this.renderelement = new DynamicRow(data, this.columns, this.config);

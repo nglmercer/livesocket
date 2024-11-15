@@ -267,5 +267,6 @@ ui.initializeEventListeners(uiElement);
     //console.log("existwordinArray",response,word)
     return response;
   }
+  //existwordinArray("tedesku")
 export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents,uiElement}
 // asdasd como seria un metodo para hacer un string a json
