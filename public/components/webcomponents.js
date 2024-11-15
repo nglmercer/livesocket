@@ -3758,3 +3758,187 @@ class ImageUrlInputComponent extends HTMLElement {
 }
 
 customElements.define('image-url-input-component', ImageUrlInputComponent);
+// Función auxiliar para generar un color aleatorio (sin cambios)
+function getRandomColor() {
+  return '#' + Math.floor(Math.random()*16777215).toString(16);
+}
+
+// Componente del contenedor de mensajes (sin cambios)
+class MessageContainer extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          width: 100%;
+          height: 100%;
+          overflow-y: auto;
+        }
+      </style>
+      <slot></slot>
+    `;
+  }
+
+  addMessage(messageData) {
+    const message = document.createElement('chat-message');
+    message.setMessageData(messageData);
+    this.appendChild(message);
+  }
+}
+
+/// Componente de mensaje individual (modificado para evitar DataCloneError)
+class ChatMessage extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this._menuOptions = [];
+  }
+
+  setMessageData(data) {
+    const { user, content, menu } = data;
+
+    // Guardar el contenido del mensaje sin los callbacks
+    this._data = { user, content };
+
+    // Guardar las opciones de menú en un array de objetos sin el callback en this._data
+    this._menuOptions = (menu && Array.isArray(menu.options)) ? menu.options : [];
+
+    // Configuración del componente
+    this.renderMessage(user, content);
+    this.setupMenu();
+  }
+
+  renderMessage(user, content) {
+    // Renderizar el HTML del mensaje y el avatar (sin cambios)
+    const bgColor = user.photo ? '' : getRandomColor();
+    const initial = user.photo ? '' : user.name.charAt(0).toUpperCase();
+    
+    this.shadowRoot.innerHTML = /*html */`
+        <style>
+          :host {
+            display: flex;
+            margin-bottom: 10px;
+            position: relative;
+          }
+          .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+          }
+          .message-content {
+            display: flex;
+            flex-wrap: wrap;
+            flex-grow: 1;
+          }
+          .menu-container {
+            position: absolute;
+            right: 0;
+          }
+          .menu-button {
+            cursor: pointer;
+            padding: 5px;
+          }
+          .menu-options {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+          }
+          .menu-options.show {
+            display: flex;
+          }
+          .menu-option {
+            padding: 5px 10px;
+            cursor: pointer;
+          }
+          .menu-option:hover {
+            background-color: #f0f0f0;
+          }
+          img {
+            max-width: 100%;
+            max-height: 250px;
+            height: auto;
+            width: auto;
+          }
+        </style>
+      <div class="avatar" role="img" aria-label="User avatar">${initial}</div>
+      <div class="message-content"></div>
+      <div class="menu-container">
+        <div class="menu-button" role="button" aria-haspopup="true" aria-expanded="false">⋮</div>
+        <div class="menu-options" role="menu"></div>
+      </div>
+    `;
+
+    const avatar = this.shadowRoot.querySelector('.avatar');
+    if (user.photo) {
+      avatar.style.backgroundImage = `url(${user.photo})`;
+      avatar.style.backgroundSize = 'cover';
+    } else {
+      avatar.style.backgroundColor = bgColor;
+    }
+
+    const messageContent = this.shadowRoot.querySelector('.message-content');
+    content.forEach(item => {
+      if (item.type === 'text') {
+        const p = document.createElement('p');
+        p.textContent = item.value;
+        messageContent.appendChild(p);
+      } else if (item.type === 'image') {
+        const img = document.createElement('img');
+        img.src = item.value;
+        img.alt = 'Message image';
+        messageContent.appendChild(img);
+      }
+    });
+  }
+
+  setupMenu() {
+    const menuButton = this.shadowRoot.querySelector('.menu-button');
+    const menuOptions = this.shadowRoot.querySelector('.menu-options');
+
+    menuButton.addEventListener('click', () => {
+      const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+      menuButton.setAttribute('aria-expanded', !isExpanded);
+      menuOptions.classList.toggle('show');
+    });
+
+    // Crear opciones de menú solo si tienen callback
+    this._menuOptions.forEach(option => {
+      if (typeof option.callback === 'function') {
+        const button = document.createElement('button');
+        button.textContent = option.text;
+        button.classList.add('menu-option');
+        button.setAttribute('role', 'menuitem');
+        button.addEventListener('click', () => {
+          option.callback(this.getMessageData());
+          menuOptions.classList.remove('show');
+          menuButton.setAttribute('aria-expanded', 'false');
+        });
+        menuOptions.appendChild(button);
+      }
+    });
+  }
+
+  getMessageData() {
+    return this._data;
+  }
+}
+
+// Registrar los componentes
+customElements.define('message-container', MessageContainer);
+customElements.define('chat-message', ChatMessage);
+
+// Ejemplo de uso
