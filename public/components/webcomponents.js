@@ -857,404 +857,445 @@ class CustomMultiSelect extends HTMLElement {
 customElements.define('custom-multi-select', CustomMultiSelect);
 class UserProfile extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
+    super();
+    this.attachShadow({ mode: 'open' });
+    
+    this.translations = {
+      es: {
+        connect: 'Conectar',
+        disconnect: 'Desconectar',
+        placeholder: 'Ingresa tu nombre',
+        status: {
+          offline: 'Desconectado',
+          online: 'En línea',
+          away: 'Ausente',
+          busy: 'Ocupado'
+        }
+      },
+      en: {
+        connect: 'Connect',
+        disconnect: 'Disconnect',
+        placeholder: 'Enter your name',
+        status: {
+          offline: 'Offline',
+          online: 'Online',
+          away: 'Away',
+          busy: 'Busy'
+        }
+      },
+      fr: {
+        connect: 'Se connecter',
+        disconnect: 'Se déconnecter',
+        placeholder: 'Entrezvotre nom',
+        status: {
+          offline: 'Hors ligne',
+          online: 'En ligne',
+          away: 'Absent',
+          busy: 'Occupé'
+        }
+      },
+      pt: {
+        connect: 'Conectar',
+        disconnect: 'Desconectar',
+        placeholder: 'Insira seu nome',
+        status: {
+          offline: 'Offline',
+          online: 'Online',
+          away: 'Ausente',
+          busy: 'Ocupado'
+        }
+      },
+    };
+
+    // Initialize static instances map if it doesn't exist
+    if (!UserProfile.instances) {
+      UserProfile.instances = new Map();
+    }
+
+    // Get the group identifier from the attribute
+    const groupId = this.getAttribute('group-id');
+
+    // If no group-id is provided, create a unique instance
+    if (!groupId) {
+      this._state = this.createInitialState();
+      this.loadFromLocalStorage();
+    } else {
+      // Check if an instance for this group already exists
+      if (!UserProfile.instances.has(groupId)) {
+        // Create new instance for this group
+        UserProfile.instances.set(groupId, {
+          state: this.createInitialState(),
+          elements: new Set()
+        });
+      }
       
-      // Singleton instance
-      if (!UserProfile.instance) {
-          UserProfile.instance = this;
-          
-          this.state = {
-              connected: false,
-              username: '',
-              imageUrl: './favicon.svg',
-              language: 'es',
-              connectionStatus: 'offline' // nuevo: 'offline', 'online', 'away', 'busy'
-          };
+      // Add this element to the group
+      const group = UserProfile.instances.get(groupId);
+      group.elements.add(this);
+      
+      // Load state from localStorage if exists
+      this.loadFromLocalStorage();
+    }
 
-          this.translations = {
-              es: {
-                  connect: 'Conectar',
-                  disconnect: 'Desconectar',
-                  placeholder: 'Ingresa tu nombre',
-                  status: {
-                      offline: 'Desconectado',
-                      online: 'En línea',
-                      away: 'Ausente',
-                      busy: 'Ocupado'
-                  }
-              },
-              en: {
-                  connect: 'Connect',
-                  disconnect: 'Disconnect',
-                  placeholder: 'Enter your name',
-                  status: {
-                      offline: 'Offline',
-                      online: 'Online',
-                      away: 'Away',
-                      busy: 'Busy'
-                  }
-              },
-              fr: {
-                  connect: 'Se connecter',
-                  disconnect: 'Se déconnecter',
-                  placeholder: 'Entrez votre nom',
-                  status: {
-                      offline: 'Hors ligne',
-                      online: 'En ligne',
-                      away: 'Absent',
-                      busy: 'Occupé'
-                  }
-              },
-              pt: {
-                  connect: 'Conectar',
-                  disconnect: 'Desconectar',
-                  placeholder: 'Insira seu nome',
-                  status: {
-                      offline: 'Offline',
-                      online: 'Online',
-                      away: 'Ausente',
-                      busy: 'Ocupado'
-                  }
-                },
-          };
-          
-          this.loadFromLocalStorage();
-      }
+    this.groupId = groupId;
+    this.activeListeners = new Set();
+    this.render();
+    return this;
+  }
 
-      // Registro de instancias
-      if (!UserProfile.instances) {
-          UserProfile.instances = new Set();
-      }
-      UserProfile.instances.add(this);
+  createInitialState() {
+    return {
+      connected: false,
+      username: '',
+      imageUrl: './favicon.svg',
+      language: 'es',
+      connectionStatus: 'offline'
+    };
+  }
 
-      // Cada instancia mantiene sus propios listeners
-      this.activeListeners = new Set();
+  static get observedAttributes() {
+    return ['minimal', 'group-id'];
+  }
 
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'minimal') {
       this.render();
-      return this;
-  }
-
-    static get observedAttributes() {
-        return ['minimal'];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'minimal') {
-            this.render();
+    } else if (name === 'group-id' && oldValue !== newValue) {
+      // Handle group-id change
+      if (oldValue) {
+        const oldGroup = UserProfile.instances.get(oldValue);
+        if (oldGroup) {
+          oldGroup.elements.delete(this);
+          if (oldGroup.elements.size === 0) {
+            UserProfile.instances.delete(oldValue);
+          }
         }
-    }
-
-    get isMinimal() {
-        return this.hasAttribute('minimal');
-    }
-
-    static updateAllInstances() {
-        UserProfile.instances.forEach(instance => {
-            instance.render();
-        });
-    }
-
-    getStyles() {
-        // ... (mismos estilos que antes) ...
-        return `
-            <style>
-                .container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 20px;
-                    padding: 20px;
-                    background-color: #1a1a2e;
-                    border-radius: 8px;
-                    color: #fff;
-                }
-                 .status-indicator {
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 50%;
-                    border: 2px solid #1a1a2e;
-                    transition: all 0.3s ease;
-                }
-
-                .status-indicator[data-status="offline"] {
-                    background-color: #808080;
-                }
-
-                .status-indicator[data-status="online"] {
-                    background-color: #4CAF50;
-                }
-
-                .status-indicator[data-status="away"] {
-                    background-color: #FFC107;
-                }
-
-                .status-indicator[data-status="busy"] {
-                    background-color: #f44336;
-                }
-                /* Estilos para modo minimal */
-                :host([minimal]) .container {
-                    flex-direction: row;
-                    padding: 8px;
-                    gap: 10px;
-                    background-color: transparent;
-                }
-
-                .profile-image {
-                    width: 120px;
-                    height: 120px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    border: 3px solid #4d7cff;
-                    box-shadow: 0 0 15px rgba(77, 124, 255, 0.3);
-                    transition: all 0.3s ease;
-                }
-
-                :host([minimal]) .profile-image {
-                    width: 36px;
-                    height: 36px;
-                    border-width: 2px;
-                }
-                :host([minimal]) .status-indicator {
-                    width: 12px;
-                    height: 12px;
-                    bottom: 0;
-                    right: 0;
-                    border-width: 1px;
-                }
-
-                .profile-image:hover {
-                    transform: scale(1.05);
-                    border-color: #4d9cff;
-                }
-
-                input {
-                    width: 100%;
-                    padding: 12px;
-                    background-color: #162447;
-                    border: 2px solid #4d9cff;
-                    border-radius: 8px;
-                    color: #fff;
-                    font-size: 14px;
-                    transition: all 0.3s ease;
-                    box-sizing: border-box;
-                }
-
-                :host([minimal]) input {
-                    padding: 6px;
-                }
-
-                input:focus {
-                    outline: none;
-                    border-color: #e94560;
-                    box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
-                }
-
-                input::placeholder {
-                    color: #8a8a9e;
-                }
-
-                input:disabled {
-                    background-color: #1f1f3d;
-                    border-color: #404060;
-                    cursor: not-allowed;
-                }
-
-                button {
-                    width: 100%;
-                    padding: 12px 24px;
-                    background: linear-gradient(135deg, #4d7cff 0%, #3b5998 100%);
-                    color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                }
-
-                :host([minimal]) button {
-                    width: auto;
-                    padding: 6px 12px;
-                    font-size: 12px;
-                }
-
-                button:hover {
-                    background: linear-gradient(135deg, #5a88ff 0%, #4866ab 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(77, 124, 255, 0.3);
-                }
-
-                button:active {
-                    transform: translateY(0);
-                }
-
-                button.connected {
-                    background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
-                }
-
-                button.connected:hover {
-                    background: linear-gradient(135deg, #f25672 0%, #d4405f 100%);
-                }
-            .profile-wrapper {
-                    position: relative;
-                    display: inline-block;
-                }
-            </style>
-        `;
-    }
-
-    render() {
-      const state = UserProfile.instance.state;
-      const currentTranslations = UserProfile.instance.translations[state.language];
-      
-      this.shadowRoot.innerHTML = `
-          ${this.getStyles()}
-          <div class="container ${state.connected ? 'connected' : ''}">
-              <div class="profile-wrapper">
-                  <img 
-                      class="profile-image" 
-                      src="${state.imageUrl}"
-                      alt="Profile"
-                  />
-                  <div 
-                      class="status-indicator" 
-                      data-status="${state.connectionStatus}"
-                      title="${currentTranslations.status[state.connectionStatus]}"
-                  ></div>
-              </div>
-              <input 
-                  type="text"
-                  placeholder="${currentTranslations.placeholder}"
-                  value="${state.username}"
-                  ${state.connected ? 'disabled' : ''}
-              />
-              <button class="${state.connected ? 'connected' : ''}">
-                  ${state.connected ? currentTranslations.disconnect : currentTranslations.connect}
-              </button>
-          </div>
-      `;
-
-      this.setupEventListeners();
-  }
-    setupEventListeners() {
-        // Limpia los listeners anteriores de esta instancia
-        this.activeListeners.forEach(({ element, type, handler }) => {
-            element.removeEventListener(type, handler);
-        });
-        this.activeListeners.clear();
-
-        const button = this.shadowRoot.querySelector('button');
-        const input = this.shadowRoot.querySelector('input');
-
-        // Los handlers usan la instancia singleton para la lógica
-        const buttonHandler = () => {
-            if (UserProfile.instance.state.connected) {
-                UserProfile.instance.disconnect();
-            } else if (input.value.trim()) {
-                UserProfile.instance.connect(input.value);
-            }
-        };
-
-        const inputHandler = (e) => {
-            UserProfile.instance.state.username = e.target.value;
-        };
-
-        button.addEventListener('click', buttonHandler);
-        input.addEventListener('input', inputHandler);
-
-        // Guarda las referencias para limpieza
-        this.activeListeners.add({ element: button, type: 'click', handler: buttonHandler });
-        this.activeListeners.add({ element: input, type: 'input', handler: inputHandler });
-    }
-
-    loadFromLocalStorage() {
-        const savedState = localStorage.getItem('userProfileState');
-        if (savedState) {
-            this.state = { ...this.state, ...JSON.parse(savedState) };
-        }
-    }
-
-    saveToLocalStorage() {
-        localStorage.setItem('userProfileState', JSON.stringify(this.state));
-    }
-
-    setConnectionStatus(status) {
-      if (this !== UserProfile.instance) return;
-      
-      if (['offline', 'online', 'away', 'busy'].includes(status)) {
-          this.state.connectionStatus = status;
-          this.saveToLocalStorage();
-          UserProfile.updateAllInstances();
-          
-          this.dispatchEvent(new CustomEvent('connectionStatusChanged', { 
-              detail: { status: this.state.connectionStatus }
-          }));
       }
+
+      if (newValue) {
+        if (!UserProfile.instances.has(newValue)) {
+          UserProfile.instances.set(newValue, {
+            state: this.createInitialState(),
+            elements: new Set()
+          });
+        }
+        UserProfile.instances.get(newValue).elements.add(this);
+        this.loadFromLocalStorage();
+      } else {
+        this._state = this.createInitialState();
+        this.loadFromLocalStorage();
+      }
+
+      this.groupId = newValue;
+      this.render();
+    }
   }
-    connect(username) {
-      if (this !== UserProfile.instance) return;
-      
-      this.state.connected = true;
-      this.state.username = username;
-      this.state.imageUrl = './favicon.svg';
-      this.state.connectionStatus = 'online'; // Automáticamente establece online al conectar
+
+  get isMinimal() {
+    return this.hasAttribute('minimal');
+  }
+
+  get state() {
+    return this.groupId ? 
+      UserProfile.instances.get(this.groupId).state : 
+      this._state;
+  }
+
+  set state(value) {
+    if (this.groupId) {
+      UserProfile.instances.get(this.groupId).state = value;
+    } else {
+      this._state = value;
+    }
+  }
+
+  render() {
+    const currentTranslations = this.translations[this.state.language];
+
+    this.shadowRoot.innerHTML = `
+      ${this.getStyles()}
+      <div class="container ${this.state.connected ? 'connected' : ''}">
+        <div class="profile-wrapper">
+          <img 
+            class="profile-image" 
+            src="${this.state.imageUrl}"
+            alt="Profile"
+          />
+          <div 
+            class="status-indicator" 
+            data-status="${this.state.connectionStatus}"
+            title="${currentTranslations.status[this.state.connectionStatus]}"
+          ></div>
+        </div>
+        <input 
+          type="text"
+          placeholder="${currentTranslations.placeholder}"
+          value="${this.state.username}"
+          ${this.state.connected ? 'disabled' : ''}
+        />
+        <button class="${this.state.connected ? 'connected' : ''}">
+          ${this.state.connected ? currentTranslations.disconnect : currentTranslations.connect}
+        </button>
+      </div>
+    `;
+
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    this.activeListeners.forEach(({ element, type, handler }) => {
+      element.removeEventListener(type, handler);
+    });
+    this.activeListeners.clear();
+
+    const button = this.shadowRoot.querySelector('button');
+    const input = this.shadowRoot.querySelector('input');
+
+    const buttonHandler = () => {
+      if (this.state.connected) {
+        this.disconnect();
+      } else if (input.value.trim()) {
+        this.connect(input.value);
+      }
+    };
+
+    const inputHandler = (e) => {
+      this.state.username = e.target.value;
+    };
+
+    button.addEventListener('click', buttonHandler);
+    input.addEventListener('input', inputHandler);
+
+    this.activeListeners.add({ element: button, type: 'click', handler: buttonHandler });
+    this.activeListeners.add({ element: input, type: 'input', handler: inputHandler });
+  }
+
+  updateGroupElements() {
+    if (this.groupId) {
+      const group = UserProfile.instances.get(this.groupId);
+      group.elements.forEach(element => {
+        if (element !== this) {
+          element.render();
+        }
+      });
+    }
+  }
+
+  getStyles() {
+    return `
+      <style>
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          padding: 20px;
+          background-color: #1a1a2e;
+          border-radius: 8px;
+          color: #fff;
+        }
+        .status-indicator {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 2px solid #1a1a2e;
+          transition: all 0.3s ease;
+        }
+        .status-indicator[data-status="offline"] {
+          background-color: #808080;
+        }
+        .status-indicator[data-status="online"] {
+          background-color: #4CAF50;
+        }
+        .status-indicator[data-status="away"] {
+          background-color: #FFC107;
+        }
+        .status-indicator[data-status="busy"] {
+          background-color: #f44336;
+        }
+        :host([minimal]) .container {
+          flex-direction: row;
+          padding: 8px;
+          gap: 0px;
+          background-color: transparent;
+        }
+        :host([minimal]) .profile-image {
+          width: 36px;
+          height: 36px;
+          border-width: 2px;
+        }
+        :host([minimal]) .status-indicator {
+          width: 12px;
+          height: 12px;
+          bottom: 0;
+          right: 0;
+          border-width: 1px;
+        }
+        .profile-image {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid #4d7cff;
+          box-shadow: 0 0 10px rgba(77, 124, 255, 0.3);
+          transition: all 0.3s ease;
+        }
+        .profile-image:hover {
+          transform: scale(1.05);
+          border-color: #4d9cff;
+        }
+        input {
+          width: 100%;
+          padding: 12px;
+          background-color: #162447;
+          border: 3px solid #4d9cff;
+          border-radius: 8px;
+          color: #fff;
+          font-size: 14px;
+          transition: all 0.3s ease;
+          box-sizing: border-box;
+        }
+        :host([minimal]) input {
+          padding: 6px;
+        }
+        input:focus {
+          outline: none;
+          border-color: #e94560;
+          box-shadow: 0 0 10px rgba(233, 69, 96, 0.2);
+        }
+        input::placeholder {
+          color: #8a8a9e;
+        }
+        input:disabled {
+          background-color: #1f1f3d;
+          border-color: #404060;
+          cursor: not-allowed;
+        }
+        button {
+          width: 100%;
+          padding: 12px 24px;
+          background: linear-gradient(135deg, #4d7cff 0%, #3b5998 100%);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        :host([minimal]) button {
+          width: auto;
+          padding: 6px 12px;
+          font-size: 12px;
+        }
+        button:hover {
+          background: linear-gradient(135deg, #5a88ff 0%, #4866ab 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(77, 124, 255, 0.3);
+        }
+        button:active {
+          transform: translateY(0);
+        }
+        button.connected {
+          background: linear-gradient(135deg, #e94560 0%, #c23152 100%);
+        }
+        button.connected:hover {
+          background: linear-gradient(135deg, #f25672 0%, #d4405f 100%);
+        }
+        .profile-wrapper {
+          position: relative;
+          display: inline-block;
+        }
+      </style>
+    `;
+  }
+
+  connect(username) {
+    this.state.connected = true;
+    this.state.username = username;
+    this.state.imageUrl = './favicon.svg';
+    this.state.connectionStatus = 'online';
+    this.saveToLocalStorage();
+    this.render();
+    this.updateGroupElements();
+    this.dispatchEvent(new CustomEvent('userConnected', { 
+      detail: { username: this.state.username }
+    }));
+  }
+
+  disconnect() {
+    this.state.connected = false;
+    this.state.imageUrl = './favicon.svg';
+    this.state.username = '';
+    this.state.connectionStatus = 'offline';
+    this.saveToLocalStorage();
+    this.render();
+    this.updateGroupElements();
+    this.dispatchEvent(new CustomEvent('userDisconnected'));
+  }
+
+  setConnectionStatus(status) {
+    if (['offline', 'online', 'away', 'busy'].includes(status)) {
+      this.state.connectionStatus = status;
       this.saveToLocalStorage();
-      UserProfile.updateAllInstances();
-      this.dispatchEvent(new CustomEvent('userConnected', { 
-          detail: { username: this.state.username }
+      this.render();
+      this.updateGroupElements();
+      this.dispatchEvent(new CustomEvent('connectionStatusChanged', { 
+        detail: { status: this.state.connectionStatus }
       }));
+    }
   }
 
-
-    disconnect() {
-      if (this !== UserProfile.instance) return;
-      
-      this.state.connected = false;
-      this.state.imageUrl = './favicon.svg';
-      this.state.username = '';
-      this.state.connectionStatus = 'offline'; // Automáticamente establece offline al desconectar
+  setLanguage(lang) {
+    if (this.translations[lang]) {
+      this.state.language = lang;
       this.saveToLocalStorage();
-      UserProfile.updateAllInstances();
-      this.dispatchEvent(new CustomEvent('userDisconnected'));
+      this.render();
+      this.updateGroupElements();
+    }
   }
 
+  setProfileImage(url) {
+    this.state.imageUrl = url;
+    this.saveToLocalStorage();
+    this.render();
+    this.updateGroupElements();
+  }
 
-    setLanguage(lang) {
-        if (this !== UserProfile.instance) return;
-        
-        if (this.translations[lang]) {
-            this.state.language = lang;
-            this.saveToLocalStorage();
-            UserProfile.updateAllInstances();
+  loadFromLocalStorage() {
+    const key = this.groupId ? `userProfileState_${this.groupId}` : 'userProfileState';
+    const savedState = localStorage.getItem(key);
+    if (savedState) {
+      this.state = { ...this.state, ...JSON.parse(savedState) };
+    }
+  }
+
+  saveToLocalStorage() {
+    const key = this.groupId ? `userProfileState_${this.groupId}` : 'userProfileState';
+    localStorage.setItem(key, JSON.stringify(this.state));
+  }
+
+  disconnectedCallback() {
+    if (this.groupId) {
+      const group = UserProfile.instances.get(this.groupId);
+      if (group) {
+        group.elements.delete(this);
+        if (group.elements.size === 0) {
+          UserProfile.instances.delete(this.groupId);
         }
+      }
     }
-
-    setProfileImage(url) {
-        if (this !== UserProfile.instance) return;
-        
-        this.state.imageUrl = url;
-        this.saveToLocalStorage();
-        UserProfile.updateAllInstances();
-    }
-
-    disconnectedCallback() {
-        UserProfile.instances.delete(this);
-        
-        // Limpia los listeners cuando se remueve el elemento
-        this.activeListeners.forEach(({ element, type, handler }) => {
-            element.removeEventListener(type, handler);
-        });
-        
-        if (this === UserProfile.instance) {
-            UserProfile.instance = null;
-        }
-    }
+    
+    // Clean up listeners
+    this.activeListeners.forEach(({ element, type, handler }) => {
+      element.removeEventListener(type, handler);
+    });
+  }
 }
 
 customElements.define('user-profile', UserProfile);

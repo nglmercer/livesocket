@@ -18,12 +18,28 @@
     <responsive-nav-sidebar>
         <!-- Items base para el navbar (móvil) -->
         <div slot="nav-base-items">
-            <user-profile minimal></user-profile>
+            <user-profile group-id="main" id="kicklogin" minimal></user-profile>
         </div>
 
         <!-- Los mismos items base para el sidebar (desktop) -->
         <div slot="sidebar-base-items">
-                <user-profile></user-profile>
+                <user-profile group-id="main" id="kicklogin"></user-profile>
+<!--                 <script>
+                  document.getElementById('userProfile2').addEventListener('userConnected', (e) => {
+                    console.log('Usuario conectado:', e.detail.username);
+                  });
+
+                  document.getElementById('userProfile2').addEventListener('userDisconnected', (e) => {
+                    console.log('Usuario desconectado');
+                  });
+                  document.getElementById('userProfile').addEventListener('userConnected', (e) => {
+                    console.log('Usuario conectado:', e.detail.username);
+                  });
+
+                  document.getElementById('userProfile').addEventListener('userDisconnected', (e) => {
+                    console.log('Usuario desconectado');
+                  });
+                </script> -->
         </div>
 
         <!-- Items adicionales del menú -->

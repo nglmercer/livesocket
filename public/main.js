@@ -10,17 +10,27 @@ const socket = io();
 const userProfile = document.querySelector('user-profile');
 console.log(userProfile.state);
 userProfile.setConnectionStatus('offline');
-
+const loginelements = document.querySelectorAll('#kicklogin')
+loginelements.forEach(element => {
+  element.addEventListener('userConnected', (e) => {
+      console.log('Usuario conectado:', e.detail.username);
+      element.setConnectionStatus('away');
+      joinRoom(e.detail.username);
+    });
+    element.addEventListener('userDisconnected', (e) => {
+      console.log('Usuario desconectado' ,e);
+  });
+})
 // Escuchar eventos
-userProfile.addEventListener('userConnected', (e) => {
+/* userProfile.addEventListener('userConnected', (e) => {
     console.log('Usuario conectado:', e.detail.username, e);
     userProfile.setConnectionStatus('away');
-    joinRoom(e.detail.username);
+    //joinRoom(e.detail.username);
   }); 
 
 userProfile.addEventListener('userDisconnected', (e) => {
     console.log('Usuario desconectado' ,e);
-});
+}); */
 function joinRoom(roomid) {
     const roomId = roomid || document.getElementById('roomId').value;
     socket.emit('joinRoom', { uniqueId: roomId });
