@@ -168,7 +168,7 @@ events.forEach(event => {
         //console.log("event",event,data)
         switch (event) {
             case 'ready':
-                userProfile.setProfileImage(await GetAvatarUrlKick.getprofilepic(data.username));
+                userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(data.username));
                 break;
             case 'ChatMessage':
                 const newdata = await mapChatMessagetochat(data);
@@ -183,13 +183,7 @@ events.forEach(event => {
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
-(async () => {
-  const messagedata = JSON.parse(localStorage.getItem('lastChatMessage'));
-  const newdata = await mapChatMessagetochat(messagedata);
-  HandleAccionEvent('chat',newdata)
-  console.log("mapChatMessagetochat",newdata)
-  handlechat(newdata);
-})()
+
 async function mapChatMessagetochat(data) {
   return {
     comment: data.content,
@@ -200,7 +194,7 @@ async function mapChatMessagetochat(data) {
     profilePictureUrl: await GetAvatarUrlKick.getProfilePic(data.sender?.username),
   }
 }
-const textcontent = {
+/* const textcontent = {
     content: {
       1: ["text", getTranslation('username'),"white"],
       2: ["text", "uniqueId","silver"],
@@ -215,8 +209,17 @@ const textcontent = {
     //   number: 123,
     //   text: "text",
     // }
-  }
-const numbercontent = {
+  } */
+const newtextcontent = {
+  user: {
+    name: "username",
+    value: "uniqueId comment",
+  },
+  content: [
+    { type: 'text', value: "uniqueId = username comentario = comment" },
+  ],
+}
+/* const numbercontent = {
   content: {
     1: ["text", getTranslation('username'),"white"],
     2: ["text", "uniqueId","silver"],
@@ -228,8 +231,19 @@ const numbercontent = {
     number: 123,
     text: "text",
   }
+} */
+const newnumbercontent = {
+  user: {
+    name: "username",
+    value: "texto de prueba123123123",
+  },
+  content: [
+    { type: 'text', value: "UniqueId" },
+    { type: 'text', value: "1 = repeatCount" },
+    { type: 'text', value: "rose = giftname" },
+  ],
 }
-const eventcontent = {
+/* const eventcontent = {
   content: {
     1: ["text", "UniqueId","white"],
     2: ["text", getTranslation('followed'),"yellow"],
@@ -238,6 +252,16 @@ const eventcontent = {
     number: 123,
     text: "text",
   }
+} */
+const neweventcontent = {
+  user: {
+    name: "username",
+    value: "UniqueId",
+  },
+  content: [
+    { type: 'text', value: "UniqueId" },
+    { type: 'text', value: getTranslation('followed') },
+  ],
 }
 const splitfilterwords = (data) => {
   console.log("Callback 1 ejecutado:", data);
@@ -256,146 +280,114 @@ const filterwordadd = (data) => {
     addfilterword(data.comment);
   }
 }
-const callbacksmessage = [splitfilterwords,filterwordadd];
-const optionTexts = ['filtrar comentarios - dividir', 'filtrar comentario'];
-const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent, callbacksmessage,optionTexts);
-const message2 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', numbercontent);
-const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', eventcontent);
+//const callbacksmessage = [splitfilterwords,filterwordadd];
+//const optionTexts = ['filtrar comentarios - dividir', 'filtrar comentario'];
+//const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent, callbacksmessage,optionTexts);
+//const message2 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', numbercontent);
+//const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', eventcontent);
 // Crear callbacks
-newChatContainer.addMessage(message1);
-newGiftContainer.addMessage(message2);
-newEventsContainer.addMessage(message3);
+//newChatContainer.addMessage(message1);
+//newGiftContainer.addMessage(message2);
+//newEventsContainer.addMessage(message3);
+const defaultmenuchat = [
+  {
+    text: 'filtrar comentarios - dividir',
+    callback: (messageData) => {
+      console.log('Responder clicked', messageData);
+      // splitfilterwords(messageData);
+    }
+  },
+  {
+    text: 'filtrar comentario',
+    callback: (messageData) => {
+      console.log('Reaccionar clicked', messageData);
+      // filterwordadd(messageData);
+    }
+  },
+  {
+    text: 'Eliminar',
+    callback: (messageData) => {
+      console.log('Eliminar clicked', messageData);
+    }
+  }
+];
+const giftmenu = [
+  {
+    text: 'Responder',
+    callback: (messageData) => {
+      console.log('Responder clicked', messageData);
+    }
+  }
+]
+
+async function lastelement(){
+  const messagedata = JSON.parse(localStorage.getItem('lastChatMessage'));
+  const newdata = await mapChatMessagetochat(messagedata);
+  HandleAccionEvent('chat',newdata)
+  console.log("mapChatMessagetochat",newdata)
+
+  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:"texto adicional"});
+  const newmessage1 = webcomponenttemplate(newtextcontent);
+  const newmessage2 = webcomponenttemplate(newnumbercontent,giftmenu);
+  const newmessage3 = webcomponenttemplate(neweventcontent,giftmenu);
+  
+  const chatcontainer = returnchatelement(newwebcomponentchat);
+  const chatcontainer2 = returnchatelement(newmessage1);
+  const chatcontainer3 = returnchatelement(newmessage2);
+  const eventscontainer = returnchatelement(newmessage3);
+
+  appendmessage(eventscontainer,"eventscontainer");
+  appendmessage(chatcontainer,"chatcontainer");
+  appendmessage(chatcontainer2,"chatcontainer");
+  appendmessage(chatcontainer3,"giftcontainer");
+}
+lastelement();
+function returnchatelement(data) {
+  const elementwebcomponent = document.createElement('chat-message');
+  elementwebcomponent.setMessageData(data);
+  return elementwebcomponent;
+}
+function appendmessage(content,container) {
+  const elementcontainer = document.getElementById(container);
+  elementcontainer.appendChild(content);
+}
 const arrayevents = ["like", "gift", "chat"];
 
-const messageTemplates = {
-  chat: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', data.comment, 'white']
-      },
-      comment: data.comment
-    }),
-    alert: null,
-    options: callbacksmessage,
-    optionTexts: optionTexts,
-  },
-
-  gift: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', 'gifted', 'white'],
-        3: ['number', data.diamondCount, 'gold'],
-        4: ['text', data.giftName, 'gold'],
-        5: ['image', data.giftPictureUrl]
-      }
-    }),
-    alert: (data) => `${data.uniqueId} gifted ${data.diamondCount}, ${data.giftName}`
-  },
-
-  member: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', 'welcome', 'gold']
-      },
-      comment: ''
-    }),
-    alert: null
-  },
-
-  like: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', data.likeCount, 'gold'],
-        3: ['text', 'likes', 'white']
-      },
-      comment: ''
-    }),
-    alert: null
-  },
-
-  follow: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', 'followed', 'gold']
-      },
-      comment: ''
-    }),
-    alert: null
-  },
-
-  share: {
-    template: (data) => ({
-      content: {
-        1: ['url', `http://tiktok.com/@${data.uniqueId}`, 'blue', data.nickname],
-        2: ['text', 'shared', 'gold']
-      },
-      comment: ''
-    }),
-    alert: null
-  }
-};
-class MessageHandler {
-  constructor(containerConfig, messageTemplates) {
-    this.containerConfig = containerConfig;
-    this.messageTemplates = messageTemplates;
-    this.translations = translations;
-    this.currentLang = localStorage.getItem('selectedLanguage') || 'es';
-  }
-
-  setLanguage(lang) {
-    if (this.translations[lang]) {
-      this.currentLang = lang;
-    }
-  }
-
-  getTranslation(key) {
-    return this.translations[this.currentLang]?.[key] || key;
-  }
-
-  handleMessage(type, data) {
-    const config = this.containerConfig[type];
-    const template = this.messageTemplates[type];
-
-    if (!config || !template) {
-      console.error(`Configuration not found for message type: ${type}`);
-      return;
-    }
-
-    const parsedData = template.template(data);
-    const counter = config.counter;
-    const container = config.container;
-
-    const newMessage = new ChatMessage(
-      `msg${counter.increment()}`,
-      data.profilePictureUrl,
-      parsedData,
-      template.options,template.optionTexts
-    );
-
-    container.addMessage(newMessage);
-    console.log(type, data);
-
-    if (template.alert) {
-      showAlert('info', template.alert(data), 5000);
-    }
-  }
-}
-
-// Crear instancia del manejador de mensajes
-const messageHandler = new MessageHandler(containerConfig, messageTemplates);
-messageHandler.setLanguage('es');
 // Funciones de manejo específicas
-const handlechat = (data) => messageHandler.handleMessage('chat', data);
-const handlegift = (data) => messageHandler.handleMessage('gift', data);
-const handlemember = (data) => messageHandler.handleMessage('member', data);
-const handlelike = (data) => messageHandler.handleMessage('like', data);
-const handleFollow = (data) => messageHandler.handleMessage('follow', data);
-const handleShare = (data) => messageHandler.handleMessage('share', data);
+
+function webcomponentchat(data,optionmenuchat = defaultmenuchat,additionaldata = {}) {
+  return {
+    user: {
+      name: data.uniqueId,
+      photo: data.profilePictureUrl,
+      value: data.comment
+    },
+    content: [
+      { type: 'text', value: data.comment },
+      additionaldata
+    //  { type: 'image', value: data.profilePictureUrl }
+    ],
+    menu: {
+      options: optionmenuchat
+    }
+  };
+}
+function webcomponenttemplate(template = {}, optionmenuchat = defaultmenuchat, newdata = {},additionaldata={}){
+  if (template && template.user && template.content && template.content.length > 0) {
+    return { ...template, menu: {options: optionmenuchat}};
+  }
+  return {
+    user : newdata,
+    content: [
+      { type: 'text', value: data.comment },
+      additionaldata
+    //  { type: 'image', value: data.profilePictureUrl }
+    ],
+    menu: {
+      options: optionmenuchat
+    }
+  };
+}
 let lastcomment = ''
 function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome

@@ -3763,7 +3763,6 @@ function getRandomColor() {
   return '#' + Math.floor(Math.random()*16777215).toString(16);
 }
 
-// Componente del contenedor de mensajes (sin cambios)
 class MessageContainer extends HTMLElement {
   constructor() {
     super();
@@ -3775,9 +3774,16 @@ class MessageContainer extends HTMLElement {
           width: 100%;
           height: 100%;
           overflow-y: auto;
+          position: relative;
+        }
+        .messages-wrapper {
+          position: relative;
+          min-height: 100%;
         }
       </style>
-      <slot></slot>
+      <div class="messages-wrapper">
+        <slot></slot>
+      </div>
     `;
   }
 
@@ -3785,42 +3791,214 @@ class MessageContainer extends HTMLElement {
     const message = document.createElement('chat-message');
     message.setMessageData(messageData);
     this.appendChild(message);
+    this.scrollTop = this.scrollHeight;
   }
 }
 
-/// Componente de mensaje individual (modificado para evitar DataCloneError)
 class ChatMessage extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this._menuOptions = [];
+    this._createMenuPortal();
+    
+    // Sistema de seguimiento de posición
+    this._positionTracker = {
+      scrollListeners: new Set(),
+      resizeObserver: null,
+      intersectionObserver: null
+    };
+  }
+
+  connectedCallback() {
+    this._setupPositionTracking();
+    this._handleClickOutside = this._handleClickOutside.bind(this);
+    document.addEventListener('click', this._handleClickOutside);
+  }
+
+  disconnectedCallback() {
+    this._cleanupPositionTracking();
+    document.removeEventListener('click', this._handleClickOutside);
+    if (this._menuPortal && this._menuPortal.parentNode) {
+      this._menuPortal.parentNode.removeChild(this._menuPortal);
+    }
+  }
+
+  _createMenuPortal() {
+    this._menuPortal = document.createElement('div');
+    this._menuPortal.className = 'menu-portal';
+    Object.assign(this._menuPortal.style, {
+      position: 'fixed',
+      zIndex: '1000',
+      display: 'none',
+      pointerEvents: 'none' // Importante: permite clicks a través del contenedor
+    });
+    
+    this._menuPortal.innerHTML = `
+      <style>
+        .menu-options {
+          position: absolute;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          min-width: 120px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          pointer-events: auto; /* Restaura interactividad solo para el menú */
+        }
+        .menu-option {
+          padding: 8px 12px;
+          cursor: pointer;
+          background: none;
+          border: none;
+          text-align: left;
+          width: 100%;
+          font-family: inherit;
+          font-size: 14px;
+          color: #333;
+        }
+        .menu-option:hover {
+          background-color: #f0f0f0;
+        }
+      </style>
+      <div class="menu-options" role="menu"></div>
+    `;
+    
+    document.body.appendChild(this._menuPortal);
+  }
+
+  _setupPositionTracking() {
+    // 1. Rastrear todos los contenedores con scroll
+    this._trackScrollContainers();
+    
+    // 2. Observar cambios en el tamaño
+    this._setupResizeObserver();
+    
+    // 3. Observar visibilidad
+    this._setupIntersectionObserver();
+  }
+
+  _trackScrollContainers() {
+    // Encontrar todos los contenedores con scroll hasta el root
+    let element = this.parentElement;
+    while (element && element !== document.body) {
+      if (this._hasScrollableOverflow(element)) {
+        element.addEventListener('scroll', () => this._updateMenuPosition());
+        this._positionTracker.scrollListeners.add(element);
+      }
+      element = element.parentElement;
+    }
+    
+    // También rastrear scroll del window
+    window.addEventListener('scroll', () => this._updateMenuPosition());
+    this._positionTracker.scrollListeners.add(window);
+  }
+
+  _hasScrollableOverflow(element) {
+    const style = window.getComputedStyle(element);
+    return ['auto', 'scroll'].includes(style.overflowY) || 
+           ['auto', 'scroll'].includes(style.overflow);
+  }
+
+  _setupResizeObserver() {
+    this._positionTracker.resizeObserver = new ResizeObserver(() => {
+      this._updateMenuPosition();
+    });
+    this._positionTracker.resizeObserver.observe(this);
+  }
+
+  _setupIntersectionObserver() {
+    this._positionTracker.intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry.isIntersecting && this._menuPortal.style.display !== 'none') {
+          this._hideMenu();
+        }
+      },
+      { threshold: 0 }
+    );
+    this._positionTracker.intersectionObserver.observe(this);
+  }
+
+  _cleanupPositionTracking() {
+    // Limpiar listeners de scroll
+    this._positionTracker.scrollListeners.forEach(element => {
+      if (element === window) {
+        window.removeEventListener('scroll', () => this._updateMenuPosition());
+      } else {
+        element.removeEventListener('scroll', () => this._updateMenuPosition());
+      }
+    });
+    this._positionTracker.scrollListeners.clear();
+    
+    // Desconectar observers
+    if (this._positionTracker.resizeObserver) {
+      this._positionTracker.resizeObserver.disconnect();
+    }
+    if (this._positionTracker.intersectionObserver) {
+      this._positionTracker.intersectionObserver.disconnect();
+    }
+  }
+
+  _updateMenuPosition() {
+    if (!this._menuPortal || this._menuPortal.style.display === 'none') return;
+
+    const buttonRect = this.shadowRoot.querySelector('.menu-button').getBoundingClientRect();
+    const menuOptions = this._menuPortal.querySelector('.menu-options');
+    
+    // Verificar si el botón está visible en la ventana
+    if (buttonRect.top < 0 || 
+        buttonRect.bottom > window.innerHeight ||
+        buttonRect.left < 0 || 
+        buttonRect.right > window.innerWidth) {
+      this._hideMenu();
+      return;
+    }
+
+    // Calcular la mejor posición para el menú
+    const viewportHeight = window.innerHeight;
+    const menuHeight = menuOptions.offsetHeight;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const showBelow = spaceBelow >= menuHeight || buttonRect.top < menuHeight;
+    // Posicionar el menú
+    Object.assign(this._menuPortal.style, {
+      top: showBelow ? `${buttonRect.bottom}px` : `${buttonRect.top - menuHeight}px`,
+      left: `${Math.min(buttonRect.right, window.innerWidth - menuOptions.offsetWidth)}px`
+    });
+  }
+
+  _handleClickOutside(event) {
+    if (!this._menuPortal.contains(event.target) && 
+        !this.shadowRoot.querySelector('.menu-button').contains(event.target)) {
+      this._hideMenu();
+    }
   }
 
   setMessageData(data) {
     const { user, content, menu } = data;
-
-    // Guardar el contenido del mensaje sin los callbacks
     this._data = { user, content };
-
-    // Guardar las opciones de menú en un array de objetos sin el callback en this._data
     this._menuOptions = (menu && Array.isArray(menu.options)) ? menu.options : [];
-
-    // Configuración del componente
     this.renderMessage(user, content);
     this.setupMenu();
   }
 
   renderMessage(user, content) {
-    // Renderizar el HTML del mensaje y el avatar (sin cambios)
-    const bgColor = user.photo ? '' : getRandomColor();
+    const bgColor = user.photo ? '' : this.getRandomColor();
     const initial = user.photo ? '' : user.name.charAt(0).toUpperCase();
     
-    this.shadowRoot.innerHTML = /*html */`
+    this.shadowRoot.innerHTML = /*html*/`
         <style>
           :host {
             display: flex;
             margin-bottom: 10px;
             position: relative;
+          }
+          img {
+            max-width: 100%;
+            max-height: 250px;
+            height: auto;
+            width: auto;
           }
           .avatar {
             width: 40px;
@@ -3832,54 +4010,33 @@ class ChatMessage extends HTMLElement {
             justify-content: center;
             font-weight: bold;
             color: white;
+            flex-shrink: 0;
           }
           .message-content {
             display: flex;
             flex-wrap: wrap;
             flex-grow: 1;
-          }
-          .menu-container {
-            position: absolute;
-            right: 0;
+            margin-right: 30px;
           }
           .menu-button {
-            cursor: pointer;
-            padding: 5px;
-          }
-          .menu-options {
             position: absolute;
             right: 0;
-            top: 100%;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            display: none;
-            flex-direction: column;
-            z-index: 10;
-          }
-          .menu-options.show {
-            display: flex;
-          }
-          .menu-option {
-            padding: 5px 10px;
+            top: 0;
             cursor: pointer;
+            padding: 5px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            transition: color 0.2s;
           }
-          .menu-option:hover {
-            background-color: #f0f0f0;
-          }
-          img {
-            max-width: 100%;
-            max-height: 250px;
-            height: auto;
-            width: auto;
+          .menu-button:hover {
+            color: #333;
           }
         </style>
-      <div class="avatar" role="img" aria-label="User avatar">${initial}</div>
-      <div class="message-content"></div>
-      <div class="menu-container">
-        <div class="menu-button" role="button" aria-haspopup="true" aria-expanded="false">⋮</div>
-        <div class="menu-options" role="menu"></div>
-      </div>
+        <div class="avatar" role="img" aria-label="User avatar">${initial}</div>
+        <div class="message-content"></div>
+        <button class="menu-button" role="button" aria-haspopup="true" aria-expanded="false">⋮</button>
     `;
 
     const avatar = this.shadowRoot.querySelector('.avatar');
@@ -3907,37 +4064,63 @@ class ChatMessage extends HTMLElement {
 
   setupMenu() {
     const menuButton = this.shadowRoot.querySelector('.menu-button');
-    const menuOptions = this.shadowRoot.querySelector('.menu-options');
+    const menuOptions = this._menuPortal.querySelector('.menu-options');
 
-    menuButton.addEventListener('click', () => {
-      const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-      menuButton.setAttribute('aria-expanded', !isExpanded);
-      menuOptions.classList.toggle('show');
-    });
+    // Limpiar opciones anteriores
+    menuOptions.innerHTML = '';
 
-    // Crear opciones de menú solo si tienen callback
+    // Agregar nuevas opciones
     this._menuOptions.forEach(option => {
       if (typeof option.callback === 'function') {
         const button = document.createElement('button');
         button.textContent = option.text;
         button.classList.add('menu-option');
         button.setAttribute('role', 'menuitem');
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
           option.callback(this.getMessageData());
-          menuOptions.classList.remove('show');
-          menuButton.setAttribute('aria-expanded', 'false');
+          this._hideMenu();
         });
         menuOptions.appendChild(button);
       }
     });
+
+    // Manejar clicks en el botón del menú
+    menuButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+      
+      if (!isExpanded) {
+        this._showMenu();
+      } else {
+        this._hideMenu();
+      }
+    });
+  }
+
+  _showMenu() {
+    const menuButton = this.shadowRoot.querySelector('.menu-button');
+    menuButton.setAttribute('aria-expanded', 'true');
+    this._menuPortal.style.display = 'block';
+    this._updateMenuPosition();
+  }
+
+  _hideMenu() {
+    const menuButton = this.shadowRoot.querySelector('.menu-button');
+    menuButton.setAttribute('aria-expanded', 'false');
+    this._menuPortal.style.display = 'none';
   }
 
   getMessageData() {
     return this._data;
   }
+
+  getRandomColor() {
+    const colors = ['#4CAF50', '#2196F3', '#9C27B0', '#F44336', '#FF9800'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
 }
 
-// Registrar los componentes
 customElements.define('message-container', MessageContainer);
 customElements.define('chat-message', ChatMessage);
 
