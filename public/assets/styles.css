@@ -354,7 +354,7 @@ input[type="text"],
 input[type="number"],
 textarea {
   box-sizing: border-box; /* Cambiado de content-box para mejor control del tamaño */
-  width: 100%;
+  width: auto;
   min-height: 40px;
   padding: 8px 12px;
   background-color: var(--dark-input-bg);

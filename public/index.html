@@ -57,61 +57,12 @@
                       <div class="events3 eventscontainer">Events</div>
               
                   </div>
+                  </div>
                   <div class="containerbox relative">
                     <div class="LiveContainer">
                       <div  id="chat-container" class="chat1 chatcontainer"><message-container id="chatcontainer"></message-container></div>
                       <div class="gift2 giftcontainer"><message-container id="giftcontainer"></message-container></div>
                       <div class="events3 eventscontainer"><message-container id="eventscontainer"></message-container></div>
-                      <script>
-/*                         document.addEventListener('DOMContentLoaded', () => {
-                          console.log('DOMContentLoaded');
-
-
-                        //const messageContainer = document.getElementById('chatcontainer');
-                        //messageContainer.appendChild(container);
-                        const containersarray = ["chatcontainer","giftcontainer","eventscontainer"];
-                        containersarray.forEach(containerid => {
-                          const container = document.createElement('chat-message');
-
-                          // Ejemplo de cómo añadir un mensaje con menú expandible
-                          container.setMessageData({
-                            user: {
-                              name: 'Jasdasd',
-                              photo: 'https://img.lovepik.com/photo/45009/3908.jpg_wh860.jpg',
-                              value: 'Hola, ¿cómo estás?'
-                            },
-                            content: [
-                              { type: 'text', value: 'Hola, ¿cómo estás?' },
-                              { type: 'image', value: 'https://img.lovepik.com/photo/45009/3908.jpg_wh860.jpg' }
-                            ],
-                            menu: {
-                              options: [
-                                {
-                                  text: 'Responder',
-                                  callback: (messageData) => {
-                                    console.log('Responder clicked', messageData);
-                                  }
-                                },
-                                {
-                                  text: 'Reaccionar',
-                                  callback: (messageData) => {
-                                    console.log('Reaccionar clicked', messageData);
-                                  }
-                                },
-                                {
-                                  text: 'Eliminar',
-                                  callback: (messageData) => {
-                                    console.log('Eliminar clicked', messageData);
-                                  }
-                                }
-                              ]
-                            }
-                          });
-                          const messageContainer = document.getElementById(containerid);
-                          messageContainer.appendChild(container);
-                        });
-                      }); */
-                      </script>
                   </div>
                 </div>              
             </section>
@@ -135,14 +86,14 @@
                       <div id="ActionModalContainer"></div>
                     </custom-modal>
                     <div id="table-containerAction" class="dynamic-table1"></div>
+                    <input type="text" id="speaktext" placeholder="Speak text" class="default-input">
+                    <button id="speakbutton" class="button default-button">Speak test</button>
                 </div>
                 <div class="containerbox relative grid-minmax-28rem-auto">
                   <div id="chatbotconfig" class="grid grid-cols-2 gap-4"></div>
-                  <div>                  <input type="text" id="speaktext" placeholder="Speak text" class="default-input">
-                    <button id="speakbutton" class="button default-button">Speak test</button>
+                   
                     <audio id="audio"></audio>
-                  </div>
-                    <div id="MinecraftModalContainer">                  <h3><translate-text key="minecraftPlugin"></translate-text></h3>
+                    <div id="MinecraftModalContainer"> 
                     </div>
                 </div>
               </section>
