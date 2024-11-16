@@ -108,7 +108,7 @@ getRowAt(index) {
 // usando async y await
 
 async getRowIndex(searchData) {
-  logger.log("renderhtml","getRowIndex", searchData);
+  //logger.log("renderhtml","getRowIndex", searchData);
   
   for (let i = 0; i < this.rows.length; i++) {
       const row = this.rows[i];
@@ -457,6 +457,8 @@ class DynamicRow {
       labelElement.classList.add('label');
       labelElement.setAttribute('for', key);
       divElement.appendChild(labelElement);
+    } else {
+      selectComponent.setLabel(key);
     }
     return divElement
   }
@@ -597,7 +599,7 @@ class DynamicRow {
       options: typeConfig.options,
       name: key,
     };
-    // logger.log("renderhtml","createMultiSelectElement", fieldConfig,value);
+    logger.log("renderhtml","createMultiSelectElement", fieldConfig,value);
     const multiSelectField = createMultiSelectField(fieldConfig, (selectedValues) => {
       this.updateModifiedData(key, subKey, selectedValues);
     }, value);
@@ -627,24 +629,40 @@ class DynamicRow {
     }
   }
   handletoggleoptions(key, subKey, HtmlContainer, dataAttributes = []) {
-    const dataAbase = 'data-associated'
-    dataAttributes.push(`${dataAbase}-0`,`${dataAbase}-1`,`${dataAbase}-2`,dataAbase);
+    const dataAbase = 'data-associated';
+    dataAttributes.push(`${dataAbase}-0`,`${dataAbase}-1`,`${dataAbase}-2`, dataAbase);
+    
     // Crear el selector combinando todos los atributos
     const selector = dataAttributes.map(attr => `[${attr}]`).join(',');
     const fields = HtmlContainer.querySelectorAll(selector);
     
     if (!fields.length) return;
 
+    // Primero hacemos fade out de todos los elementos
     fields.forEach(field => {
-        // Verificar si alguno de los atributos coincide con subKey
-        const matches = dataAttributes.some(attr => 
-            field.getAttribute(attr) === subKey
-        );
-
-        field.style.display = matches ? 'block' : 'none';
+      field.style.opacity = '0';
     });
-}
 
+    // Esperamos a que termine la transición de fade out
+    setTimeout(() => {
+      fields.forEach(field => {
+        // Verificar si alguno de los atributos coincide con subKey
+        const matches = dataAttributes.some(attr =>
+          field.getAttribute(attr) === subKey
+        ) || field.getAttribute(dataAbase) === key;
+
+        if (matches) {
+          field.style.display = 'block';
+          // Aplicamos fade in solo a los elementos que deben mostrarse
+          setTimeout(() => {
+            field.style.opacity = '1';
+          }, 150);
+        } else {
+          field.style.display = 'none';
+        }
+      });
+    }, 500); // Este tiempo debe coincidir con la duración de la transición
+  }
   updateData(newData) {
     this.data = { ...newData };
     this.originalData = { ...newData };
@@ -764,10 +782,12 @@ function createMultiSelectField(field, onChangeCallback, initialValue) {
   if (Array.isArray(initialValue)) {
       multiSelect.value = initialValue;
   }
-
+  logger.log("renderhtml","createMultiSelectElement", field);
   // Set custom label if needed
-  if (field.placeholder) {
-      multiSelect.setlabel(field.placeholder);
+  if (field.label) {
+      multiSelect.setlabel(field.label || "Select");
+  } else {
+    multiSelect.setlabel(field.name || "Select");
   }
 
   // Add change event listener

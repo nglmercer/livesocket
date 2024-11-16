@@ -216,7 +216,8 @@ const newtextcontent = {
     value: "uniqueId comment",
   },
   content: [
-    { type: 'text', value: "uniqueId = username comentario = comment" },
+    { type: 'text', value: "uniqueId = username" },
+    { type: 'text', value: "comentario = comment" },
   ],
 }
 /* const numbercontent = {
@@ -294,20 +295,30 @@ const defaultmenuchat = [
     text: 'filtrar comentarios - dividir',
     callback: (messageData) => {
       console.log('Responder clicked', messageData);
-      // splitfilterwords(messageData);
+      const { user, content } = messageData;
+      const { name, value } = user;
+      console.log('Responder clicked', user, content);
+      // splitfilterwords(value);
     }
   },
   {
     text: 'filtrar comentario',
     callback: (messageData) => {
-      console.log('Reaccionar clicked', messageData);
-      // filterwordadd(messageData);
+      console.log('Responder clicked', messageData);
+      const { user, content } = messageData;
+      const { name, value } = user;
+      console.log('Responder clicked', user, content);
+      // filterwordadd(value);
     }
   },
   {
-    text: 'Eliminar',
+    text: 'Bloquear usuario',
     callback: (messageData) => {
-      console.log('Eliminar clicked', messageData);
+      console.log('Responder clicked', messageData);
+      const { user, content } = messageData;
+      const { name, value } = user;
+      console.log('Responder clicked', user, content);
+      // create functio to block user example blockuser(name);
     }
   }
 ];
@@ -319,50 +330,59 @@ const giftmenu = [
     }
   }
 ]
-
+const timenow = () => {
+  const now = new Date();
+  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  return timeString;
+}
 async function lastelement(){
   const messagedata = JSON.parse(localStorage.getItem('lastChatMessage'));
   const newdata = await mapChatMessagetochat(messagedata);
   HandleAccionEvent('chat',newdata)
   console.log("mapChatMessagetochat",newdata)
 
-  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:"texto adicional"});
+  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:timenow()});
   const newmessage1 = webcomponenttemplate(newtextcontent);
   const newmessage2 = webcomponenttemplate(newnumbercontent,giftmenu);
   const newmessage3 = webcomponenttemplate(neweventcontent,giftmenu);
   
-  const chatcontainer = returnchatelement(newwebcomponentchat);
-  const chatcontainer2 = returnchatelement(newmessage1);
-  const chatcontainer3 = returnchatelement(newmessage2);
-  const eventscontainer = returnchatelement(newmessage3);
+  appendmessage(newwebcomponentchat,"chatcontainer");
+  appendmessage(newmessage1,"chatcontainer");
+  appendmessage(newmessage2,"giftcontainer");
+  appendmessage(newmessage3,"eventscontainer");
 
-  appendmessage(eventscontainer,"eventscontainer");
-  appendmessage(chatcontainer,"chatcontainer");
-  appendmessage(chatcontainer2,"chatcontainer");
-  appendmessage(chatcontainer3,"giftcontainer");
-}
-lastelement();
-function returnchatelement(data) {
+/* function returnchatelement(data) {
   const elementwebcomponent = document.createElement('chat-message');
   elementwebcomponent.setMessageData(data);
   return elementwebcomponent;
+} */
 }
-function appendmessage(content,container) {
+lastelement();
+
+function appendmessage(data,container) {
+  const elementwebcomponent = document.createElement('chat-message');
+  elementwebcomponent.setMessageData(data);
+
   const elementcontainer = document.getElementById(container);
-  elementcontainer.appendChild(content);
+  elementcontainer.appendChild(elementwebcomponent);
 }
 const arrayevents = ["like", "gift", "chat"];
 
 // Funciones de manejo específicas
-
+const handlechat = async (data) => {
+  const newhtml = webcomponentchat(data,defaultmenuchat,{type:"text",value:timenow()});
+  appendmessage(newhtml,"chatcontainer");
+}
 function webcomponentchat(data,optionmenuchat = defaultmenuchat,additionaldata = {}) {
   return {
     user: {
       name: data.uniqueId,
       photo: data.profilePictureUrl,
-      value: data.comment
+      value: data.comment,
+      data: data,
     },
     content: [
+      { type: 'text', value: data.uniqueId },
       { type: 'text', value: data.comment },
       additionaldata
     //  { type: 'image', value: data.profilePictureUrl }

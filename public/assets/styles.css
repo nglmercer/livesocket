@@ -30,7 +30,33 @@ body {
     --dark-select-bg: #2d2d2d;
     --dark-hover-bg: #333333;
     --dark-option-hover: #404040;
-  }
+    --dark0:    #2E4053;
+    --dark1:    #283747;
+    --dark2:    #1B4F72; 
+    --dark3:    #154360; 
+    --dark4:    #1C2833;
+    --dark5:    #4A235A;
+    --dark6:    #512E5F;
+    --dark7:    #78281F;
+    --dark8:    #641E16;
+    --dark9:    #7B7D7D;
+    --dark10:   #34495E;
+    --dark11:   #1C2833;
+    --dark12:   #273746;
+    --dark13:   #212F3D;
+    --dark14:   #1A5276;
+    --dark15:   #7D6608;
+    --dark16:   #6E2C00;
+    --dark17:   #4D5656;
+    --dark18:   #17202A;
+    --dark19:   #566573;
+    --dark20:   #515A5A;
+    --dark21:   #1B2631;
+    --dark22:   #212F3C;
+    --dark23:   #4A235A;
+    --dark24:   #5B2C6F;
+    --dark25:   #78281F; 
+ }
 input {
   box-sizing: content-box;
   max-width: auto;
@@ -49,7 +75,9 @@ button {
   margin: 0.5rem;
   transition: background-color 0.2s;
 }
-
+.h-4rem {
+  height: 4rem;
+}
 .default-button:hover {
   background-color: #3d8ae5;
 }
@@ -273,10 +301,14 @@ button {
   color: var(--dark-text);
   padding: 1.5rem;
   border-radius: 8px;
-  display: grid;
-  grid-template-rows: minmax(1fr, 1fr);
 }
-
+.w-1\/2 {
+  width: 50% !important;
+}
+.maxw-1\/2 {
+  max-width: 50% !important;
+}
+.radio-wrapper { max-width: 250px; }
 /* Estilos para inputs y textareas */
 .input-default {
   background-color: var(--dark-secondary);
@@ -674,4 +706,12 @@ table {
 .menu-options button:hover {
   background-color: #555; /* Color de fondo al hacer hover */
   border-radius: 5px;
+}
+[data-associated] {
+  opacity: 0;
+  transition: opacity 0.3s ease, height 0.3s ease;
+}
+[data-associated].visible {
+  opacity: 1;
+  height: auto;
 }

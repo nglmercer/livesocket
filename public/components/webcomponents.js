@@ -519,8 +519,15 @@ class CustomMultiSelect extends HTMLElement {
       this.renderOptions();
   }
   setlabel(label) {
-    this.selectlabel = label || "Select";
+    this.renderLabel();
+    this.selectlabel = label || "select options";
     return this.selectlabel
+  }
+  renderLabel() {
+    const selectedElement = this.shadowRoot.querySelector('.selected-area.placeholder');
+    if (selectedElement) {
+        selectedElement.textContent = this.selectLabel;
+    }
   }
   async setValues(values) {
     // si this optios es una promesa o si no es un array, entonces esperamos a que se resuelva
@@ -736,7 +743,7 @@ class CustomMultiSelect extends HTMLElement {
 
       <div class="select-wrapper">
           <div class="selected-area">
-              <span class="placeholder">${this.selectlabel}</span>
+              <span class="placeholder">Select</span>
           </div>
           <div class="dropdown">
               <div class="search">
@@ -3759,10 +3766,54 @@ class ImageUrlInputComponent extends HTMLElement {
 
 customElements.define('image-url-input-component', ImageUrlInputComponent);
 // Función auxiliar para generar un color aleatorio (sin cambios)
-function getRandomColor() {
-  return '#' + Math.floor(Math.random()*16777215).toString(16);
+function getRandomColor(string) {
+  let randomChar = string ||Math.random().toString(36).substring(2, 15);
+  return getColorByChar(randomChar);
+  //return '#' + Math.floor(Math.random()*16777215).toString(16);
+}
+function getColorByChar(char) {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+
+  // Asignar un índice único para cada carácter del alfabeto
+  const lowerChar = char.toLowerCase();
+  const index = alphabet.indexOf(lowerChar);
+
+  // Si no es un carácter alfabético, devuelve un color por defecto
+  if (index === -1) return '#ff5733'; // Ejemplo de color por defecto
+
+  // Convertir índice a un color HSL saturado y con luminosidad moderada
+  const hue = (index / alphabet.length) * 360; // Distribuir colores uniformemente en el espectro
+  const saturation = 85; // Alta saturación
+  const lightness = 45; // Moderada luminosidad para evitar tonos muy claros o muy oscuros
+
+  // Convertir HSL a HEX
+  return hslToHex(hue, saturation, lightness);
 }
 
+// Función para convertir HSL a HEX
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+
+  let c = (1 - Math.abs(2 * l - 1)) * s;
+  let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  let m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+
+  if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+  else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+  else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+  else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+  else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+  else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+// Ejemplo de uso:
 class MessageContainer extends HTMLElement {
   constructor() {
     super();
@@ -3984,61 +4035,72 @@ class ChatMessage extends HTMLElement {
   }
 
   renderMessage(user, content) {
-    const bgColor = user.photo ? '' : this.getRandomColor();
+    const bgColor = user.photo ? '' : getRandomColor(user.name.charAt(0).toUpperCase());
     const initial = user.photo ? '' : user.name.charAt(0).toUpperCase();
-    
+  
     this.shadowRoot.innerHTML = /*html*/`
-        <style>
-          :host {
-            display: flex;
-            margin-bottom: 10px;
-            position: relative;
-          }
-          img {
-            max-width: 100%;
-            max-height: 250px;
-            height: auto;
-            width: auto;
-          }
-          .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            flex-shrink: 0;
-          }
-          .message-content {
-            display: flex;
-            flex-wrap: wrap;
-            flex-grow: 1;
-            margin-right: 30px;
-          }
-          .menu-button {
-            position: absolute;
-            right: 0;
-            top: 0;
-            cursor: pointer;
-            padding: 5px;
-            background: none;
-            border: none;
-            font-size: 16px;
-            color: #666;
-            transition: color 0.2s;
-          }
-          .menu-button:hover {
-            color: #333;
-          }
-        </style>
-        <div class="avatar" role="img" aria-label="User avatar">${initial}</div>
-        <div class="message-content"></div>
-        <button class="menu-button" role="button" aria-haspopup="true" aria-expanded="false">⋮</button>
+      <style>
+        :host {
+          display: flex;
+          margin-bottom: 10px;
+          position: relative;
+        }
+        img {
+          max-width: 100%;
+          max-height: 250px;
+          height: auto;
+          width: auto;
+          display: block;
+          margin-bottom: 5px; /* Espaciado entre imagen y texto */
+        }
+        .avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: white;
+          flex-shrink: 0;
+        }
+        .message-content {
+          display: flex;
+          flex-direction: column; /* Elementos en columna */
+          flex-grow: 1;
+          margin-right: 30px;
+          padding:0;
+          gap: 0;
+        }
+        p {
+          margin: 0;
+          padding: 0;
+        }
+        .message-item {
+          margin-bottom: 0; /* Separación entre cada bloque de contenido */
+        }
+        .menu-button {
+          position: absolute;
+          right: 0;
+          top: 0;
+          cursor: pointer;
+          padding: 5px;
+          background: none;
+          border: none;
+          font-size: 16px;
+          color: #666;
+          transition: color 0.2s;
+        }
+        .menu-button:hover {
+          color: #333;
+        }
+      </style>
+      <div class="avatar" role="img" aria-label="User avatar">${initial}</div>
+      <div class="message-content"></div>
+      <button class="menu-button" role="button" aria-haspopup="true" aria-expanded="false">⋮</button>
     `;
-
+  
     const avatar = this.shadowRoot.querySelector('.avatar');
     if (user.photo) {
       avatar.style.backgroundImage = `url(${user.photo})`;
@@ -4046,21 +4108,30 @@ class ChatMessage extends HTMLElement {
     } else {
       avatar.style.backgroundColor = bgColor;
     }
-
+  
     const messageContent = this.shadowRoot.querySelector('.message-content');
     content.forEach(item => {
-      if (item.type === 'text') {
-        const p = document.createElement('p');
-        p.textContent = item.value;
-        messageContent.appendChild(p);
-      } else if (item.type === 'image') {
+      const messageItem = document.createElement('div');
+      messageItem.classList.add('message-item');
+  
+      if (item.type === 'image') {
         const img = document.createElement('img');
         img.src = item.value;
         img.alt = 'Message image';
-        messageContent.appendChild(img);
+        messageItem.appendChild(img);
       }
+  
+      if (item.type === 'text') {
+        const p = document.createElement('p');
+        p.textContent = item.value;
+        p.classList.add('message-text');
+        messageItem.appendChild(p);
+      }
+  
+      messageContent.appendChild(messageItem);
     });
   }
+  
 
   setupMenu() {
     const menuButton = this.shadowRoot.querySelector('.menu-button');

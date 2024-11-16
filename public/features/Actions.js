@@ -273,7 +273,9 @@ function updatemodaldata(data = testdata) {
 const tableconfigcallback = {
   callback: async (data,modifiedData) => {
     console.log("callbacktable",data,modifiedData);
-    ActionsManager.updateDataById(data.id,modifiedData)
+    Aformelement.ReturnHtml(actionsconfig,modifiedData);
+    Aformelement.updateData(modifiedData)
+    ActionModal.open();
   },
   deletecallback:  async (data,modifiedData) => {
     const index = await table.getRowIndex(data);
@@ -282,8 +284,7 @@ const tableconfigcallback = {
     ActionsManager.deleteData(data.id)
   },
 }
-const renderer = document.getElementById('zone-renderer');
-console.log("renderer",renderer)
+//const renderer = document.getElementById('zone-renderer');
 async function execobsaction(data) {
   if (data.obs && data.obs?.check) {
     const valueobsaction = arrayobs[data.obs.action];
@@ -352,7 +353,7 @@ const table = new DynamicTable('#table-containerAction',replaceMultipleValues(ac
    for (let i = 0; i < alldata.length; i++) {
      table.addRow(alldata[i]);
     const newbutton = addCustomButton(alldata[i]);
-    renderer.addCustomElement(alldata[i].id,newbutton);
+    //renderer.addCustomElement(alldata[i].id,newbutton);
   }
   console.log("alldata render table",alldata);
 })  (); 
@@ -398,7 +399,7 @@ ObserverActions.subscribe(async (action, data) => {
     console.log("dataupdate",action,data)
     table.addRow(data);
     const newbutton = addCustomButton(data);
-    renderer.addCustomElement(data.id,newbutton);
+    //renderer.addCustomElement(data.id,newbutton);
   } else if (action === "delete") {
 /*     table.clearRows();
     const dataupdate = await ActionsManager.getAllData();
@@ -406,7 +407,7 @@ ObserverActions.subscribe(async (action, data) => {
       table.addRow(data);
     }); */
     console.log("dataupdate",action,data)
-    renderer.removeElement(data);
+    //renderer.removeElement(data);
   }
   else if (action === "update") {
     // table.clearRows();
@@ -415,7 +416,7 @@ ObserverActions.subscribe(async (action, data) => {
     //   table.addRow(data);
     // });
     const newbuttonchange = addCustomButton(data);
-    renderer.addCustomElement(data.id,newbuttonchange);
+    //renderer.addCustomElement(data.id,newbuttonchange);
     showAlert ('info', "Actualizado", "1000");
   }
 });
