@@ -276,7 +276,7 @@
   .items-container {
     max-height: 70dvh;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 280px));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 180px));
     overflow-y: auto;
     gap: 0.5rem;
     max-width: 1200px;

@@ -56,6 +56,7 @@ trackerMultiple.addInteractionListener(async (interaction) => {
     }
 });
 const htmlminecraft = Aformelement.ReturnHtml(minecraftdata);
+htmlminecraft.classList.add('grid');
 //   document.getElementById('sendcommandmc').addEventListener('submit', function(e) {
 //     e.preventDefault();
 //     const data = Object.fromEntries(new FormData(e.target).entries());

@@ -346,10 +346,10 @@ async function lastelement(){
   const newmessage2 = webcomponenttemplate(newnumbercontent,giftmenu);
   const newmessage3 = webcomponenttemplate(neweventcontent,giftmenu);
   
-  appendmessage(newwebcomponentchat,"chatcontainer");
-  appendmessage(newmessage1,"chatcontainer");
-  appendmessage(newmessage2,"giftcontainer");
-  appendmessage(newmessage3,"eventscontainer");
+  appendmessage2(newwebcomponentchat,"chatcontainer");
+  appendmessage2(newmessage1,"chatcontainer");
+  appendmessage2(newmessage2,"giftcontainer");
+  appendmessage2(newmessage3,"eventscontainer");
 
 /* function returnchatelement(data) {
   const elementwebcomponent = document.createElement('chat-message');
@@ -366,12 +366,16 @@ function appendmessage(data,container) {
   const elementcontainer = document.getElementById(container);
   elementcontainer.appendChild(elementwebcomponent);
 }
+function appendmessage2(data,container) {
+  const elementwebcomponent = document.getElementById(container);
+  elementwebcomponent.addMessage(data);
+}
 const arrayevents = ["like", "gift", "chat"];
 
 // Funciones de manejo específicas
 const handlechat = async (data) => {
   const newhtml = webcomponentchat(data,defaultmenuchat,{type:"text",value:timenow()});
-  appendmessage(newhtml,"chatcontainer");
+  appendmessage2(newhtml,"chatcontainer");
 }
 function webcomponentchat(data,optionmenuchat = defaultmenuchat,additionaldata = {}) {
   return {
@@ -413,6 +417,11 @@ function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome
   if (eventType === 'member') eventType = 'welcome';
   if (eventType === 'chat') {
+    const removeHttpLinksRegex = (text) => {
+      return text.replace(/(?:^|\s)https?:\/\/\S+/gi, ' link').trim();
+  };  
+    data.comment = removeHttpLinksRegex(data.comment);
+    console.log("data.comment",data.comment,removeHttpLinksRegex(data.comment));
     if(data.comment === lastcomment) {
       return;
     } 
@@ -420,6 +429,7 @@ function Readtext(eventType = 'chat',data) {
   }
   Replacetextoread(eventType, data);
 }
+Readtext('chat',{uniqueId:"testUser",comment:"hola  https://www.google.com mira esto"});
 const generateobject = (eventType,comparison ) => {
   return arrayevents.includes(eventType) 
     ? [{ key: eventType, compare: comparison },{ key: 'eventType', compare: 'isEqual' }] 

@@ -3813,7 +3813,6 @@ function hslToHex(h, s, l) {
 
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
-// Ejemplo de uso:
 class MessageContainer extends HTMLElement {
   constructor() {
     super();
@@ -3823,26 +3822,45 @@ class MessageContainer extends HTMLElement {
         :host {
           display: block;
           width: 100%;
-          height: 100%;
-          overflow-y: auto;
+          max-height: 280px;
           position: relative;
         }
         .messages-wrapper {
           position: relative;
           min-height: 100%;
+          max-height: 280px;
+          overflow-y: auto;
         }
       </style>
-      <div class="messages-wrapper">
+      <div class="messages-wrapper" id="messagesWrapper">
         <slot></slot>
       </div>
     `;
+
+    // Guardamos una referencia al wrapper
+    this.messagesWrapper = this.shadowRoot.querySelector('#messagesWrapper');
+  }
+  connectedCallback() {
+    // Observador para detectar cambios en el contenedor principal
+    if (this.messagesWrapper) {
+      const observer = new MutationObserver(() => {
+        this.scrollToBottom();
+      });
+      observer.observe(this.messagesWrapper, { childList: true });
+    }
   }
 
   addMessage(messageData) {
     const message = document.createElement('chat-message');
     message.setMessageData(messageData);
-    this.appendChild(message);
-    this.scrollTop = this.scrollHeight;
+    this.messagesWrapper.appendChild(message); // Añades el mensaje directamente al contenedor
+    this.scrollToBottom();
+    // No es necesario usar requestAnimationFrame porque el MutationObserver se encargará del scroll
+  }
+  scrollToBottom() {
+    // Asegura que el scroll se mueva hasta el final
+    this.messagesWrapper.scrollTop = this.messagesWrapper.scrollHeight;
+    console.log('scrollToBottom', this.messagesWrapper.scrollTop, this.messagesWrapper.scrollHeight);
   }
 }
 

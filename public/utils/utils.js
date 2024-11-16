@@ -261,12 +261,9 @@ const EvaluerLikes = new LikeTracker(5000);
 const replaceVariables = (command, data, iscommand = false ) => {
   let playerName = localStorage.getItem('playerNameInput') || localStorage.getItem('playerName');
 
-  if (typeof command !== 'string') {
+  if (!command || typeof command !== 'string') {
     console.warn("Error: 'command' debe ser una cadena de texto.", typeof command);
     return command; // O lanzar un error si prefieres: throw new Error("'command' debe ser una cadena de texto.");
-  }
-  if (!command) {
-    return command;
   }
   if (iscommand && command.includes(" ")) {
     // Dividimos el string en máximo 2 partes usando el espacio como separador
