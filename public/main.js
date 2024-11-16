@@ -1,6 +1,6 @@
 import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker, EvaluerLikes } from './utils/utils.js';
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Replacetextoread, addfilterword } from './features/speechconfig.js';
+import { Replacetextoread, addfilterword, existuserinArray } from './features/speechconfig.js';
 import { handleleermensaje } from './audio/tts.js';
 import { getTranslation, translations } from './translations.js';
 import { ActionsManager } from './features/Actions.js';
@@ -415,6 +415,7 @@ function webcomponenttemplate(template = {}, optionmenuchat = defaultmenuchat, n
 let lastcomment = ''
 function Readtext(eventType = 'chat',data) {
   // especial case if roomuser is welcome
+  if (data.uniqueId && existuserinArray(data.uniqueId)) { showAlert('info',`${getTranslation('blacklistuser')} ${data.uniqueId} `); return; }
   if (eventType === 'member') eventType = 'welcome';
   if (eventType === 'chat') {
     const removeHttpLinksRegex = (text) => {
@@ -429,7 +430,7 @@ function Readtext(eventType = 'chat',data) {
   }
   Replacetextoread(eventType, data);
 }
-Readtext('chat',{uniqueId:"testUser",comment:"hola  https://www.google.com mira esto"});
+//Readtext('chat',{uniqueId:"nightbot",comment:"hola  https://www.google.com mira esto"});
 const generateobject = (eventType,comparison ) => {
   return arrayevents.includes(eventType) 
     ? [{ key: eventType, compare: comparison },{ key: 'eventType', compare: 'isEqual' }] 

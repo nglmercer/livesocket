@@ -274,5 +274,5 @@ blueui.initializeEventListeners(blueuiElement);
     return response;
   }
   //existwordinArray("tedesku")
-export { Replacetextoread, addfilterword, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
+export { Replacetextoread, addfilterword,existuserinArray, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
 // asdasd como seria un metodo para hacer un string a json
