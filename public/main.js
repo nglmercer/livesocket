@@ -194,7 +194,7 @@ tiktokLiveEvents.forEach(event => {
             break;
           case 'member':
             const eventmember = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'member', class: "gold"});
-            appendmessage2(eventmember,"eventscontainer");
+            appendmessage2(eventmember,"eventscontainer",true);
             console.log("member",data)
             break;
           case 'roomUser':
@@ -202,17 +202,17 @@ tiktokLiveEvents.forEach(event => {
             break;
           case 'like':
             const eventlike = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'like', class: "gold"});
-            appendmessage2(eventlike,"eventscontainer");
+            appendmessage2(eventlike,"eventscontainer",true);
             console.log("like",data)
             break;
           case 'follow':
             const eventfollow = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'follow', class: "gold"});
-            appendmessage2(eventfollow,"eventscontainer");
+            appendmessage2(eventfollow,"eventscontainer",true);
             console.log("follow",data)
             break;
           case 'share':
             const eventshare = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'share', class: "gold"});
-            appendmessage2(eventshare,"eventscontainer");
+            appendmessage2(eventshare,"eventscontainer",true);
             console.log("share",data)
             break;
           default:
@@ -410,9 +410,9 @@ async function lastelement(){
 }
 lastelement();
 
-function appendmessage2(data,container) {
+function appendmessage2(data,container,autohide = false) {
   const elementwebcomponent = document.getElementById(container);
-  elementwebcomponent.addMessage(data);
+  elementwebcomponent.addMessage(data,autohide);
 }
 const arrayevents = ["like", "gift", "chat"];
 

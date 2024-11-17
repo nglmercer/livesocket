@@ -3862,54 +3862,27 @@ class MessageContainer extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
-    // Definir los estilos base que pueden ser sobrescritos
     this.shadowRoot.innerHTML = `
       <style>
-        /* Estilos base que pueden ser sobrescritos usando CSS custom properties */
         :host {
-          display: var(--message-container-display, block);
-          width: var(--message-container-width, 100%);
-          max-height: var(--message-container-max-height, 280px);
-          position: var(--message-container-position, relative);
-          
-          /* Permite que los estilos del tema light/dark se hereden */
-          color-scheme: light dark;
+          display: block;
+          width: 100%;
+          position: relative;
         }
-
         .messages-wrapper {
-          position: var(--messages-wrapper-position, relative);
-          min-height: var(--messages-wrapper-min-height, 100%);
-          max-height: var(--messages-wrapper-max-height, 280px);
-          overflow-y: var(--messages-wrapper-overflow, auto);
-          
-          /* Propiedades adicionales personalizables */
-          background: var(--messages-wrapper-background, transparent);
-          padding: var(--messages-wrapper-padding, 0);
-          margin: var(--messages-wrapper-margin, 0);
-          border-radius: var(--messages-wrapper-border-radius, 0);
-          border: var(--messages-wrapper-border, none);
+          position: relative;
+          min-height: 100%;
+          max-height: 280px;
+          overflow-y: auto;
         }
-
-        /* Permite que los slots hereden estilos */
-        ::slotted(*) {
-          /* Heredar propiedades de color y fuente del contenedor padre */
-          color: inherit;
-          font-family: inherit;
-        }
-
-        /* Soporte para temas personalizados */
-        :host([theme="dark"]) {
-          --messages-wrapper-background: var(--dark-background, #2b2b2b);
-          color: var(--dark-text-color, #ffffff);
-        }
-
-        :host([theme="light"]) {
-          --messages-wrapper-background: var(--light-background, #ffffff);
-          color: var(--light-text-color, #000000);
-        }
+        .maxh-5rem {max-height: 5rem !important;}
+        .maxh-10rem {max-height: 10rem !important;}
+        .maxh-15rem {max-height: 15rem !important;}
+        .maxh-20rem {max-height: 20rem !important;}
+        .maxh-25rem {max-height: 25rem !important;}
+        .maxh-30rem {max-height: 30rem !important;}
       </style>
-      <div class="messages-wrapper" id="messagesWrapper" part="wrapper">
+      <div class="messages-wrapper" id="messagesWrapper">
         <slot></slot>
       </div>
     `;
@@ -3917,52 +3890,33 @@ class MessageContainer extends HTMLElement {
     this.messagesWrapper = this.shadowRoot.querySelector('#messagesWrapper');
   }
 
-  // Método para aplicar estilos personalizados
-  setCustomStyles(styles) {
-    const styleSheet = new CSSStyleSheet();
-    styleSheet.replaceSync(styles);
-    this.shadowRoot.adoptedStyleSheets = [styleSheet];
-  }
-
   connectedCallback() {
+    // Aplicar clases desde un atributo
+    if (this.hasAttribute('wrapper-classes')) {
+      this.messagesWrapper.className += ` ${this.getAttribute('wrapper-classes')}`;
+    }
+
+    // Aplicar estilo dinámico desde un atributo
+    if (this.hasAttribute('wrapper-style')) {
+      this.messagesWrapper.style.cssText += this.getAttribute('wrapper-style');
+    }
+
+    // Observador para detectar cambios en el contenedor principal
     if (this.messagesWrapper) {
       const observer = new MutationObserver(() => {
         this.scrollToBottom();
       });
       observer.observe(this.messagesWrapper, { childList: true });
     }
-
-    // Aplicar los atributos personalizados si existen
-    this.updateStyles();
   }
 
-  static get observedAttributes() {
-    return ['theme', 'custom-styles'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (name === 'theme') {
-        this.updateStyles();
-      } else if (name === 'custom-styles') {
-        this.setCustomStyles(newValue);
-      }
-    }
-  }
-
-  updateStyles() {
-    // Actualizar estilos basados en atributos
-    const theme = this.getAttribute('theme');
-    if (theme) {
-      this.setAttribute('theme', theme);
-    }
-  }
-
-  addMessage(messageData) {
+  addMessage(messageData, autoHide = false) {
     const message = document.createElement('chat-message');
+
     message.setMessageData(messageData);
     this.messagesWrapper.appendChild(message);
     this.scrollToBottom();
+    if (autoHide) message.setAutoHide(3000);
   }
 
   scrollToBottom() {
@@ -3976,12 +3930,12 @@ class ChatMessage extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._menuOptions = [];
     this._createMenuPortal();
-    
+
     // Sistema de seguimiento de posición
     this._positionTracker = {
       scrollListeners: new Set(),
       resizeObserver: null,
-      intersectionObserver: null
+      intersectionObserver: null,
     };
   }
 
@@ -3989,6 +3943,10 @@ class ChatMessage extends HTMLElement {
     this._setupPositionTracking();
     this._handleClickOutside = this._handleClickOutside.bind(this);
     document.addEventListener('click', this._handleClickOutside);
+    const autoHideAttr = this.getAttribute('auto-hide');
+    if (autoHideAttr) {
+      this.setAutoHide(Number(autoHideAttr));
+    }
   }
 
   disconnectedCallback() {
@@ -4149,7 +4107,36 @@ class ChatMessage extends HTMLElement {
       this._hideMenu();
     }
   }
+    // Método para configurar el auto-ocultamiento
+  setAutoHide(timeout) {
+    if (typeof timeout === 'number' && timeout > 0) {
+      setTimeout(() => {
+        this._startFadeOut();
+      }, timeout);
+    }
+  }
 
+  _startFadeOut() {
+    // Agregar la clase de desvanecimiento
+    this.classList.add('fade-out');
+
+    // Esperar al final de la animación para ocultar completamente el elemento
+    const animationDuration = parseFloat(
+      getComputedStyle(this).getPropertyValue('--fade-duration') || '1'
+    ) * 1000;
+
+    setTimeout(() => {
+      this.style.display = 'none';
+    }, animationDuration);
+  }
+  static get observedAttributes() {
+    return ['auto-hide'];
+  }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'auto-hide' && newValue) {
+      this.setAutoHide(Number(newValue));
+    }
+  }
   setMessageData(data) {
     const { user, content, menu } = data;
     this._data = { user, content };
@@ -4326,7 +4313,7 @@ class ChatMessage extends HTMLElement {
   }
 }
 
-customElements.define('message-container', MessageContainer);
 customElements.define('chat-message', ChatMessage);
+customElements.define('message-container', MessageContainer);
 
 // Ejemplo de uso
