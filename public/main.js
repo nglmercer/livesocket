@@ -7,6 +7,8 @@ import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
 //import { text } from 'express';
+let client = tmi.client();
+
 const socket = io();
 const userProfile = document.querySelector('#kicklogin');
 userProfile.setConnectionStatus('offline');
@@ -14,8 +16,13 @@ userProfile.setPlatform("kick");
 const userProfile2 = document.querySelector('#tiktoklogin');
 userProfile2.setConnectionStatus('offline');
 userProfile2.setPlatform("tiktok");
+const userProfile3 = document.querySelector('#twitchlogin');
+userProfile3.setConnectionStatus('offline');
+userProfile3.setPlatform("twitch");
+
 const loginelements = document.querySelectorAll('#kicklogin')
 const loginelements2 = document.querySelectorAll('#tiktoklogin')
+const loginelements3 = document.querySelectorAll('#twitchlogin')
 loginelements.forEach(element => {
   element.setConnectionStatus('offline');
   element.setPlatform("kick");
@@ -42,7 +49,19 @@ loginelements2.forEach(element => {
       console.log('Usuario desconectado' ,e);
   });
 })
-
+loginelements3.forEach(element => {
+  element.setConnectionStatus('offline');
+  element.setPlatform("twitch");
+  element.addEventListener('userConnected', (e) => {
+      console.log('Usuario conectado:', e.detail.username);
+      element.setConnectionStatus('away');
+      //joinRoom(e.detail.username, e.detail.platform);
+      changeChannel(e.detail.username, "#", client);
+    });
+    element.addEventListener('userDisconnected', (e) => {
+      console.log('Usuario desconectado' ,e);
+  });
+})
 function joinRoom(roomid, platform = 'tiktok') {
     const roomId = roomid;
     socket.emit('joinRoom', { uniqueId: roomId, platform: platform });
@@ -152,7 +171,12 @@ trackerMultiple.addInteractionListener(async event => {
   console.error('Error al detectar interacción:', error);
 }
 });
-  
+await client.connect()
+.then(() => {
+    const hashVal = window.location.hash.slice(1);
+    if (hashVal.length) {changeChannel(hashVal, "#", client);}
+})
+.catch(e => console.error('No se pudo conectar a Twitch:', e));  
 
 const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error', 'allromuser', 'connected'];
 const tiktokLiveEvents = [
@@ -160,6 +184,12 @@ const tiktokLiveEvents = [
   'websocketConnected', 'error', 'member', 'roomUser',
   'like', 'social', 'emote', 'envelope', 'questionNew',
   'subscribe', 'follow', 'share', 'streamEnd'
+];
+const eventstwitch = ["emote","emotes","chat","ban","clear","color","commercial","deletemessage","host","unhost","cheer","bits","cheers",
+  "connected","disconnected","maxreconnect","reconnect","action","message","emotesets","whisper","mod","unmod","r9kbeta","r9kmode","r9kbetaoff",
+  "r9kmodeoff","subscribers","subscriber","subscribersoff","mods","vips","ban","clear","color","commercial","deletemessage","host","unhost",
+  "join","part","subs_on","subs_off","slow","slowmode","slowoff","sub","resub","subgift","anonsubgift","submysterygift","anonsubmysterygift",
+  "primepaidupgrade","giftpaidupgrade","anongiftpaidupgrade","raided","newanchor","raid","ritual",
 ];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
@@ -249,6 +279,132 @@ tiktokLiveEvents.forEach(event => {
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
+eventstwitch.forEach(event => {
+  client.on(event, (...args) => {
+    const lastevent = "lastevent" + event;
+    localStorage.setItem(lastevent, JSON.stringify(args));
+    localStorage.setItem("lastevent", event);
+    const mapdata = mapEvent(event, args);
+    const arraylinkstoobject = mapdata.emotes && mapdata.emotes.length > 0 ? mapdata.emotes.map(link => ({ value: link, type: "image" })) : []
+    console.log("mapdata",arraylinkstoobject)
+    switch (event) {
+      case "chat":
+          handlechat(mapdata);
+          Readtext(event,mapdata);
+          HandleAccionEvent("chat",mapdata,arraylinkstoobject[0]);
+          break;
+      case "cheer":
+          handlegift(mapdata);
+          Readtext("gift",mapdata);
+          HandleAccionEvent("bits",mapdata);
+          break;
+      default:
+        console.log(event,mapEvent(event, args));
+      }
+  });
+});
+async function changeChannel(newChannel, hash = "#", client) { 
+  if (!newChannel || newChannel.length <= 2) return;
+
+  // Asegúrate de que el cliente esté conectado
+  if (!client.readyState) {
+    await client.connect()
+    .then(() => {
+        const hashVal = window.location.hash.slice(1);
+        if (hashVal.length) {
+            // Cambia de canal solo si ya estás conectado
+            changeChannel(hashVal, "#", client);
+        }
+          })
+      .catch(e => console.error('No se pudo conectar a Twitch:', e));
+      console.error('Error: No conectado al servidor.');
+      return;
+  }
+
+  window.location.hash = newChannel.includes(hash) ? newChannel : '#' + newChannel;
+
+  try {
+      // Sal de todos los canales actuales antes de unirte a uno nuevo
+      await Promise.all(client.getChannels().map(oldChannel => client.part(oldChannel)));
+      const joinedChannel = await client.join(newChannel);
+      console.log('Unido al canal:', joinedChannel[0]);
+  } catch (e) {
+      console.error('Error al cambiar de canal:', e);
+  }
+}
+client.on('connected', (addr, port) => {
+  console.log(`Conectado a ${addr}:${port}`);
+});
+function mapEvent(eventType, eventData) {
+
+  switch (eventType) {
+      case "chat":
+          return baseData(eventData[1], 2, eventData);
+      case "cheer":
+          return { ...baseData(eventData[1], 2, eventData), bits: eventData[1].bits };
+      case "join":
+          return { uniqueId: eventData[1], nickname: eventData[1], isMod: !eventData[2], isSub: !eventData[2] };
+      case "sub":
+          return baseData(eventData[4],null, eventData);
+      case "resub":
+          return { ...baseData(eventData[5], null , eventData), nickname: eventData[3], uniqueId: eventData[3] };
+      case "subgift":
+          return { ...baseData(eventData[5], null , eventData), nickname: eventData[3], uniqueId: eventData[3] };
+      case "submysterygift":
+          return baseData(eventData[4],null, eventData);
+      case "primepaidupgrade":
+          return baseData(eventData[3], null, eventData);
+      case "giftpaidupgrade":
+          return baseData(eventData[4], null, eventData);
+      case "raided":
+          return { ...baseData(eventData[3], null, eventData), nickname: eventData[1], uniqueId: eventData[1] };
+      default:
+          return eventData;
+  }
+}
+function baseData(data, commentIndex = null, eventData) {
+  let rawcomment = commentIndex !== null ? eventData[commentIndex] : undefined || data["system-msg"];
+  return {
+      uniqueId: data.username || eventData[1],
+      nickname: data["display-name"] || eventData[1],
+      isMod: data.mod,
+      isSub: data.subscriber,
+      isVip: data.vip,
+      comment: getMessagestring(rawcomment, data).message,
+      emotes: getMessagestring(rawcomment, data).emotes,
+      data
+  };
+}
+function getMessagestring(message, { emotes }) {
+  if (!emotes) return { message: message, emotes: [] }; // Retorna mensaje original y un array vacío si no hay emotes
+
+  // Array para almacenar los links de los emotes
+  const emoteLinks = [];
+
+  // Iterar sobre los emotes para acceder a los IDs y posiciones
+  Object.entries(emotes).forEach(([id, positions]) => {
+    // Usar solo la primera posición para encontrar la palabra clave del emote
+    const position = positions[0];
+    const [start, end] = position.split("-");
+    const stringToReplace = message.substring(
+      parseInt(start, 10),
+      parseInt(end, 10) + 1
+    );
+
+    // Agregar el link del emote al array
+    emoteLinks.push(`https://static-cdn.jtvnw.net/emoticons/v1/${id}/1.0`);
+
+    // En caso de error, agregar el emote de fallback
+    const fallbackLink = `https://static-cdn.jtvnw.net/emoticons/v2/${id}/animated/dark/1.0`;
+    emoteLinks.push(fallbackLink);
+    
+    // Reemplazar la palabra clave del emote con un espacio en blanco
+    message = message.replace(stringToReplace, ''); // Reemplaza el emote en el mensaje
+  });
+
+  // Retornar el mensaje sin emotes y el array de links de emotes
+  return { message: message.trim(), emotes: emoteLinks }; // Elimina espacios en blanco innecesarios
+}
 async function mapChatMessagetochat(data) {
   return {
     comment: data.content,
@@ -436,9 +592,10 @@ function appendmessage2(data,container,autohide = false) {
 const arrayevents = ["like", "gift", "chat"];
 
 // Funciones de manejo específicas
-const handlechat = async (data) => {
-  const newhtml = webcomponentchat(data,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
+const handlechat = async (data,aditionaldata = {type:"text",value:timenow(), class: "bottom-right-0"}) => {
+  const newhtml = webcomponentchat(data,defaultmenuchat,aditionaldata);
   appendmessage2(newhtml,"chatcontainer");
+  console.log("chat",data)
 }
 const handlegift = async (data) => {
   const newhtml = webcomponentgift(data,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
