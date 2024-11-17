@@ -90,6 +90,11 @@ button {
 .flex {
   display: flex;
 }
+.bottom-right-0 {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
 * {
 
     box-sizing: border-box;

@@ -949,7 +949,8 @@ class UserProfile extends HTMLElement {
       username: '',
       imageUrl: './favicon.svg',
       language: 'es',
-      connectionStatus: 'offline'
+      connectionStatus: 'offline',
+      platform: 'tiktok'
     };
   }
 
@@ -1238,7 +1239,10 @@ class UserProfile extends HTMLElement {
     this.updateGroupElements();
     this.dispatchEvent(new CustomEvent('userDisconnected'));
   }
-
+  setPlatform(platform) {
+    this.state.platform = platform;
+    this.saveToLocalStorage();
+  }
   setConnectionStatus(status) {
     if (['offline', 'online', 'away', 'busy'].includes(status)) {
       this.state.connectionStatus = status;
@@ -3858,50 +3862,111 @@ class MessageContainer extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    
+    // Definir los estilos base que pueden ser sobrescritos
     this.shadowRoot.innerHTML = `
       <style>
+        /* Estilos base que pueden ser sobrescritos usando CSS custom properties */
         :host {
-          display: block;
-          width: 100%;
-          max-height: 280px;
-          position: relative;
+          display: var(--message-container-display, block);
+          width: var(--message-container-width, 100%);
+          max-height: var(--message-container-max-height, 280px);
+          position: var(--message-container-position, relative);
+          
+          /* Permite que los estilos del tema light/dark se hereden */
+          color-scheme: light dark;
         }
+
         .messages-wrapper {
-          position: relative;
-          min-height: 100%;
-          max-height: 280px;
-          overflow-y: auto;
+          position: var(--messages-wrapper-position, relative);
+          min-height: var(--messages-wrapper-min-height, 100%);
+          max-height: var(--messages-wrapper-max-height, 280px);
+          overflow-y: var(--messages-wrapper-overflow, auto);
+          
+          /* Propiedades adicionales personalizables */
+          background: var(--messages-wrapper-background, transparent);
+          padding: var(--messages-wrapper-padding, 0);
+          margin: var(--messages-wrapper-margin, 0);
+          border-radius: var(--messages-wrapper-border-radius, 0);
+          border: var(--messages-wrapper-border, none);
+        }
+
+        /* Permite que los slots hereden estilos */
+        ::slotted(*) {
+          /* Heredar propiedades de color y fuente del contenedor padre */
+          color: inherit;
+          font-family: inherit;
+        }
+
+        /* Soporte para temas personalizados */
+        :host([theme="dark"]) {
+          --messages-wrapper-background: var(--dark-background, #2b2b2b);
+          color: var(--dark-text-color, #ffffff);
+        }
+
+        :host([theme="light"]) {
+          --messages-wrapper-background: var(--light-background, #ffffff);
+          color: var(--light-text-color, #000000);
         }
       </style>
-      <div class="messages-wrapper" id="messagesWrapper">
+      <div class="messages-wrapper" id="messagesWrapper" part="wrapper">
         <slot></slot>
       </div>
     `;
 
-    // Guardamos una referencia al wrapper
     this.messagesWrapper = this.shadowRoot.querySelector('#messagesWrapper');
   }
+
+  // Método para aplicar estilos personalizados
+  setCustomStyles(styles) {
+    const styleSheet = new CSSStyleSheet();
+    styleSheet.replaceSync(styles);
+    this.shadowRoot.adoptedStyleSheets = [styleSheet];
+  }
+
   connectedCallback() {
-    // Observador para detectar cambios en el contenedor principal
     if (this.messagesWrapper) {
       const observer = new MutationObserver(() => {
         this.scrollToBottom();
       });
       observer.observe(this.messagesWrapper, { childList: true });
     }
+
+    // Aplicar los atributos personalizados si existen
+    this.updateStyles();
+  }
+
+  static get observedAttributes() {
+    return ['theme', 'custom-styles'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (name === 'theme') {
+        this.updateStyles();
+      } else if (name === 'custom-styles') {
+        this.setCustomStyles(newValue);
+      }
+    }
+  }
+
+  updateStyles() {
+    // Actualizar estilos basados en atributos
+    const theme = this.getAttribute('theme');
+    if (theme) {
+      this.setAttribute('theme', theme);
+    }
   }
 
   addMessage(messageData) {
     const message = document.createElement('chat-message');
     message.setMessageData(messageData);
-    this.messagesWrapper.appendChild(message); // Añades el mensaje directamente al contenedor
+    this.messagesWrapper.appendChild(message);
     this.scrollToBottom();
-    // No es necesario usar requestAnimationFrame porque el MutationObserver se encargará del scroll
   }
+
   scrollToBottom() {
-    // Asegura que el scroll se mueva hasta el final
     this.messagesWrapper.scrollTop = this.messagesWrapper.scrollHeight;
-    console.log('scrollToBottom', this.messagesWrapper.scrollTop, this.messagesWrapper.scrollHeight);
   }
 }
 
@@ -4136,8 +4201,10 @@ class ChatMessage extends HTMLElement {
           margin: 0;
           padding: 0;
         }
-        .message-item {
-          margin-bottom: 0; /* Separación entre cada bloque de contenido */
+        .bottom-right-0 {
+          position: absolute;
+          bottom: 0;
+          right: 0;
         }
         .menu-button {
           position: absolute;
@@ -4169,24 +4236,32 @@ class ChatMessage extends HTMLElement {
     }
   
     const messageContent = this.shadowRoot.querySelector('.message-content');
+    console.log("content webcomponent",content)
     content.forEach(item => {
       const messageItem = document.createElement('div');
-      messageItem.classList.add('message-item');
+      const classNameitem = item.class ? item.class : 'message-item';
+      messageItem.className = `${classNameitem}`;
   
       if (item.type === 'image') {
         const img = document.createElement('img');
         img.src = item.value;
-        img.alt = 'Message image';
+        img.alt = `message image`;
         messageItem.appendChild(img);
       }
   
       if (item.type === 'text') {
         const p = document.createElement('p');
         p.textContent = item.value;
-        p.classList.add('message-text');
+        p.className = `message-text ${classNameitem}`;
         messageItem.appendChild(p);
       }
-  
+      if (item.type === 'url') {
+        const a = document.createElement('a')
+        a.href = item.url;
+        a.textContent = item.value;
+        a.className = `message-text ${classNameitem}`;
+        messageItem.appendChild(a);
+      }
       messageContent.appendChild(messageItem);
     });
   }

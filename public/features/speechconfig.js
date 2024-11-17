@@ -273,6 +273,12 @@ blueui.initializeEventListeners(blueuiElement);
     //console.log("existwordinArray",response,word)
     return response;
   }
+  function adduserinArray(word) {
+    const response = bluemanager.add(word);
+    blueuiElement.loadItems();
+    //console.log("existwordinArray",response,word)
+    return response;
+  }
   //existwordinArray("tedesku")
-export { Replacetextoread, addfilterword,existuserinArray, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
+export { Replacetextoread, addfilterword,existuserinArray,adduserinArray, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
 // asdasd como seria un metodo para hacer un string a json

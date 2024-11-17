@@ -1,21 +1,23 @@
 import { Counter, compareObjects, replaceVariables, logger, UserInteractionTracker, EvaluerLikes } from './utils/utils.js';
 import { ChatContainer, ChatMessage, showAlert } from './components/message.js';
-import { Replacetextoread, addfilterword, existuserinArray } from './features/speechconfig.js';
+import { Replacetextoread, addfilterword, existuserinArray,adduserinArray } from './features/speechconfig.js';
 import { handleleermensaje } from './audio/tts.js';
 import { getTranslation, translations } from './translations.js';
 import { ActionsManager } from './features/Actions.js';
 import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
+//import { text } from 'express';
 const socket = io();
 const userProfile = document.querySelector('user-profile');
-console.log(userProfile.state);
+console.log("userprofilestate",userProfile.state);
 userProfile.setConnectionStatus('offline');
 const loginelements = document.querySelectorAll('#kicklogin')
 loginelements.forEach(element => {
   element.addEventListener('userConnected', (e) => {
       console.log('Usuario conectado:', e.detail.username);
       element.setConnectionStatus('away');
-      joinRoom(e.detail.username);
+      joinRoom(e.detail.username, e.detail.platform);
+      element.setPlatform(e.detail.platform);
     });
     element.addEventListener('userDisconnected', (e) => {
       console.log('Usuario desconectado' ,e);
@@ -31,9 +33,10 @@ loginelements.forEach(element => {
 userProfile.addEventListener('userDisconnected', (e) => {
     console.log('Usuario desconectado' ,e);
 }); */
-function joinRoom(roomid) {
+function joinRoom(roomid, platform = 'tiktok') {
     const roomId = roomid || document.getElementById('roomId').value;
-    socket.emit('joinRoom', { uniqueId: roomId });
+    socket.emit('joinRoom', { uniqueId: roomId, platform: platform });
+    console.log("joinRoom",{ uniqueId: roomId, platform: platform })
 }
 function getAvatarUrl(avatarData, preferredSize = 'large') {
   // Mapeo de nombres de tamaños a keys del objeto
@@ -124,18 +127,25 @@ if (userProfile.state.connected) {
     
     if (interacted) {
       console.log('Usuario ha interactuado se conectara');
-      joinRoom(userProfile.state.username);
+      joinRoom(userProfile.state.username, userProfile.state.platform);
       trackerMultiple.destroy()
     }
-    userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(userProfile.state.username));
+    if (userProfile.state.platform === 'kick') userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(userProfile.state.username));
   } catch (error) {
     console.error('Error al detectar interacción:', error);
   }
   });
   
     userProfile.setConnectionStatus('away');
+    userProfile.setPlatform('tiktok');
 }
-const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error', 'allromuser'];
+const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error', 'allromuser', 'connected'];
+const tiktokLiveEvents = [
+  'chat', 'gift', 'connected', 'disconnected',
+  'websocketConnected', 'error', 'member', 'roomUser',
+  'like', 'social', 'emote', 'envelope', 'questionNew',
+  'subscribe', 'follow', 'share', 'streamEnd'
+];
 const counterchat = new Counter(0, 1000);
 const countergift = new Counter(0, 1000);
 const countershare = new Counter(0, 1000);
@@ -145,32 +155,7 @@ const countermember = new Counter(0, 1000);
 const newChatContainer = new ChatContainer('.chatcontainer', 500);
 const newGiftContainer = new ChatContainer('.giftcontainer', 500);
 const newEventsContainer = new ChatContainer('.eventscontainer', 200); 
-const containerConfig = {
-  chat: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.chatcontainer', 500)
-  },
-  gift: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.giftcontainer', 500)
-  },
-  share: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.eventscontainer', 200)
-  },
-  like: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.eventscontainer', 200)
-  },
-  follow: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.eventscontainer', 200)
-  },
-  member: {
-    counter: new Counter(0, 1000),
-    container: new ChatContainer('.eventscontainer', 200)
-  }
-};   
+
 events.forEach(event => {
     socket.on(event, async (data) => {
       //Readtext(event, data);
@@ -178,6 +163,7 @@ events.forEach(event => {
         //console.log("event",event,data)
         switch (event) {
             case 'ready':
+              console.log("ready",data)
                 userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(data.username));
                 break;
             case 'ChatMessage':
@@ -193,7 +179,49 @@ events.forEach(event => {
 /*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
  */  });
 });
-
+tiktokLiveEvents.forEach(event => {
+    socket.on(event, async (data) => {
+        //Readtext(event, data);
+        localStorage.setItem('last'+event, JSON.stringify(data));
+        //console.log("event",event,data)
+        switch (event) {
+          case 'chat':
+            handlechat(data);
+            break;
+          case 'gift':
+            handlegift(data);
+            console.log("gift",data)
+            break;
+          case 'member':
+            const eventmember = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'member', class: "gold"});
+            appendmessage2(eventmember,"eventscontainer");
+            console.log("member",data)
+            break;
+          case 'roomUser':
+            console.log("roomUser",data)
+            break;
+          case 'like':
+            const eventlike = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'like', class: "gold"});
+            appendmessage2(eventlike,"eventscontainer");
+            console.log("like",data)
+            break;
+          case 'follow':
+            const eventfollow = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'follow', class: "gold"});
+            appendmessage2(eventfollow,"eventscontainer");
+            console.log("follow",data)
+            break;
+          case 'share':
+            const eventshare = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'share', class: "gold"});
+            appendmessage2(eventshare,"eventscontainer");
+            console.log("share",data)
+            break;
+          default:
+            console.log("event",event,data)
+              break;
+        }
+/*         document.getElementById('lasteventParse').innerHTML = JSON.stringify(data);
+ */  });
+});
 async function mapChatMessagetochat(data) {
   return {
     comment: data.content,
@@ -306,9 +334,9 @@ const defaultmenuchat = [
     callback: (messageData) => {
       console.log('Responder clicked', messageData);
       const { user, content } = messageData;
-      const { name, value } = user;
+      const { name, value, photo,data } = user;
       console.log('Responder clicked', user, content);
-      // splitfilterwords(value);
+      splitfilterwords(value);
     }
   },
   {
@@ -316,13 +344,26 @@ const defaultmenuchat = [
     callback: (messageData) => {
       console.log('Responder clicked', messageData);
       const { user, content } = messageData;
-      const { name, value } = user;
+      const { name, value, photo,data } = user;
       console.log('Responder clicked', user, content);
-      // filterwordadd(value);
+      filterwordadd(value);
     }
   },
   {
     text: 'Bloquear usuario',
+    callback: (messageData) => {
+      console.log('Responder clicked', messageData);
+      const { user, content } = messageData;
+      const { name, value, photo,data } = user;
+      console.log('Responder clicked', user, content);
+      adduserinArray(name);
+      // create functio to block user example blockuser(name);
+    }
+  }
+];
+const defaulteventsmenu = [
+  {
+    text: 'mas información',
     callback: (messageData) => {
       console.log('Responder clicked', messageData);
       const { user, content } = messageData;
@@ -331,7 +372,7 @@ const defaultmenuchat = [
       // create functio to block user example blockuser(name);
     }
   }
-];
+]
 const giftmenu = [
   {
     text: 'Responder',
@@ -342,7 +383,7 @@ const giftmenu = [
 ]
 const timenow = () => {
   const now = new Date();
-  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
   return timeString;
 }
 async function lastelement(){
@@ -351,7 +392,7 @@ async function lastelement(){
   HandleAccionEvent('chat',newdata)
   console.log("mapChatMessagetochat",newdata)
 
-  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:timenow()});
+  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
   const newmessage1 = webcomponenttemplate(newtextcontent);
   const newmessage2 = webcomponenttemplate(newnumbercontent,giftmenu);
   const newmessage3 = webcomponenttemplate(neweventcontent,giftmenu);
@@ -369,13 +410,6 @@ async function lastelement(){
 }
 lastelement();
 
-function appendmessage(data,container) {
-  const elementwebcomponent = document.createElement('chat-message');
-  elementwebcomponent.setMessageData(data);
-
-  const elementcontainer = document.getElementById(container);
-  elementcontainer.appendChild(elementwebcomponent);
-}
 function appendmessage2(data,container) {
   const elementwebcomponent = document.getElementById(container);
   elementwebcomponent.addMessage(data);
@@ -384,10 +418,14 @@ const arrayevents = ["like", "gift", "chat"];
 
 // Funciones de manejo específicas
 const handlechat = async (data) => {
-  const newhtml = webcomponentchat(data,defaultmenuchat,{type:"text",value:timenow()});
+  const newhtml = webcomponentchat(data,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
   appendmessage2(newhtml,"chatcontainer");
 }
-function webcomponentchat(data,optionmenuchat = defaultmenuchat,additionaldata = {}) {
+const handlegift = async (data) => {
+  const newhtml = webcomponentgift(data,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
+  appendmessage2(newhtml,"giftcontainer");
+}
+function webcomponentchat(data,optionmenuchat = [],additionaldata = {}) {
   return {
     user: {
       name: data.uniqueId,
@@ -405,6 +443,43 @@ function webcomponentchat(data,optionmenuchat = defaultmenuchat,additionaldata =
       options: optionmenuchat
     }
   };
+}
+function webcomponentgift(data,optionmenu = [],additionaldata={}){
+  return {
+    user : {
+      name: data.uniqueId,
+      photo: data.profilePictureUrl,
+      value: data.giftName,
+      data: data,
+    },
+    content: [
+      { type: 'text', value: data.uniqueId },
+      { type: 'text', value: data.repeatCount },
+      { type: 'text', value: data.giftName },
+      { type: 'image', value: data.giftPictureUrl },
+      additionaldata
+    ],
+    menu: {
+      options: optionmenu
+    }
+  }
+}
+function webcomponentevent(data,optionmenu = [],additionaldata={}){
+  return {
+    user : {
+      name: data.uniqueId,
+      photo: data.profilePictureUrl,
+      value: data.comment,
+      data: data,
+    },
+    content: [
+      { type: 'text', value: data.uniqueId },
+      additionaldata
+    ],
+    menu: {
+      options: optionmenu
+    }
+  }
 }
 function webcomponenttemplate(template = {}, optionmenuchat = defaultmenuchat, newdata = {},additionaldata={}){
   if (template && template.user && template.content && template.content.length > 0) {
