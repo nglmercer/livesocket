@@ -170,11 +170,13 @@ const countermember = new Counter(0, 1000);
 
 events.forEach(event => {
     socket.on(event, async (data) => {
-      //Readtext(event, data);
+        Readtext(event, data);
         localStorage.setItem('last'+event, JSON.stringify(data));
         //console.log("event",event,data)
+        
         switch (event) {
             case 'ready':
+              showAlert('success', `Connected`);
               console.log("ready",data)
                 userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(data.username));
                 break;
@@ -193,18 +195,21 @@ events.forEach(event => {
 });
 tiktokLiveEvents.forEach(event => {
     socket.on(event, async (data) => {
-        //Readtext(event, data);
+        Readtext(event, data);
         localStorage.setItem('last'+event, JSON.stringify(data));
         //console.log("event",event,data)
         switch (event) {
           case 'chat':
+            HandleAccionEvent('chat',data);
             handlechat(data);
             break;
           case 'gift':
             handlegift(data);
+            HandleAccionEvent('gift',data);
             console.log("gift",data)
             break;
           case 'member':
+            HandleAccionEvent('welcome',data)
             const eventmember = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'member', class: "gold"});
             appendmessage2(eventmember,"eventscontainer",true);
             console.log("member",data)
@@ -213,11 +218,13 @@ tiktokLiveEvents.forEach(event => {
             console.log("roomUser",data)
             break;
           case 'like':
+            HandleAccionEvent(event,data, 'isInRange')
             const eventlike = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'like', class: "gold"});
             appendmessage2(eventlike,"eventscontainer",true);
             console.log("like",data)
             break;
           case 'follow':
+            HandleAccionEvent('follow',data);
             const eventfollow = webcomponentevent(data,defaulteventsmenu,{type:"text",value:'follow', class: "gold"});
             appendmessage2(eventfollow,"eventscontainer",true);
             console.log("follow",data)
@@ -227,7 +234,15 @@ tiktokLiveEvents.forEach(event => {
             appendmessage2(eventshare,"eventscontainer",true);
             console.log("share",data)
             break;
+          case 'connected':
+            if (data.roomInfo?.owner) localStorage.setItem('ownerdata',JSON.stringify(data.roomInfo.owner));
+            const lastownerdata = localStorage.getItem('ownerdata');
+            if (lastownerdata) userProfile2.setProfileImage(getAvatarUrl(JSON.parse(lastownerdata)));
+            console.log(event, data);
+            showAlert('success', `Connected`);
+            break;
           default:
+            HandleAccionEvent(event,data)
             console.log("event",event,data)
               break;
         }
