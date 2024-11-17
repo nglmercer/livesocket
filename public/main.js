@@ -286,12 +286,12 @@ eventstwitch.forEach(event => {
     localStorage.setItem("lastevent", event);
     const mapdata = mapEvent(event, args);
     const arraylinkstoobject = mapdata.emotes && mapdata.emotes.length > 0 ? mapdata.emotes.map(link => ({ value: link, type: "image" })) : []
-    console.log("mapdata",arraylinkstoobject)
     switch (event) {
       case "chat":
-          handlechat(mapdata);
+        console.log("mapdata emotes",mapdata,mapEvent(event, args),arraylinkstoobject)
+          handlechat(mapdata,arraylinkstoobject[0]);
           Readtext(event,mapdata);
-          HandleAccionEvent("chat",mapdata,arraylinkstoobject[0]);
+          HandleAccionEvent("chat",mapdata);
           break;
       case "cheer":
           handlegift(mapdata);
@@ -299,7 +299,7 @@ eventstwitch.forEach(event => {
           HandleAccionEvent("bits",mapdata);
           break;
       default:
-        console.log(event,mapEvent(event, args));
+        console.log("default map",event,mapEvent(event, args),arraylinkstoobject);
       }
   });
 });
