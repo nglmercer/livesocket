@@ -24,26 +24,11 @@
         <!-- Los mismos items base para el sidebar (desktop) -->
         <div slot="sidebar-base-items">
                 <user-profile group-id="main" id="kicklogin"></user-profile>
-<!--                 <script>
-                  document.getElementById('userProfile2').addEventListener('userConnected', (e) => {
-                    console.log('Usuario conectado:', e.detail.username);
-                  });
-
-                  document.getElementById('userProfile2').addEventListener('userDisconnected', (e) => {
-                    console.log('Usuario desconectado');
-                  });
-                  document.getElementById('userProfile').addEventListener('userConnected', (e) => {
-                    console.log('Usuario conectado:', e.detail.username);
-                  });
-
-                  document.getElementById('userProfile').addEventListener('userDisconnected', (e) => {
-                    console.log('Usuario desconectado');
-                  });
-                </script> -->
         </div>
 
         <!-- Items adicionales del menú -->
         <div slot="menu-items">
+            <user-profile group-id="tiktok" id="tiktoklogin" minimal></user-profile>
             <div class="menu-item" data-target="#users">
               <translate-text key="home"></translate-text>
             </div>
@@ -65,15 +50,8 @@
         <!-- Contenido principal -->
         <div slot="main-content">
               <section id="users">
-                <h2>Usuarios</h2>
-                <div class="containerbox relative">
-                    <div class="LiveContainer">
-                      <div  id="chat-container" class="chat1 chatcontainer">Chats</div>
-                      <div class="gift2 giftcontainer">Gifts</div>
-                      <div class="events3 eventscontainer">Events</div>
-              
-                  </div>
-                  </div>
+                <h2>Chat</h2>
+                 
                   <div class="containerbox relative">
                     <div class="LiveContainer">
                       <div  id="chat-container" class="chat1 chatcontainer">

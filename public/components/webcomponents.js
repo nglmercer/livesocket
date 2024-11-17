@@ -1012,14 +1012,14 @@ class UserProfile extends HTMLElement {
 
   render() {
     const currentTranslations = this.translations[this.state.language];
-
+    const actualimageUrl = this.state.imageUrl ? this.state.imageUrl : this.createInitialState().imageUrl;
     this.shadowRoot.innerHTML = `
       ${this.getStyles()}
       <div class="container ${this.state.connected ? 'connected' : ''}">
         <div class="profile-wrapper">
           <img 
             class="profile-image" 
-            src="${this.state.imageUrl}"
+            src="${actualimageUrl}"
             alt="Profile"
           />
           <div 
@@ -1232,7 +1232,6 @@ class UserProfile extends HTMLElement {
   disconnect() {
     this.state.connected = false;
     this.state.imageUrl = './favicon.svg';
-    this.state.username = '';
     this.state.connectionStatus = 'offline';
     this.saveToLocalStorage();
     this.render();

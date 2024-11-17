@@ -252,33 +252,33 @@ const ui = new ArrayManagerUI(manager,filterworddefault);
 // Uso del método getHTML para añadir el componente al DOM
 const uiElement = ui.getHTML();
 // appContainer.appendChild(uiElement);
-ui.initializeEventListeners(uiElement);
+const uifunctions = ui.initializeEventListeners(uiElement);
 
 const bluemanager = new ArrayStorageManager('blacklistusers');
 const blueui = new ArrayManagerUI(bluemanager,["kickbot","nightbot","examplebot"]);    
 const blueuiElement = blueui.getHTML();
-blueui.initializeEventListeners(blueuiElement);
-
-  function addfilterword(word) {
-    manager.add(word);
-    ui.loadItems();
-  }
-  function existwordinArray(word) {
-    const response = manager.containword(word);
-    //console.log("existwordinArray",response,word)
-    return response;
-  }
-  function existuserinArray(word) {
-    const response = bluemanager.containword(word);
-    //console.log("existwordinArray",response,word)
-    return response;
-  }
-  function adduserinArray(word) {
-    const response = bluemanager.add(word);
-    blueuiElement.loadItems();
-    //console.log("existwordinArray",response,word)
-    return response;
-  }
+const blueuifunctions = blueui.initializeEventListeners(blueuiElement);
+//{ loadItems, addItem: handleAddItem, addDefault: handleAddDefault }
+function addfilterword(word) {
+manager.add(word);
+uifunctions.loadItems();
+}
+function existwordinArray(word) {
+const response = manager.containword(word);
+//console.log("existwordinArray",response,word)
+return response;
+}
+function existuserinArray(word) {
+const response = bluemanager.containword(word);
+//console.log("existwordinArray",response,word)
+return response;
+}
+function adduserinArray(word) {
+const response = bluemanager.add(word);
+blueuifunctions.loadItems();
+//console.log("existwordinArray",response,word)
+return response;
+}
   //existwordinArray("tedesku")
 export { Replacetextoread, addfilterword,existuserinArray,adduserinArray, htmlvoice, htmlvoiceevents,uiElement,blueuiElement}
 // asdasd como seria un metodo para hacer un string a json

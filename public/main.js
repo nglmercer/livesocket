@@ -8,35 +8,45 @@ import { EventsManager } from './features/Events.js';
 import { sendcommandmc } from './features/Minecraftconfig.js';
 //import { text } from 'express';
 const socket = io();
-const userProfile = document.querySelector('user-profile');
-console.log("userprofilestate",userProfile.state);
+const userProfile = document.querySelector('#kicklogin');
 userProfile.setConnectionStatus('offline');
+userProfile.setPlatform("kick");
+const userProfile2 = document.querySelector('#tiktoklogin');
+userProfile2.setConnectionStatus('offline');
+userProfile2.setPlatform("tiktok");
 const loginelements = document.querySelectorAll('#kicklogin')
+const loginelements2 = document.querySelectorAll('#tiktoklogin')
 loginelements.forEach(element => {
+  element.setConnectionStatus('offline');
+  element.setPlatform("kick");
   element.addEventListener('userConnected', (e) => {
       console.log('Usuario conectado:', e.detail.username);
       element.setConnectionStatus('away');
-      joinRoom(e.detail.username, e.detail.platform);
-      element.setPlatform(e.detail.platform);
+      //joinRoom(e.detail.username, e.detail.platform);
+      socket.emit('joinRoom', { uniqueId: e.detail.username, platform: "kick" });
     });
     element.addEventListener('userDisconnected', (e) => {
       console.log('Usuario desconectado' ,e);
   });
 })
-// Escuchar eventos
-/* userProfile.addEventListener('userConnected', (e) => {
-    console.log('Usuario conectado:', e.detail.username, e);
-    userProfile.setConnectionStatus('away');
-    //joinRoom(e.detail.username);
-  }); 
+loginelements2.forEach(element => {
+  element.setConnectionStatus('offline');
+  element.setPlatform("tiktok");
+  element.addEventListener('userConnected', (e) => {
+      console.log('Usuario conectado:', e.detail.username);
+      element.setConnectionStatus('away');
+      //joinRoom(e.detail.username, e.detail.platform);
+      socket.emit('joinRoom', { uniqueId: e.detail.username, platform: "tiktok" });
+    });
+    element.addEventListener('userDisconnected', (e) => {
+      console.log('Usuario desconectado' ,e);
+  });
+})
 
-userProfile.addEventListener('userDisconnected', (e) => {
-    console.log('Usuario desconectado' ,e);
-}); */
 function joinRoom(roomid, platform = 'tiktok') {
-    const roomId = roomid || document.getElementById('roomId').value;
+    const roomId = roomid;
     socket.emit('joinRoom', { uniqueId: roomId, platform: platform });
-    console.log("joinRoom",{ uniqueId: roomId, platform: platform })
+    //console.log("joinRoom",{ uniqueId: roomId, platform: platform })
 }
 function getAvatarUrl(avatarData, preferredSize = 'large') {
   // Mapeo de nombres de tamaños a keys del objeto
@@ -114,31 +124,36 @@ class GetAvatarUrlKick {
   }
 }
 
-if (userProfile.state.connected) {
-  const trackerMultiple = new UserInteractionTracker();
-  trackerMultiple.addInteractionListener(async event => {
-    try {
-    const interacted = trackerMultiple.getAllInteractionsByArray([
-      'click', 
-      'touchstart', 
-      'keydown',
-    ]);
-    
-    
-    if (interacted) {
-      console.log('Usuario ha interactuado se conectara');
-      joinRoom(userProfile.state.username, userProfile.state.platform);
-      trackerMultiple.destroy()
-    }
-    if (userProfile.state.platform === 'kick') userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(userProfile.state.username));
-  } catch (error) {
-    console.error('Error al detectar interacción:', error);
-  }
-  });
+
+const trackerMultiple = new UserInteractionTracker();
+trackerMultiple.addInteractionListener(async event => {
+  try {
+  const interacted = trackerMultiple.getAllInteractionsByArray([
+    'click', 
+    'touchstart', 
+    'keydown',
+  ]);
   
-    userProfile.setConnectionStatus('away');
-    userProfile.setPlatform('tiktok');
+  //userProfile.setConnectionStatus('offline');
+  if (interacted) {
+    console.log('Usuario ha interactuado se conectara');
+    if (userProfile.state.connected) {
+      userProfile.setConnectionStatus('away');
+      joinRoom(userProfile.state.username, userProfile.state.platform);
+      //if (userProfile.state.platform === 'kick') userProfile.setProfileImage(await GetAvatarUrlKick.getProfilePic(userProfile.state.username));
+    };
+    if (userProfile2.state.connected) {
+      userProfile2.setConnectionStatus('away');
+      joinRoom(userProfile2.state.username, userProfile2.state.platform);
+    };
+    trackerMultiple.destroy()
+  }
+} catch (error) {
+  console.error('Error al detectar interacción:', error);
 }
+});
+  
+
 const events = ['ready', 'ChatMessage', 'Subscription', 'disconnected', 'error', 'allromuser', 'connected'];
 const tiktokLiveEvents = [
   'chat', 'gift', 'connected', 'disconnected',
@@ -152,9 +167,6 @@ const countershare = new Counter(0, 1000);
 const counterlike = new Counter(0, 1000);
 const counterfollow = new Counter(0, 1000);
 const countermember = new Counter(0, 1000);
-const newChatContainer = new ChatContainer('.chatcontainer', 500);
-const newGiftContainer = new ChatContainer('.giftcontainer', 500);
-const newEventsContainer = new ChatContainer('.eventscontainer', 200); 
 
 events.forEach(event => {
     socket.on(event, async (data) => {
@@ -319,15 +331,7 @@ const filterwordadd = (data) => {
     addfilterword(data.comment);
   }
 }
-//const callbacksmessage = [splitfilterwords,filterwordadd];
-//const optionTexts = ['filtrar comentarios - dividir', 'filtrar comentario'];
-//const message1 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', textcontent, callbacksmessage,optionTexts);
-//const message2 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', numbercontent);
-//const message3 = new ChatMessage( `msg${counterchat.increment()}`, 'https://cdn-icons-png.flaticon.com/128/6422/6422200.png', eventcontent);
-// Crear callbacks
-//newChatContainer.addMessage(message1);
-//newGiftContainer.addMessage(message2);
-//newEventsContainer.addMessage(message3);
+
 const defaultmenuchat = [
   {
     text: 'filtrar comentarios - dividir',
