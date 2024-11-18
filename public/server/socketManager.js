@@ -1,6 +1,7 @@
 class SocketManager {
     constructor(backendUrl) {
-      this.socket = io(backendUrl);
+      // this.socket = io(backendUrl);
+      this.socket = io();
       this.isInitialized = false;
       this.socket.on("connect", () => {
         console.log("Socket connected successfully");
