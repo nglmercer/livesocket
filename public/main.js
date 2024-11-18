@@ -563,16 +563,18 @@ const timenow = () => {
 }
 async function lastelement(){
   const messagedata = JSON.parse(localStorage.getItem('lastChatMessage'));
-  const newdata = await mapChatMessagetochat(messagedata);
-  HandleAccionEvent('chat',newdata)
-  console.log("mapChatMessagetochat",newdata)
-
-  const newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
+  let newwebcomponentchat = null;
+  if (messagedata) {
+    const newdata = await mapChatMessagetochat(messagedata);
+    HandleAccionEvent('chat',newdata)
+    console.log("mapChatMessagetochat",newdata)
+    newwebcomponentchat = webcomponentchat(newdata,defaultmenuchat,{type:"text",value:timenow(), class: "bottom-right-0"});
+  }
   const newmessage1 = webcomponenttemplate(newtextcontent);
   const newmessage2 = webcomponenttemplate(newnumbercontent,giftmenu);
   const newmessage3 = webcomponenttemplate(neweventcontent,giftmenu);
   
-  appendmessage2(newwebcomponentchat,"chatcontainer");
+  if(newwebcomponentchat) appendmessage2(newwebcomponentchat,"chatcontainer");
   appendmessage2(newmessage1,"chatcontainer");
   appendmessage2(newmessage2,"giftcontainer");
   appendmessage2(newmessage3,"eventscontainer");
